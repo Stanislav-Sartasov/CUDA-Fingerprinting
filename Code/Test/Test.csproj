@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Test</RootNamespace>
+    <AssemblyName>Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.ComplexFilters\CUDAFingerprinting.Common.ComplexFilters.csproj">
+      <Project>{9cbc91ce-0ee7-4a78-a5f5-89ea40023f52}</Project>
+      <Name>CUDAFingerprinting.Common.ComplexFilters</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.ConvexHull\CUDAFingerprinting.Common.ConvexHull.csproj">
+      <Project>{ddf83afe-585e-463e-8835-fd11b389ef04}</Project>
+      <Name>CUDAFingerprinting.Common.ConvexHull</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj">
+      <Project>{5eec4bd2-e1b0-4794-948a-45732cd41f99}</Project>
+      <Name>CUDAFingerprinting.Common.OrientationField</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.Segmentation\CUDAFingerprinting.Common.Segmentation.csproj">
+      <Project>{6bef775c-e400-4ea6-a220-15be47b27148}</Project>
+      <Name>CUDAFingerprinting.Common.Segmentation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.SerializationHelper\CUDAFingerprinting.Common.Serialization.csproj">
+      <Project>{c57f6464-8900-4cc8-a08c-5a7b33bdaf60}</Project>
+      <Name>CUDAFingerprinting.Common.Serialization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
+      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
+      <Name>CUDAFingerprinting.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

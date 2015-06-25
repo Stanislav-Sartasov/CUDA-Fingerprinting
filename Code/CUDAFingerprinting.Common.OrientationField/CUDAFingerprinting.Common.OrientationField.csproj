@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OrientationField.cs" />
     <Compile Include="OrientationFieldGenerator.cs" />
     <Compile Include="PixelwiseOrientationFieldGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

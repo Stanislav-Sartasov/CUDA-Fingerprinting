@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.OrientationField", "CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj", "{5EEC4BD2-E1B0-4794-948A-45732CD41F99}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.Serialization", "CUDAFingerprinting.Common.SerializationHelper\CUDAFingerprinting.Common.Serialization.csproj", "{C57F6464-8900-4CC8-A08C-5A7B33BDAF60}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.ConvexHull", "CUDAFingerprinting.Common.ConvexHull\CUDAFingerprinting.Common.ConvexHull.csproj", "{DDF83AFE-585E-463E-8835-FD11B389EF04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,20 @@ Global
 		{DDF83AFE-585E-463E-8835-FD11B389EF04}.Release|Win32.ActiveCfg = Release|Any CPU
 		{DDF83AFE-585E-463E-8835-FD11B389EF04}.Release|x64.ActiveCfg = Release|Any CPU
 		{DDF83AFE-585E-463E-8835-FD11B389EF04}.Release|x86.ActiveCfg = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|Win32.ActiveCfg = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|x64.ActiveCfg = Release|Any CPU
+		{86CFA6F5-831C-4C9F-A171-745C6D6D8ED6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
