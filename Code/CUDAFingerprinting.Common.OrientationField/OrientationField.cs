@@ -95,13 +95,13 @@ namespace CUDAFingerprinting.OrientationField
         {
             int maxX = bytes.GetUpperBound(0) + 1;
             int maxY = bytes.GetUpperBound(1) + 1;
-            // разделение на блоки
-            this._blocks = new Block[(int)Math.Ceiling((float)(maxX / _SIZE)), (int)Math.Ceiling((float)(maxY / _SIZE))];
-            for (int i = 0; i < _blocks.GetUpperBound(0) + 1; i++)
+            // разделение на блоки: количество строк и колонок
+            this._blocks = new Block[(int)Math.Floor((float)(maxY / _SIZE)), (int)Math.Floor((float)(maxX / _SIZE))];
+            for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
             {
-                for (int j = 0; j < _blocks.GetUpperBound(1) + 1; j++)
+                for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
                 {
-                    _blocks[i, j] = new Block(_SIZE, bytes, i * _SIZE, j * _SIZE);
+					_blocks[row, column] = new Block(_SIZE, bytes, column * _SIZE, row * _SIZE);
                 }
             }
 
@@ -109,8 +109,8 @@ namespace CUDAFingerprinting.OrientationField
 
 		public double GetOrientation(int x, int y)                  // метод, определяющий по входным координатам (х, у) поле напрваления в этой точке
 		{
-			int row = x / _SIZE;
-			int column = y / _SIZE;
+			int row = y / _SIZE;
+			int column = x / _SIZE;
 			return this._blocks[row, column].Orientation;
 		}
     } 
