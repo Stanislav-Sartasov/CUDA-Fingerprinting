@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.ConvexHull", "CUDAFingerprinting.Common.ConvexHull\CUDAFingerprinting.Common.ConvexHull.csproj", "{DDF83AFE-585E-463E-8835-FD11B389EF04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.OrientationField.Test", "CUDAFingerprinting.Common.OrientationField.Test\CUDAFingerprinting.Common.OrientationField.Test.csproj", "{12F715CF-D9A7-49CA-B0A3-D9E34CC60821}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.OrientationField.Tests", "CUDAFingerprinting.Common.OrientationField.Test\CUDAFingerprinting.Common.OrientationField.Tests.csproj", "{12F715CF-D9A7-49CA-B0A3-D9E34CC60821}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}"
 EndProject

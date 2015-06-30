@@ -206,113 +206,17 @@ namespace CUDAFingerprinting.Common
             SaveArrayToBitmap(data).Save(path);
         }
 
-        public static void Visualization(Bitmap sourceImage, CUDAFingerprinting.OrientationField.OrientationField Field)		// визуализирует поле направлений в картинку, где на каждом блоке 16х16 находится отрезок, наклоненный под соответствующим углом
+        public static ImageFormat GetImageFormatFromExtension(string path)
         {
-            const int SIZE = 16;
-            Bitmap orientedImage = new Bitmap(sourceImage.Width, sourceImage.Height);
-            Graphics g = Graphics.FromImage(orientedImage);
-            g.Clear(Color.White);
-
-            // перебираем все блоки 16х16
-            for (int row = 0; row < Field.Blocks.GetUpperBound(0) + 1; row++)
+            var extension = Path.GetExtension(path).ToUpper();
+            switch(extension)
             {
-                for (int column = 0; column < Field.Blocks.GetUpperBound(1) + 1; column++)
-                {
-                    // в каждом блоке получаем направление и строим отрезок
-                    double angle = Field.Blocks[row, column].Orientation;
-                    int x1 = SIZE * column;
-                    int x2 = SIZE * (column + 1);
-                    int y1, y2;
-                    if (angle == Math.PI / 2) // прямая ~ вертикальна
-                    {
-                        // начинаем строить линию с точки (SIZE * column + SIZE / 2, SIZE * row)
-                        x1 = x2 = SIZE * column + SIZE / 2;
-                        y1 = SIZE * row;
-                        y2 = SIZE * (row + 1);
-                        g.DrawLine(new Pen(Color.Black), new Point(x1, y1), new Point(x2, y2));
-                        //orientedImage.Save(@"1_1_oriented.jpg");
-                        continue;
-                    }
-                    int dy = (int)((x2 - x1) * Math.Tan(angle));
-                    if (dy == 0)					// прямая ~ горизонтальна
-                    {
-                        // начинаем строить линию с точки (SIZE * column, SIZE * row + SIZE / 2)
-                        y1 = SIZE * row + SIZE / 2;
-                        y2 = SIZE * row + SIZE / 2;
-                        g.DrawLine(new Pen(Color.Black), new Point(x1, y1), new Point(x2, y2));
-                        //orientedImage.Save(@"1_1_oriented.jpg");
-                        continue;
-                    }
-                    if (angle > 0)			// прямая убывает
-                    {
-                        // начинаем строить линию с точки (SIZE * column, SIZE * row + SIZE - 1)  -- с верхней левой точки блока
-                        y1 = SIZE * row;
-                        if (Math.Abs(dy) >= Field.Blocks[row, column].Size)
-                        {
-                            y2 = Field.Blocks[row, column].Size - 1 + y1;
-                        }
-                        else
-                        {
-                            y2 = dy + y1;
-                        }
-                        g.DrawLine(new Pen(Color.Blue), new Point(x1, y1), new Point(x2, y2));
-                        //orientedImage.Save(@"1_1_oriented.jpg");
-                        continue;
-                    }
-                    if (angle < 0)		// прямая возрастает
-                    {
-                        // начинаем строить линию с точки (SIZE * column, SIZE * row)  -- с нижней левой точки блока
-                        y1 = SIZE * (row + 1) - 1;
-                        if (Math.Abs(dy) >= Field.Blocks[row, column].Size)
-                        {
-                            y2 = y1 - Field.Blocks[row, column].Size + 1;
-                        }
-                        else
-                        {
-                            y2 = y1 + dy; // dy < 0
-                        }
-                        g.DrawLine(new Pen(Color.Green), new Point(x1, y1), new Point(x2, y2));
-                        //orientedImage.Save(@"1_1_oriented.jpg");
-                        continue;
-                    }
-
-                }
+                case ".BMP": return ImageFormat.Bmp;
+                case ".JPG":
+                case ".JPEG": return ImageFormat.Jpeg;
+                case ".PNG": return ImageFormat.Png;
+                default: throw new NotSupportedException();
             }
-            orientedImage.Save(@"1_1_oriented.jpg");
-        }
-
-        [Obsolete]
-        public static void SaveFieldAbove(double[,] data, double[,] orientations, int blockSize, int overlap,
-                                          string fileName)
-        {
-            int lineLength = blockSize / 2;
-            var bmp = SaveArrayToBitmap(data);
-            var gfx = Graphics.FromImage(bmp);
-            var pen = new Pen(Brushes.Red) {Width = 2};
-            orientations.Select2D(
-                (value, row, column) =>
-                    {
-                        int x = column * (blockSize - overlap) + blockSize / 2;
-                        int y = row * (blockSize - overlap) + blockSize / 2;
-
-                        Point p0 = new Point
-                        {
-                            X = Convert.ToInt32(x - lineLength * Math.Cos(value)),
-                            Y = Convert.ToInt32(y - lineLength * Math.Sin(value))
-                        };
-
-                        Point p1 = new Point
-                        {
-                            X = Convert.ToInt32(x + lineLength * Math.Cos(value)),
-                            Y = Convert.ToInt32(y + lineLength * Math.Sin(value))
-                        };
-
-                        gfx.DrawLine(pen, p0, p1);
-                        return 0;
-                    });
-            gfx.Save();
-            bmp.Save(fileName, ImageFormat.Png);
-
         }
     }
 }

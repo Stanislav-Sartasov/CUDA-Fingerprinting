@@ -25,14 +25,14 @@ namespace CUDAFingerprinting.Common.OrientationField
 			get { return _size; }
 		}
 
-        public Block(int SIZE, int[,] bytes, int i, int j)		// параметры: размер блока; массив пикселей, из которого копировать в блок; координаты, с которых начать копирование
+        public Block(int size, int[,] bytes, int i, int j)		// параметры: размер блока; массив пикселей, из которого копировать в блок; координаты, с которых начать копирование
         {
-			this._size = SIZE;
-            this._pxl = new double[SIZE, SIZE];
+            this._size = size;
+            this._pxl = new double[size, size];
 			// копируем в блоки части массива
-			for (int x = 0; x < SIZE; x++)
+            for (int x = 0; x < size; x++)
 			{
-				for (int y = 0; y < SIZE; y++)
+                for (int y = 0; y < size; y++)
 				{
 					this._pxl[x, y] = bytes[x + i, y + j];
 				}
@@ -47,8 +47,8 @@ namespace CUDAFingerprinting.Common.OrientationField
             double[,] filterY = new double[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
 
 			// градиенты
-			double[,] Gx = CUDAFingerprinting.Common.ConvolutionHelper.Convolve(_pxl, filterX); 
-			double[,] Gy = CUDAFingerprinting.Common.ConvolutionHelper.Convolve(_pxl, filterY); 
+			double[,] Gx = ConvolutionHelper.Convolve(_pxl, filterX); 
+			double[,] Gy = ConvolutionHelper.Convolve(_pxl, filterY); 
             double numerator = 0;
             double denominator = 0;
             for (int i = 0; i < _size; i++)
@@ -73,7 +73,7 @@ namespace CUDAFingerprinting.Common.OrientationField
     public class OrientationField
     {
         Block[,] _blocks;
-        const int _SIZE = 16;
+        public const int DefaultSize = 16;
 
 		// property
 		public Block[,] Blocks
@@ -83,34 +83,36 @@ namespace CUDAFingerprinting.Common.OrientationField
 				return _blocks;
 			}
 		}
-		public int SIZE
-		{
-			get
-			{
-				return _SIZE;
-			}
-		}
-
-        public OrientationField(int[,] bytes)
+        public int BlockSize
         {
+            get;
+            private set;
+        }
+
+        public OrientationField(int[,] bytes, int blockSize)
+        {
+            BlockSize = blockSize;
             int maxX = bytes.GetUpperBound(0) + 1;
             int maxY = bytes.GetUpperBound(1) + 1;
             // разделение на блоки: количество строк и колонок
-            this._blocks = new Block[(int)Math.Floor((float)(maxY / _SIZE)), (int)Math.Floor((float)(maxX / _SIZE))];
+            this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
             for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
             {
                 for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
                 {
-					_blocks[row, column] = new Block(_SIZE, bytes, column * _SIZE, row * _SIZE);
+                    _blocks[row, column] = new Block(BlockSize, bytes, column * BlockSize, row * BlockSize);
                 }
             }
+        }
 
+        public OrientationField(int[,] bytes):this(bytes, DefaultSize)
+        {
         }
 
 		public double GetOrientation(int x, int y)                  // метод, определяющий по входным координатам (х, у) поле напрваления в этой точке
 		{
-			int row = y / _SIZE;
-			int column = x / _SIZE;
+            int row = y / BlockSize;
+            int column = x / BlockSize;
 			return this._blocks[row, column].Orientation;
 		}
     } 

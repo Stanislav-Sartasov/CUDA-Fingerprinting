@@ -8,8 +8,8 @@
     <ProjectGuid>{5EEC4BD2-E1B0-4794-948A-45732CD41F99}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.OrientationField</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.OrientationField</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.Common.OrientationField</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.Common.OrientationField</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseIntermediateOutputPath>..\obj\</BaseIntermediateOutputPath>
@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="OrientationField.cs" />
+    <Compile Include="OrientationFieldExtensions.cs" />
     <Compile Include="OrientationFieldGenerator.cs" />
     <Compile Include="PixelwiseOrientationFieldGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
