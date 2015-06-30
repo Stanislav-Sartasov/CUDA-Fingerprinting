@@ -26,6 +26,10 @@
     <ClInclude Include="Convolution.cuh" />
     <ClInclude Include="CUDAArray.cuh" />
     <ClInclude Include="constsmacros.h" />
+    <ClInclude Include="ImageLoading.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ImageLoading.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}</ProjectGuid>
