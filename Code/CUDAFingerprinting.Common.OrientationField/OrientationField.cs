@@ -19,6 +19,7 @@ namespace CUDAFingerprinting.Common.OrientationField
 		public double Orientation
 		{
 			get { return _orientation; }
+            set { _orientation = value; }
 		}
 		public int Size
 		{
@@ -61,11 +62,12 @@ namespace CUDAFingerprinting.Common.OrientationField
             }
             if (denominator == 0)
             {
-                this._orientation = Math.PI / 2;
+                _orientation = Math.PI / 2;
             }
             else
             {
-            this._orientation = Math.Atan2(2 * numerator, denominator) / 2;
+                _orientation = Math.PI / 2 + Math.Atan2(2 * numerator, denominator) / 2;
+                if (_orientation > Math.PI / 2) _orientation -= Math.PI;
             }
         }
     }
@@ -92,15 +94,15 @@ namespace CUDAFingerprinting.Common.OrientationField
         public OrientationField(int[,] bytes, int blockSize)
         {
             BlockSize = blockSize;
-            int maxX = bytes.GetUpperBound(0) + 1;
-            int maxY = bytes.GetUpperBound(1) + 1;
+            int maxX = bytes.GetUpperBound(1) + 1;
+            int maxY = bytes.GetUpperBound(0) + 1;
             // разделение на блоки: количество строк и колонок
             this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
             for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
             {
                 for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
                 {
-                    _blocks[row, column] = new Block(BlockSize, bytes, column * BlockSize, row * BlockSize);
+                    _blocks[row, column] = new Block(BlockSize, bytes, row * BlockSize, column * BlockSize);
                 }
             }
         }
