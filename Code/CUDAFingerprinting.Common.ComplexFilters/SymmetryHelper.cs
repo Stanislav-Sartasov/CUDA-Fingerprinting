@@ -3,6 +3,7 @@ using System.Numerics;
 
 namespace CUDAFingerprinting.Common.ComplexFilters
 {
+    // TODO: revise the code with the works of Nilsson, Bigun et al.
     public class SymmetryHelper
     {
         public static Complex[,] EstimateLS(double[,] l1, double Sigma1, double Sigma2)

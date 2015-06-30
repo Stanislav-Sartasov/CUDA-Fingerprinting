@@ -10,6 +10,7 @@ namespace CUDAFingerprinting.Common
 {
     public static class ImageHelper
     {
+        [Obsolete]
         public static void MarkMinutiae(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
@@ -32,11 +33,14 @@ namespace CUDAFingerprinting.Common
 
             bmp2.Save(path, ImageFormat.Png);   
         }
+
+        [Obsolete]
         public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae, string path)
         {
             MarkMinutiae(new Bitmap(sourcePath), minutiae, path);
         }
 
+        [Obsolete]
         public static void MarkMinutiaeWithDirections(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
@@ -61,11 +65,13 @@ namespace CUDAFingerprinting.Common
             bmp2.Save(path, ImageFormat.Png);
         }
 
+        [Obsolete]
         public static void MarkMinutiaeWithDirections(string sourcePath, List<Minutia> minutiae, string path)
         {
             MarkMinutiaeWithDirections(new Bitmap(sourcePath), minutiae, path);
         }
 
+        [Obsolete]
         public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae, List<Minutia> minutiae2, string path)
         {
             var bmp = new Bitmap(sourcePath);
@@ -97,19 +103,25 @@ namespace CUDAFingerprinting.Common
 
         }
 
+        // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
+        // For the simplicity of geometric transformations everywhere in the project
+        // the origin point is BOTTOM left angle.
         public static double[,] LoadImage(Bitmap bmp)
         {
             double[,] imgBytes = new double[bmp.Height, bmp.Width];
             for (int x = 0; x < bmp.Width; x++)
             {
-                  for (int y = 0; y < bmp.Height; y++)
+                for (int y = 0; y < bmp.Height; y++)
                 {
-                    imgBytes[y, x] = bmp.GetPixel(x, y).R;
+                    imgBytes[bmp.Height-1 - y, x] = bmp.GetPixel(x, y).R;
                 }
             }
             return imgBytes;
         }
 
+        // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
+        // For the simplicity of geometric transformations everywhere in the project
+        // the origin point is BOTTOM left angle.
         public static int[,] LoadImageAsInt(Bitmap bmp)
         {
             int[,] imgBytes = new int[bmp.Height, bmp.Width];
@@ -117,125 +129,30 @@ namespace CUDAFingerprinting.Common
             {
                 for (int y = 0; y < bmp.Height; y++)
                 {
-                    imgBytes[y, x] = bmp.GetPixel(x, y).R;
+                    // the flipping of the image
+                    imgBytes[bmp.Height-1 - y, x] = bmp.GetPixel(x, y).R;
                 }
             }
             return imgBytes;
         }
 
+        // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
+        // For the simplicity of geometric transformations everywhere in the project
+        // the origin point is BOTTOM left angle.
         public static double[,] LoadImage(string path)
         {
             return LoadImage(new Bitmap(path));
         }
 
+        // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
+        // For the simplicity of geometric transformations everywhere in the project
+        // the origin point is BOTTOM left angle.
         public static int[,] LoadImageAsInt(string path)
         {
             return LoadImageAsInt(new Bitmap(path));
         }
 
-        public static int[,] ConvertDoubleToInt(double[,] source)
-        {
-            int Height = source.GetLength(0);
-            int Width = source.GetLength(1);
-            int[,] result = new int[Height,Width];
-            for (int i = 0; i < Height; i++)
-                for (int j = 0; j < Width; j++)
-                    result[i, j] = (int) source[i, j];
-            return result;
-        }
-        public static void SaveComplexArrayAsHSV(Complex[,] data, string path)
-        {
-            int X = data.GetLength(1);
-            int Y = data.GetLength(0);
-            var bmp = new Bitmap(X, Y);
-            for (int x = 0; x < X; x++)
-            {
-                for (int y = 0; y < Y; y++)
-                {
-                    var HV = data[y, x];
-                    var V = Math.Round(HV.Magnitude * 100);
-                    var H = (int)(HV.Phase * 180 / Math.PI);
-                    if (H < 0) H += 360;
-                    var hi = H / 60;
-                    var a = V * (H % 60) / 60.0d;
-                    var vInc = (int)(a * 2.55d);
-                    var vDec = (int)((V - a) * 2.55d);
-                    var v = (int)(V * 2.55d);
-                    Color c;
-                    switch (hi)
-                    {
-                        case 0:
-                            c = Color.FromArgb(v, vInc, 0);
-                            break;
-                        case 1:
-                            c = Color.FromArgb(vDec, v, 0);
-                            break;
-                        case 2:
-                            c = Color.FromArgb(0, v, vInc);
-                            break;
-                        case 3:
-                            c = Color.FromArgb(0, vDec, v);
-                            break;
-                        case 4:
-                            c = Color.FromArgb(vInc, 0, v);
-                            break;
-                        case 5:
-                            c = Color.FromArgb(v, 0, vDec);
-                            break;
-                        default:
-                            c = Color.Black;
-                            break;
-                    }
-                    bmp.SetPixel(x, y, c);
-                }
-            }
-
-            bmp.Save(path, ImageFormat.Png);
-        }
-
-        public static void SaveImageAsBinary(string pathFrom, string pathTo)
-        {
-            var bmp = new Bitmap(pathFrom);
-            using (var fs = new FileStream(pathTo, FileMode.Create, FileAccess.Write))
-            {
-                using (BinaryWriter bw = new BinaryWriter(fs))
-                {
-                    bw.Write(bmp.Width);
-                    bw.Write(bmp.Height);
-                    for (int row = 0; row < bmp.Height; row++)
-                    {
-                        for (int column = 0; column < bmp.Width; column++)
-                        {
-                            var value = (int)bmp.GetPixel(column, row).R;
-                            bw.Write(value);
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void SaveImageAsBinaryFloat(string pathFrom, string pathTo)
-        {
-            var bmp = new Bitmap(pathFrom);
-            using (var fs = new FileStream(pathTo, FileMode.Create, FileAccess.Write))
-            {
-                using (BinaryWriter bw = new BinaryWriter(fs))
-                {
-                    bw.Write(bmp.Width);
-                    bw.Write(bmp.Height);
-                    for (int row = 0; row < bmp.Height; row++)
-                    {
-                        for (int column = 0; column < bmp.Width; column++)
-                        {
-                            var value = (float)bmp.GetPixel(column, row).R;
-                            bw.Write(value);
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void SaveIntArray(int[,] data, string path)
+        public static void SaveArray(int[,] data, string path)
         {
             SaveArrayToBitmap(data).Save(path);
         }
@@ -249,7 +166,8 @@ namespace CUDAFingerprinting.Common
             {
                 value = Math.Abs(value);
                 value = (value < 0) ? 0 : (value > 255 ? 255 : value);
-                lock(bmp)bmp.SetPixel(column, row, Color.FromArgb(value, value, value));
+                // note: notice the flipping
+                lock(bmp)bmp.SetPixel(column, y-1-row, Color.FromArgb(value, value, value));
                 return value;
             });
             return bmp;
@@ -271,7 +189,7 @@ namespace CUDAFingerprinting.Common
             {
                 var gray = (int)((value - min) / (max - min) * 255);
                 lock(bmp)
-                    bmp.SetPixel(column, row, Color.FromArgb(gray, gray, gray));
+                    bmp.SetPixel(column, bmp.Height - 1 - row, Color.FromArgb(gray, gray, gray));
                 return value;
             });
             return bmp;  
@@ -288,58 +206,82 @@ namespace CUDAFingerprinting.Common
             SaveArrayToBitmap(data).Save(path);
         }
 
-        public static void SaveBinaryAsImage(string pathFrom, string pathTo, bool applyNormalization = false)
+        public static void Visualization(Bitmap sourceImage, CUDAFingerprinting.OrientationField.OrientationField Field)		// визуализирует поле направлений в картинку, где на каждом блоке 16х16 находится отрезок, наклоненный под соответствующим углом
         {
-            using (var fs = new FileStream(pathFrom, FileMode.Open, FileAccess.Read))
+            const int SIZE = 16;
+            Bitmap orientedImage = new Bitmap(sourceImage.Width, sourceImage.Height);
+            Graphics g = Graphics.FromImage(orientedImage);
+            g.Clear(Color.White);
+
+            // перебираем все блоки 16х16
+            for (int row = 0; row < Field.Blocks.GetUpperBound(0) + 1; row++)
             {
-                using (var bw = new BinaryReader(fs))
+                for (int column = 0; column < Field.Blocks.GetUpperBound(1) + 1; column++)
                 {
-                    var width = bw.ReadInt32();
-                    var height = bw.ReadInt32();
-                    var bmp = new Bitmap(width, height);
-                    if (!applyNormalization)
+                    // в каждом блоке получаем направление и строим отрезок
+                    double angle = Field.Blocks[row, column].Orientation;
+                    int x1 = SIZE * column;
+                    int x2 = SIZE * (column + 1);
+                    int y1, y2;
+                    if (angle == Math.PI / 2) // прямая ~ вертикальна
                     {
-                        for (int row = 0; row < bmp.Height; row++)
-                        {
-                            for (int column = 0; column < bmp.Width; column++)
-                            {
-                                var value = bw.ReadInt32();
-                                var c = Color.FromArgb(value, value, value);
-                                bmp.SetPixel(column, row, c);
-                            }
-                        }
+                        // начинаем строить линию с точки (SIZE * column + SIZE / 2, SIZE * row)
+                        x1 = x2 = SIZE * column + SIZE / 2;
+                        y1 = SIZE * row;
+                        y2 = SIZE * (row + 1);
+                        g.DrawLine(new Pen(Color.Black), new Point(x1, y1), new Point(x2, y2));
+                        //orientedImage.Save(@"1_1_oriented.jpg");
+                        continue;
                     }
-                    else
+                    int dy = (int)((x2 - x1) * Math.Tan(angle));
+                    if (dy == 0)					// прямая ~ горизонтальна
                     {
-                        var arr = new float[height, width];
-                        float min = float.MaxValue;
-                        float max = float.MinValue;
-                        for (int row = 0; row < bmp.Height; row++)
-                        {
-                            for (int column = 0; column < bmp.Width; column++)
-                            {
-                                float result = bw.ReadSingle();
-                                arr[row, column] = result;
-                                if (result < min) min = result;
-                                if (result > max) max = result;
-                            }
-                        }
-                        for (int row = 0; row < bmp.Height; row++)
-                        {
-                            for (int column = 0; column < bmp.Width; column++)
-                            {
-                                var value = arr[row, column];
-                                int c = (int)((value - min) / (max - min) * 255);
-                                Color color = Color.FromArgb(c, c, c);
-                                bmp.SetPixel(column, row, color);
-                            }
-                        }
+                        // начинаем строить линию с точки (SIZE * column, SIZE * row + SIZE / 2)
+                        y1 = SIZE * row + SIZE / 2;
+                        y2 = SIZE * row + SIZE / 2;
+                        g.DrawLine(new Pen(Color.Black), new Point(x1, y1), new Point(x2, y2));
+                        //orientedImage.Save(@"1_1_oriented.jpg");
+                        continue;
                     }
-                    bmp.Save(pathTo, ImageFormat.Png);
+                    if (angle > 0)			// прямая убывает
+                    {
+                        // начинаем строить линию с точки (SIZE * column, SIZE * row + SIZE - 1)  -- с верхней левой точки блока
+                        y1 = SIZE * row;
+                        if (Math.Abs(dy) >= Field.Blocks[row, column].Size)
+                        {
+                            y2 = Field.Blocks[row, column].Size - 1 + y1;
+                        }
+                        else
+                        {
+                            y2 = dy + y1;
+                        }
+                        g.DrawLine(new Pen(Color.Blue), new Point(x1, y1), new Point(x2, y2));
+                        //orientedImage.Save(@"1_1_oriented.jpg");
+                        continue;
+                    }
+                    if (angle < 0)		// прямая возрастает
+                    {
+                        // начинаем строить линию с точки (SIZE * column, SIZE * row)  -- с нижней левой точки блока
+                        y1 = SIZE * (row + 1) - 1;
+                        if (Math.Abs(dy) >= Field.Blocks[row, column].Size)
+                        {
+                            y2 = y1 - Field.Blocks[row, column].Size + 1;
+                        }
+                        else
+                        {
+                            y2 = y1 + dy; // dy < 0
+                        }
+                        g.DrawLine(new Pen(Color.Green), new Point(x1, y1), new Point(x2, y2));
+                        //orientedImage.Save(@"1_1_oriented.jpg");
+                        continue;
+                    }
+
                 }
             }
+            orientedImage.Save(@"1_1_oriented.jpg");
         }
 
+        [Obsolete]
         public static void SaveFieldAbove(double[,] data, double[,] orientations, int blockSize, int overlap,
                                           string fileName)
         {
@@ -366,74 +308,11 @@ namespace CUDAFingerprinting.Common
                         };
 
                         gfx.DrawLine(pen, p0, p1);
-                        //int rowStart = row*(blockSize - overlap);
-                        //int columnStart = column*(blockSize - overlap);
-
-                        //int zeroX = columnStart + blockSize/2;
-                        //int zeroY = rowStart + blockSize/2;
-
-                        //double divisor = Math.Sqrt(1 + value*value);
-
-                        //// line equation is Orientation*x - 1*y = 0
-
-                        //for (int y = rowStart; y < rowStart + blockSize; y++)
-                        //{
-                        //    for (int x = columnStart; x < columnStart + blockSize; x++)
-                        //    {
-                        //        double d = Math.Abs(value*(x - zeroX) - (y - zeroY))/divisor;
-                        //        if (d < 1 && x < bmp.Width && y < bmp.Height)
-                        //        {
-                        //            bmp.SetPixel(x, y, Color.Red);
-                        //        }
-                        //    }
-                        //}
                         return 0;
                     });
             gfx.Save();
             bmp.Save(fileName, ImageFormat.Png);
 
-        }
-
-        public static void SaveArrayAsBinary(int[,] grid, string path)
-        {
-            int X = grid.GetLength(1);
-            int Y = grid.GetLength(0);
-            using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
-            {
-                using (BinaryWriter bw = new BinaryWriter(fs))
-                {
-                    bw.Write(X);
-                    bw.Write(Y);
-
-                    for (int y = 0; y < Y; y++)
-                    {
-                        for (int x = 0; x < X; x++)
-                        {
-                            bw.Write(grid[y, x]);
-                        }
-                    }
-                }
-            }
-        }
-
-        public static Tuple<int, int> FindColorPoint(string path)
-        {
-            var bmp = new Bitmap(path);
-            int x = 0;
-            int y = 0;            
-            for (int i = 0; i < bmp.Width; i++)
-            {
-                for (int j = 0; j < bmp.Height; j++)
-                {
-                    Color color = bmp.GetPixel(i,j);
-                    if (color.R != color.G || color.R != color.B)
-                    {
-                        x = i;
-                        y = j;
-                    }
-                }                
-            }
-            return new Tuple<int,int>(x,y);
         }
     }
 }

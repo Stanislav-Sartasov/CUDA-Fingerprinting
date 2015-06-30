@@ -7,6 +7,8 @@ using CUDAFingerprinting.Common.OrientationField;
 
 namespace CUDAFingerprinting.Common.Segmentation
 {
+    // TODO: revise the code
+
     //class Programm
     //{
     //    public static int[,] Normalize(int[,] arr)

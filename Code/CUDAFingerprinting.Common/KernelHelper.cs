@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace CUDAFingerprinting.Common
 {
@@ -19,7 +20,7 @@ namespace CUDAFingerprinting.Common
             return MakeComplexFromDouble(realPart, imPart);
         }
 
-        public static double Max2d(double[,] arr)
+        public static double Max2D(this double[,] arr)
         {
             double max = double.NegativeInfinity;
             for (int x = 0; x < arr.GetLength(0); x++)
@@ -32,7 +33,7 @@ namespace CUDAFingerprinting.Common
             return max;
         }
 
-        public static double Min2d(double[,] arr)
+        public static double Min2D(this double[,] arr)
         {
             double min = double.PositiveInfinity;
             for (int x = 0; x < arr.GetLength(0); x++)
@@ -91,7 +92,7 @@ namespace CUDAFingerprinting.Common
             return kernel;
         }
 
-    public static Complex[,] MakeComplexFromDouble(double[,] real, double[,] imaginary)
+        public static Complex[,] MakeComplexFromDouble(double[,] real, double[,] imaginary)
         {
             int maxX = real.GetLength(0);
             int maxY = real.GetLength(1);
@@ -106,7 +107,7 @@ namespace CUDAFingerprinting.Common
             return result;
         }
 
-        public static double[,] Subtract(double[,] source, double[,] value)
+        public static double[,] Subtract(this double[,] source, double[,] value)
         {
             var maxX = source.GetLength(0);
             var maxY = source.GetLength(1);
@@ -117,19 +118,6 @@ namespace CUDAFingerprinting.Common
                 {
                     result[x, y] = source[x, y] - value[x, y];
                  }
-            }
-            return result;
-        }
-
-        public static double[,] Zip2D(double[,] arr1, double[,] arr2, Func<double,double,double> f)
-        {
-            var result = new double[arr1.GetLength(0), arr1.GetLength(1)];
-            for (int x = 0; x < arr1.GetLength(0); x++)
-            {
-                for (int y = 0; y < arr1.GetLength(1); y++)
-                {
-                    result[x, y] = f(arr1[x, y], arr2[x, y]);
-                }
             }
             return result;
         }
@@ -147,7 +135,7 @@ namespace CUDAFingerprinting.Common
             return result;
         }
 
-        public static double[,] Add(double[,] source, double[,] value)
+        public static double[,] Add(this double[,] source, double[,] value)
         {
             var maxX = source.GetLength(0);
             var maxY = source.GetLength(1);
