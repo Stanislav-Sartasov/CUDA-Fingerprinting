@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 
@@ -32,6 +34,19 @@ namespace CUDAFingerprinting.Common.Tests
                         Assert.Fail( "Pixels don't match at ({0}, {1})", x, y);
                 }
             }
+        }
+
+        [TestMethod]
+        public void TestNormalization()
+        {
+            var bmp = Resources.SampleFinger2;
+            var array = ImageHelper.LoadImage(bmp);
+
+            array = array.DoNormalization(1000, 1000);
+
+            var bmp2 = ImageHelper.SaveArrayToBitmap(array);
+
+            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
     }
 }
