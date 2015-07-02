@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.OrientationField", "CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj", "{5EEC4BD2-E1B0-4794-948A-45732CD41F99}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.Tests", "CUDAFingerprinting.Common.Tests\CUDAFingerprinting.Common.Tests.csproj", "{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OrientationField.GPU.Test", "UnitTest1\UnitTest1.vcxproj", "{119552AD-35A6-49FC-AF54-3A13AC683361}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -147,6 +149,22 @@ Global
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}.Release|Win32.ActiveCfg = Release|Any CPU
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}.Release|x64.ActiveCfg = Release|Any CPU
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}.Release|x86.ActiveCfg = Release|Any CPU
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|Win32.ActiveCfg = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|Win32.Build.0 = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|x64.ActiveCfg = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|x86.ActiveCfg = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Debug|x86.Build.0 = Debug|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|Any CPU.ActiveCfg = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|Win32.ActiveCfg = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|Win32.Build.0 = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|x64.ActiveCfg = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|x86.ActiveCfg = Release|Win32
+		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,6 +172,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{12F715CF-D9A7-49CA-B0A3-D9E34CC60821} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
+		{119552AD-35A6-49FC-AF54-3A13AC683361} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = CUDAFingerprinting.vsmdi
