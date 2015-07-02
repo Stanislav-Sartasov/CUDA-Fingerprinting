@@ -77,21 +77,47 @@ float CalculateVariation(CUDAArray<float> image, float mean)
 	}
 	return variation;
 }
-/*
-float CalculateVariation(CUDAArray<float> image, float mean)
+__global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float variation, int bordMean, int bordVar)
 {
+
+	int row = defaultRow();
 	int height = image.Height;
 	int width = image.Width;
-	float variation = 0;
-	for (int i = 0; i < width; i++)
+
+	__shared__ float* temp;
+	temp = (float*)malloc(sizeof(float));
+	if (image.Height > row)
 	{
-		for (int j = 0; j < height; j++)
+		for (int j = 0; j < image.Width; j++)
 		{
-			variation += pow((image.At(i, j) - mean), 2) / (height * width);
+			if (image.At(row, j) > mean)
+			{
+				image.SetAt(row, j, bordMean + sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
+			}
+			else
+			{
+				image.SetAt(row, j, bordMean - sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
+			}
 		}
 	}
-	return variation;
+/*	temp[blockIdx.y] = variation;
+	__syncthreads();//is it really necessary?
+	variationArray = temp;*/
 }
+
+CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordVar)
+{
+	int height = image.Height;
+
+	float mean = CalculateMean(image);
+	float variation = CalculateVariation(image, mean);
+
+	dim3 blockSize = dim3(defaultThreadCount);
+	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
+	cudaDoNormalizationRow << <gridSize, blockSize >> > (image, mean, variation, bordMean, bordVar);
+	return image;
+}
+/*
 
 CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordVar)
 {
@@ -114,4 +140,19 @@ CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordV
 	}
 
 	return image;
+float CalculateVariation(CUDAArray<float> image, float mean)
+{
+	int height = image.Height;
+	int width = image.Width;
+	float variation = 0;
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			variation += pow((image.At(i, j) - mean), 2) / (height * width);
+		}
+	}
+	return variation;
+}
+
 	*/
