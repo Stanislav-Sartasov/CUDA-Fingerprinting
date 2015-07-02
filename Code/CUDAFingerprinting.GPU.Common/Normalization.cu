@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "CUDAArray.cuh"
-
-double CalculateMean(CUDAArray<float> image)
+float CalculateMean(CUDAArray<float> image)
 {
 	int height = image.Height;
 	int width = image.Width;
@@ -17,6 +16,21 @@ double CalculateMean(CUDAArray<float> image)
 		}
 	}
 	return mean;
+}
+
+float CalculateVariation(CUDAArray<float> image, float mean)
+{
+	int height = image.Height;
+	int width = image.Width;
+	float variation = 0;
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			variation += pow((image.At(i, j) - mean), 2) / (height * width);
+		}
+	}
+	return variation;
 }
 
 CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordVar)
