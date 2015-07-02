@@ -21,6 +21,7 @@
   <ItemGroup>
     <CudaCompile Include="Convolution.cu" />
     <CudaCompile Include="CUDAArray.cu" />
+    <CudaCompile Include="Normalization.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Convolution.cuh" />
