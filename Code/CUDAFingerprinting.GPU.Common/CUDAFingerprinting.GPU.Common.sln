@@ -5,10 +5,6 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common", "..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj", "{6FD094CC-0F63-47BD-A377-F054AE615517}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "..\CUDAFingerprinting.GPU.OrientationField\CUDAFingerprinting.GPU.OrientationField.vcxproj", "{5B48C978-E092-4225-8AB1-777778CA0A29}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,32 +31,6 @@ Global
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}.Release|Win32.Build.0 = Release|Win32
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}.Release|x64.ActiveCfg = Release|x64
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}.Release|x64.Build.0 = Release|x64
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Win32.ActiveCfg = Release|Any CPU
-		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|x64.ActiveCfg = Release|Any CPU
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|Win32.Build.0 = Debug|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|x64.ActiveCfg = Debug|x64
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Debug|x64.Build.0 = Debug|x64
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|Any CPU.ActiveCfg = Release|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|Win32.ActiveCfg = Release|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|Win32.Build.0 = Release|Win32
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|x64.ActiveCfg = Release|x64
-		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
