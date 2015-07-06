@@ -26,8 +26,7 @@ __global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
 	{
 		for (int j = 0; j < source.Width; j++)
 		{
-			//mean += source.At(row, j) / (height * width);
-			mean += source.cudaPtr[row*(source.Stride / sizeof(float)) + j] / (height * width);
+			mean += source.At(row, j) / (height * width);
 		}
 	}
 	
@@ -83,7 +82,7 @@ __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* 
 	{
 		for (int j = 0; j < image.Width; j++)
 		{
-			variation += pow((image.cudaPtr[row*(image.Stride / sizeof(float)) + j] - mean), 2) / (height * width);
+			variation += pow((image.At(row,j)- mean), 2) / (height * width);
 		}
 	}
 	temp[tempIndex] = variation;
@@ -127,17 +126,13 @@ __global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float
 	{
 		for (int j = 0; j < image.Width; j++)
 		{
-			//if (image.At(row, j) > mean)
-			float at = image.cudaPtr[row*(image.Stride / sizeof(float)) + j];
-			if (image.cudaPtr[row*(image.Stride / sizeof(float)) + j] > mean)
+			if (image.At(row, j) > mean)
 			{
-				//image.SetAt(row, j, bordMean + sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
-				at = bordMean + sqrt((bordVar * pow(at - mean, 2)) / variation);
+				image.SetAt(row, j, bordMean + sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
 			}
 			else
 			{
-				//image.SetAt(row, j, bordMean - sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
-				at = bordMean - sqrt((bordVar * pow(at - mean, 2)) / variation);
+				image.SetAt(row, j, bordMean - sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
 			}
 		}
 	}
@@ -169,8 +164,7 @@ float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int b
 	image.GetData(source);
 	return source;
 }
-/*
+
 void main()
 {
 }
-*/
