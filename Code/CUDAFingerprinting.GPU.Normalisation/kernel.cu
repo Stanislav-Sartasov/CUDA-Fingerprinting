@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+
 #include "CUDAArray.cuh"
 extern "C"
 { 
@@ -161,10 +162,10 @@ float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int b
 	dim3 blockSize = dim3(defaultThreadCount);
 	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
-	image.GetData(source);
+	cudaMemcpy(source, image.cudaPtr, image.Width * image.Height, cudaMemcpyDeviceToHost);
 	return source;
 }
 
-void main()
-{
-}
+//void main()
+//{
+//}
