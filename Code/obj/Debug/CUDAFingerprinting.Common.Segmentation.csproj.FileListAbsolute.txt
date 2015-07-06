@@ -1,0 +1,5 @@
+d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.Segmentation.dll
+d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.Segmentation.pdb
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.Segmentation.csprojResolveAssemblyReference.cache
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.Segmentation.dll
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.Segmentation.pdb

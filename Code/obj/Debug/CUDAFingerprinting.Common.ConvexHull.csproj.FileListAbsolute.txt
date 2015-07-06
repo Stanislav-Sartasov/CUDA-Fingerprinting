@@ -1,0 +1,7 @@
+d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.ConvexHull\bin\Debug\CUDAFingerprinting.Common.ConvexHull.dll
+d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.ConvexHull\bin\Debug\CUDAFingerprinting.Common.ConvexHull.pdb
+d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.ConvexHull\bin\Debug\CUDAFingerprinting.Common.dll
+d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.ConvexHull\bin\Debug\CUDAFingerprinting.Common.pdb
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.ConvexHull.csprojResolveAssemblyReference.cache
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.ConvexHull.dll
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.ConvexHull.pdb

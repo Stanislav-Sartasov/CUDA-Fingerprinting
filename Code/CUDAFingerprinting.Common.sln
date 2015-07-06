@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OrientationField.GPU.Test", "UnitTest1\UnitTest1.vcxproj", "{119552AD-35A6-49FC-AF54-3A13AC683361}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.Matrix", "CUDAFingerprinting.Common.Matrix\CUDAFingerprinting.Common.Matrix.csproj", "{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.Matrix.Tests", "CUDAFingerprinting.Common.Matrix.Tests\CUDAFingerprinting.Common.Matrix.Tests.csproj", "{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -165,6 +169,34 @@ Global
 		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|x64.ActiveCfg = Release|Win32
 		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|x86.ActiveCfg = Release|Win32
 		{119552AD-35A6-49FC-AF54-3A13AC683361}.Release|x86.Build.0 = Release|Win32
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|Win32.ActiveCfg = Release|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|x64.ActiveCfg = Release|Any CPU
+		{3CDF1AD4-45C0-40AA-B5E0-7BBCE36F7B8E}.Release|x86.ActiveCfg = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|Win32.ActiveCfg = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|x64.ActiveCfg = Release|Any CPU
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -173,6 +205,7 @@ Global
 		{12F715CF-D9A7-49CA-B0A3-D9E34CC60821} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 		{119552AD-35A6-49FC-AF54-3A13AC683361} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
+		{4BCE53AD-B27D-497C-BED9-C5825BE8B2A8} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = CUDAFingerprinting.vsmdi

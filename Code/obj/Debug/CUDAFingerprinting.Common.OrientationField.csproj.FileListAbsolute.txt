@@ -1,0 +1,5 @@
+d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.OrientationField.dll
+d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.OrientationField.pdb
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.OrientationField.csprojResolveAssemblyReference.cache
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.OrientationField.dll
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.OrientationField.pdb

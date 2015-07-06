@@ -1,0 +1,5 @@
+d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.SerializationHelper.dll
+d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.SerializationHelper.pdb
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.Serialization.csprojResolveAssemblyReference.cache
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.SerializationHelper.dll
+d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.SerializationHelper.pdb
