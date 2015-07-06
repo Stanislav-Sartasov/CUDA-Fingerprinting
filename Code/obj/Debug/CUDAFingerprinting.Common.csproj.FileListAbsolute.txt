@@ -1,5 +1,0 @@
-d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.dll
-d:\Git\CUDA-Fingerprinting\Code\bin\Debug\CUDAFingerprinting.Common.pdb
-d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.csprojResolveAssemblyReference.cache
-d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.dll
-d:\Git\CUDA-Fingerprinting\Code\obj\Debug\CUDAFingerprinting.Common.pdb
