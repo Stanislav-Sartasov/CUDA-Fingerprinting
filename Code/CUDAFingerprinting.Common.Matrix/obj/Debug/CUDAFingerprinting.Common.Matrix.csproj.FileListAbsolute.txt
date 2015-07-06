@@ -1,5 +1,0 @@
-D:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Matrix\bin\Debug\CUDAFingerprinting.Common.Matrix.dll
-D:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Matrix\bin\Debug\CUDAFingerprinting.Common.Matrix.pdb
-D:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Matrix\obj\Debug\CUDAFingerprinting.Common.Matrix.csprojResolveAssemblyReference.cache
-D:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Matrix\obj\Debug\CUDAFingerprinting.Common.Matrix.dll
-D:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Matrix\obj\Debug\CUDAFingerprinting.Common.Matrix.pdb
