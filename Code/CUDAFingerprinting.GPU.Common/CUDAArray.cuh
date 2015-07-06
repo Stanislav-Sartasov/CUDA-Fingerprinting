@@ -14,25 +14,74 @@ public:
 	size_t Width;
 	size_t Stride;
 
-	CUDAArray();
+	CUDAArray()
+	{
 
-	CUDAArray(const CUDAArray& arr);
+	}
 
-	CUDAArray(T* cpuPtr, int width, int height);
+	CUDAArray(const CUDAArray& arr)
+	{
+		cudaPtr = arr.cudaPtr;
+		Height = arr.Height;
+		Width = arr.Width;
+		Stride = arr.Stride;
+		deviceStride = arr.deviceStride;
+	}
 
-	CUDAArray(int width, int height);
+	CUDAArray(T* cpuPtr, int width, int height)
+	{
+		Width = width;
+		Height = height;
+		cudaError_t error = cudaMallocPitch((void**)&cudaPtr, &Stride, Width*sizeof(T), Height);
+		error = cudaDeviceSynchronize();
+		deviceStride = Stride / sizeof(T);
+		error = cudaMemcpy2D(cudaPtr, Stride, cpuPtr, Width*sizeof(T),
+			Width*sizeof(T), Height, cudaMemcpyHostToDevice);
+		error = cudaDeviceSynchronize();
+		error = cudaGetLastError();
+	}
 
-	T* GetData();
+	CUDAArray(int width, int height)
+	{
+		Width = width;
+		Height = height;
+		cudaError_t error = cudaMallocPitch((void**)&cudaPtr, &Stride, Width*sizeof(T), Height);
+		error = cudaDeviceSynchronize();
+		deviceStride = Stride / sizeof(T);
+	}
 
-	void GetData(T* arr);
+	T* GetData()
+	{
+		T* arr = (T*)malloc(sizeof(T)*Width*Height);
+		GetData(arr);
+		return arr;
+	}
 
-	__device__ T At(int row, int column);
+	void GetData(T* arr)
+	{
+		cudaError_t error = cudaMemcpy2D(arr, Width*sizeof(T), cudaPtr, Stride, Width*sizeof(T), Height, cudaMemcpyDeviceToHost);
+		error = cudaDeviceSynchronize();
+	}
 
-	__device__ void SetAt(int row, int column, T value);
+	__device__ T At(int row, int column)
+	{
+		return cudaPtr[row*deviceStride + column];
+	}
 
-	void Dispose();
+	__device__ void SetAt(int row, int column, T value)
+	{
+		cudaPtr[row*deviceStride + column] = value;
+	}
 
-	~CUDAArray();
+	void Dispose()
+	{
+		cudaFree(cudaPtr);
+	}
+
+	~CUDAArray()
+	{
+
+	}
 };
 
 template class CUDAArray<int>;
