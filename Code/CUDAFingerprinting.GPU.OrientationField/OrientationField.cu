@@ -20,7 +20,7 @@ void OrientationField(CUDAArray<float> source, int sizeX, int sizeY){
 
 	// Градиенты
 	CUDAArray<float> Gx;
-	CUDAArray<float> Gy;
+	CUDAArray<float> Gy; 
 	Convolve(Gx, source, filterX);
 	Convolve(Gy, source, filterX);
 
