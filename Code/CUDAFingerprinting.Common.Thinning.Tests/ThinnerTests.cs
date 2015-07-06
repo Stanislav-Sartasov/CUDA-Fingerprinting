@@ -22,8 +22,11 @@ namespace CUDAFingerprinting.Common.Thinning.Tests
             //TestThin(Resources._101_8);//very bad fingerprint
             //TestThin(Resources._19_4);
             //TestThin(Resources._29_4);
-            //TestThin(Resources.egor);
-            TestThin(Resources.idealH);
+            //TestThin(Resources.X);
+            //TestThin(Resources.connectedness);
+            //TestThin(Resources.connectedness2);
+            //TestThin(Resources.idealH);
+            TestThin(Resources._1_1);
         }
 
         //BINARIZATION_BARIER increasing <=> less loss of information, more noise

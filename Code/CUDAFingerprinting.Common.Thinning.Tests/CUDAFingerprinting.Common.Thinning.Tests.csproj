@@ -118,6 +118,18 @@
   <ItemGroup>
     <None Include="Resources\idealH.bmp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\X.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\connectedness.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\connectedness2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1_1.bmp" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CUDAFingerprinting.Common.Thinning
 {
@@ -189,128 +185,13 @@ namespace CUDAFingerprinting.Common.Thinning
             }
             return -1;
         }
-        ///*
-        /*
-        private static bool[,] concaveCornerCandidats = null;
 
-        private static bool IsMarked(int x, int y)
-        {
-            if (x < 0 || y < 0 || x >= w || y >= h) return false;
-            return concaveCornerCandidats[h - 1 - y, x];
-        }
-
-        private static void InvertMark(int x, int y)
-        {
-            if (!(x < 0 || y < 0 || x >= w || y >= h))
-            {
-                concaveCornerCandidats[h - 1 - y, x] = !concaveCornerCandidats[h - 1 - y, x];
-            }
-        }
-        */
-        //TODO: fix
-        /*
-        private static bool IsConcaveCornerCandidate(int xC, int yC, int dX, int dY, int pattern)
-        {
-            if (dX == 0 && dY == -1)//p0
-            {
-                return (pattern == 0 && GetPixel(a, xC + 1, yC - 1) == BLACK) ||
-                    (pattern == 5 && GetPixel(a, xC - 1, yC - 1) == BLACK) ||
-                    (pattern == 7 && 
-                        GetPixel(a, xC - 1, yC - 1) == BLACK &&
-                        GetPixel(a, xC + 1, yC - 1) == BLACK);
-            }
-            else if (dX == 1 && dY == 0)//p2
-            {
-                return (pattern == 1 && GetPixel(a, xC + 1, yC + 1) == BLACK) ||
-                    (pattern == 2 && GetPixel(a, xC - 1, yC - 1) == BLACK) ||
-                    (pattern == 3 && GetPixel(a, xC + 1, yC - 1) == BLACK) ||
-                    (pattern == 5 && GetPixel(a, xC - 1, yC + 1) == BLACK) ||
-                    (pattern == 8 && GetPixel(a, xC + 1, yC - 1) == BLACK);
-            }
-            else if (dX == 0 && dY == 1)//p4
-            {
-                return (pattern == 0 && GetPixel(a, xC + 1, yC + 1) == BLACK) ||
-                    (pattern == 2 && GetPixel(a, xC - 1, yC + 1) == BLACK) ||
-                    (pattern == 4 &&
-                        GetPixel(a, xC - 1, yC + 1) == BLACK &&
-                        GetPixel(a, xC + 1, yC + 1) == BLACK) ||
-                    (pattern == 8 && GetPixel(a, xC - 1, yC + 1) == BLACK);
-            }
-            else if (dX == -1 && dY == 0)//p6
-            {
-                return (pattern == 1 && GetPixel(a, xC - 1, yC + 1) == BLACK) ||
-                    (pattern == 3 && GetPixel(a, xC - 1, yC - 1) == BLACK) ||
-                    (pattern == 4 && 
-                        GetPixel(a, xC - 1, yC + 1) == BLACK &&
-                        GetPixel(a, xC - 1, yC - 1) == BLACK) ||
-                    (pattern == 7 &&
-                        GetPixel(a, xC - 1, yC - 1) == BLACK &&
-                        GetPixel(a, xC - 1, yC + 1) == BLACK);
-            }
-            return false;
-        }
-        */
-        private static bool IsConcaveCornerPattern(int x, int y)
-        {
-            PixelType[,,] concavePatterns = new PixelType[,,]
-            {
-                {
-                    {PixelType.ANY,    PixelType.FILLED, PixelType.ANY,    PixelType.FILLED},
-                    {PixelType.FILLED, PixelType.ANY,    PixelType.FILLED, PixelType.FILLED},
-                    {PixelType.ANY,    PixelType.FILLED, PixelType.CENTER, PixelType.FILLED},
-                    {PixelType.FILLED, PixelType.FILLED, PixelType.FILLED, PixelType.EMPTY}
-                },
-                {
-                    {PixelType.FILLED, PixelType.ANY,    PixelType.FILLED, PixelType.ANY},
-                    {PixelType.FILLED, PixelType.FILLED, PixelType.ANY,    PixelType.FILLED},
-                    {PixelType.FILLED, PixelType.CENTER, PixelType.FILLED, PixelType.ANY},
-                    {PixelType.EMPTY,  PixelType.FILLED, PixelType.FILLED, PixelType.FILLED}
-                },
-                {
-                    {PixelType.FILLED, PixelType.FILLED, PixelType.FILLED, PixelType.EMPTY},
-                    {PixelType.ANY,    PixelType.FILLED, PixelType.CENTER, PixelType.FILLED},
-                    {PixelType.FILLED, PixelType.ANY,    PixelType.FILLED, PixelType.FILLED},
-                    {PixelType.ANY,    PixelType.FILLED, PixelType.ANY,    PixelType.FILLED}
-                },
-                {
-                    {PixelType.EMPTY,  PixelType.FILLED, PixelType.FILLED, PixelType.FILLED},
-                    {PixelType.FILLED, PixelType.CENTER, PixelType.FILLED, PixelType.ANY},
-                    {PixelType.FILLED, PixelType.FILLED, PixelType.ANY,    PixelType.FILLED},
-                    {PixelType.FILLED, PixelType.ANY,    PixelType.FILLED, PixelType.ANY}
-                }
-            };
-            for (int p = 0; p < 4; p++)
-            {
-                bool bad = false;
-                for (int i = -2 + (p / 2); i < 2 + (p / 2); i++)
-                {
-                    for (int j = -2 + (p % 2); j < 2 + (p % 2); j++)
-                    {
-                        if (!AreEqual(GetPixel(a, x + j, y + i),
-                            concavePatterns[p, 2 - (p / 2) + i, 2 - (p % 2) + j]))
-                        {
-                            bad = true;
-                            break;
-                        }
-                    }
-                    if (bad)
-                        break;
-                }
-                if (!bad)
-                    return true;
-            }
-            return false;
-        }
-        //*/
         public static double[,] Thin(double[,] array, int width, int height)
         {
             w = width;
             h = height;
             a = new double[h, w];
             Array.Copy(array, 0, a, 0, h * w);
-
-            //concaveCornerCandidats = new bool[h, w];
-            //Array.Clear(concaveCornerCandidats, 0, h * w);
 
             bool isSkeleton;
             double[,] buffer = new double[h, w];
@@ -327,33 +208,12 @@ namespace CUDAFingerprinting.Common.Thinning
                         {
                             SetPixel(buffer, x, y, WHITE);
                             isSkeleton = false;
-                            ///*neighbors-concave corners processing
-                            for (int i = -1; i < 2; i++)
-                            {
-                                for (int j = -1; j < 2; j++)
-                                {
-                                    if (i == 0 && j == 0) continue;
-                                    /*if (IsConcaveCornerCandidate(x, y, i, j, pattern))
-                                    {
-                                        if (IsMarked(x + i, y + j))
-                                        {*/
-                                            if (IsConcaveCornerPattern(x + i, y + j))
-                                            {
-                                                SetPixel(buffer, x + i, y + j, WHITE);
-                                            }
-                                        /*}
-                                        InvertMark(x + i, y + j);
-                                    }*/
-                                }
-                            }
-                            //end concave corners processing*/
                         }
                     }
                 }
                 Array.Copy(buffer, 0, a, 0, h * w);
             } while (!isSkeleton);
             a = null;
-            //concaveCornerCandidats = null;
             return buffer;
         }
     }

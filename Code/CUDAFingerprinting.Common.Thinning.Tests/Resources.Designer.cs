@@ -63,6 +63,16 @@ namespace CUDAFingerprinting.Common.Thinning.Tests {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _1_1 {
+            get {
+                object obj = ResourceManager.GetObject("_1_1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _101_8 {
             get {
                 object obj = ResourceManager.GetObject("_101_8", resourceCulture);
@@ -86,6 +96,26 @@ namespace CUDAFingerprinting.Common.Thinning.Tests {
         internal static System.Drawing.Bitmap _29_4 {
             get {
                 object obj = ResourceManager.GetObject("_29_4", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap connectedness {
+            get {
+                object obj = ResourceManager.GetObject("connectedness", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap connectedness2 {
+            get {
+                object obj = ResourceManager.GetObject("connectedness2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -176,6 +206,16 @@ namespace CUDAFingerprinting.Common.Thinning.Tests {
         internal static System.Drawing.Bitmap verySmall2 {
             get {
                 object obj = ResourceManager.GetObject("verySmall2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap X {
+            get {
+                object obj = ResourceManager.GetObject("X", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
