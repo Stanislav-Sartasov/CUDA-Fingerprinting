@@ -11,9 +11,10 @@ namespace CUDAFingerprinting.Common.Matrix.Tests
         [TestMethod]
         public void SimpleMatrixTest()
         {
-            String filename = "1_1.bmp";
+            var image = Properties.Resources.SampleFinger;
             Matrix M = new Matrix();
-            M.calculatingAverageColor(filename);
+            Bitmap newPic = M.calculatingAverageColor(image);
+            newPic.Save("newPic.bmp");
         }
     }
 }
