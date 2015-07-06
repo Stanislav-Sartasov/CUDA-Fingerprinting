@@ -96,7 +96,7 @@ namespace CUDAFingerprinting.Common.Thinning
         };
 
         private static double[,] a = null;
-        //private static bool[,] concaveCornerCandidats = null;
+        
         private static int w = 0;
         private static int h = 0;
 
@@ -114,21 +114,7 @@ namespace CUDAFingerprinting.Common.Thinning
             if (x < 0 || y < 0 || x >= w || y >= h) return;
             array[h - 1 - y, x] = value;
         }
-        /*
-        private static bool IsMarked(int x, int y)
-        {
-            if (x < 0 || y < 0 || x >= w || y >= h) return false;
-            return concaveCornerCandidats[h - 1 - y, x];
-        }
-
-        private static void InvertMark(int x, int y)
-        {
-            if (!(x < 0 || y < 0 || x >= w || y >= h))
-            {
-                concaveCornerCandidats[h - 1 - y, x] = !concaveCornerCandidats[h - 1 - y, x];
-            }
-        }
-        */
+        
         private static bool AreEqual(double value, PixelType patternPixel)
         {
             switch (patternPixel)
@@ -203,6 +189,25 @@ namespace CUDAFingerprinting.Common.Thinning
             }
             return -1;
         }
+        ///*
+        /*
+        private static bool[,] concaveCornerCandidats = null;
+
+        private static bool IsMarked(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= w || y >= h) return false;
+            return concaveCornerCandidats[h - 1 - y, x];
+        }
+
+        private static void InvertMark(int x, int y)
+        {
+            if (!(x < 0 || y < 0 || x >= w || y >= h))
+            {
+                concaveCornerCandidats[h - 1 - y, x] = !concaveCornerCandidats[h - 1 - y, x];
+            }
+        }
+        */
+        //TODO: fix
         /*
         private static bool IsConcaveCornerCandidate(int xC, int yC, int dX, int dY, int pattern)
         {
@@ -244,7 +249,7 @@ namespace CUDAFingerprinting.Common.Thinning
             }
             return false;
         }
-
+        */
         private static bool IsConcaveCornerPattern(int x, int y)
         {
             PixelType[,,] concavePatterns = new PixelType[,,]
@@ -296,13 +301,14 @@ namespace CUDAFingerprinting.Common.Thinning
             }
             return false;
         }
-        */
+        //*/
         public static double[,] Thin(double[,] array, int width, int height)
         {
             w = width;
             h = height;
             a = new double[h, w];
             Array.Copy(array, 0, a, 0, h * w);
+
             //concaveCornerCandidats = new bool[h, w];
             //Array.Clear(concaveCornerCandidats, 0, h * w);
 
@@ -321,26 +327,26 @@ namespace CUDAFingerprinting.Common.Thinning
                         {
                             SetPixel(buffer, x, y, WHITE);
                             isSkeleton = false;
-                            /*neighbors-concave corners processing
+                            ///*neighbors-concave corners processing
                             for (int i = -1; i < 2; i++)
                             {
                                 for (int j = -1; j < 2; j++)
                                 {
                                     if (i == 0 && j == 0) continue;
-                                    if (IsConcaveCornerCandidate(x, y, i, j, pattern))
+                                    /*if (IsConcaveCornerCandidate(x, y, i, j, pattern))
                                     {
                                         if (IsMarked(x + i, y + j))
-                                        {
+                                        {*/
                                             if (IsConcaveCornerPattern(x + i, y + j))
                                             {
                                                 SetPixel(buffer, x + i, y + j, WHITE);
                                             }
-                                        }
+                                        /*}
                                         InvertMark(x + i, y + j);
-                                    }
+                                    }*/
                                 }
                             }
-                            end concave corners processing*/
+                            //end concave corners processing*/
                         }
                     }
                 }
