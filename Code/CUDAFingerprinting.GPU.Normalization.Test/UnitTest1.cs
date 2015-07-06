@@ -48,31 +48,22 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
         }
 
         [DllImport("CUDAFingerprinting.GPU.Normalisation.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Normalize")]
-        public static extern IntPtr Normalize(float[,] source, int imgWidth, int imgHeight, int bordMean, int bordVar);
+        [return: MarshalAs(UnmanagedType.SafeArray)]
+        public static extern float[,] Normalize(float[,] source, int imgWidth, int imgHeight, int bordMean, int bordVar);
 
         [TestMethod]
         public void NormalizationTest()
         {
             var bmp = Resources.SimpleFinger1;
-            float[,] array = LoadImage(bmp);
-            IntPtr cur = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
-            int[] result = new int[bmp.Width * bmp.Height];
-            Marshal.Copy(cur, result, 0, 3);
+            var array = LoadImage(bmp);
+
+            
+
+            array = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
+
             var bmp2 = SaveArrayToBitmap(array);
 
-            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
-        }
-        [TestMethod]
-        public void NormalizationTest2()
-        {
-            var bmp = Resources.SimpleFinger1;
-            float[,] array = LoadImage(bmp);
-            IntPtr cur = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
-            int[] result = new int[bmp.Width * bmp.Height];
-            Marshal.Copy(cur, result, 0, 3);
-            var bmp2 = SaveArrayToBitmap(array);
-
-            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
+            bmp.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
     }
 }
