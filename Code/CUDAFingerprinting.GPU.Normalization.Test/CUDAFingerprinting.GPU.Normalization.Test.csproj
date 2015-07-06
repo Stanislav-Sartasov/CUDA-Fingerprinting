@@ -72,6 +72,11 @@
   <ItemGroup>
     <None Include="Resources\001.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="CUDAFingerprinting.GPU.Normalisation.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
