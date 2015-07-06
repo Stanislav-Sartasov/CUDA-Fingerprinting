@@ -150,6 +150,22 @@ CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordV
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	return image;
 }
+float* Make1D (float *arr, int width, int height)
+{
+	//var rows = arr.GetLength(0);
+//	var columns = arr.GetLength(1);
+
+//	var result = new T[rows * columns];
+	float* result = (float*)malloc(width * height * sizeof(float));
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			result[i * width + j] = arr[i, j];
+		}
+	}
+	return result;
+}
 float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int bordVar)
 {
 	CUDAArray<float> image = CUDAArray<float>(source, imgWidth, imgHeight);
@@ -162,6 +178,7 @@ float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int b
 	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	image.GetData(source);
+	source = Make1D(source, imgWidth, imgHeight);
 	return source;
 }
 
