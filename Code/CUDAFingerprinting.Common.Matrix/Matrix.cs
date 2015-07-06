@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-
 namespace CUDAFingerprinting.Common.Matrix
 {
     public class Matrix
