@@ -11,18 +11,26 @@ namespace CUDAFingerprinting.Common.Matrix
 {
     public class Matrix
     {
-        private const int edge = 205;
+        private const int edge = 100;
 
-        public Bitmap calculatingAverageColor(Bitmap pic)
+        private int[,] matrix;
+        private Bitmap pic;
+
+        public Matrix(Bitmap picture)
+        {
+            matrix = new int[picture.Width, picture.Height];
+            pic = new Bitmap(picture);
+        }
+
+        public Bitmap SobelFilter()
         {
             int width = pic.Width;
             int height = pic.Height; 
 
             int[,] Gx = new int[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
             int[,] Gy = new int[,] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
-            int[,] Matrix = new int[width, height];
 
-                       
+            Bitmap SFPic = new Bitmap(pic);
 
             //Using Sobel Operator
             for (int x = 1; x < width - 1; x++)
@@ -45,9 +53,17 @@ namespace CUDAFingerprinting.Common.Matrix
                         sqrtXY = 0;
                     }
 
-                    pic.SetPixel(x, y, Color.FromArgb(sqrtXY, sqrtXY, sqrtXY));
+                    SFPic.SetPixel(x, y, Color.FromArgb(sqrtXY, sqrtXY, sqrtXY));
                 }
             }
+
+            return SFPic;
+        }
+
+        public void MatrixMaking()
+        {
+            int width = pic.Width;
+            int height = pic.Height; 
 
             //Creating Matrix with '1' for white and '0' for black
             for (int x = 0; x < width; x = x + 16)
@@ -79,11 +95,11 @@ namespace CUDAFingerprinting.Common.Matrix
                             {
                                 if (block.GetPixel(i, j).R >= edge)
                                 {
-                                    Matrix[x + i, y + j] = 1;
+                                    matrix[x + i, y + j] = 1;
                                 }
                                 else
                                 {
-                                    Matrix[x + i, y + j] = 0;
+                                    matrix[x + i, y + j] = 0;
                                 }
                             }
                         }
@@ -120,16 +136,22 @@ namespace CUDAFingerprinting.Common.Matrix
                         {
                             if (block.GetPixel(i, j).R >= edge)
                             {
-                                Matrix[x + i, 352 + j] = 1;
+                                matrix[x + i, 352 + j] = 1;
                             }
                             else
                             {
-                                Matrix[x + i, 352 + j] = 0;
+                                matrix[x + i, 352 + j] = 0;
                             }
                         }
                     }
                 }
             }
+        }
+
+        public Bitmap BWPicture()
+        {
+            int width = pic.Width;
+            int height = pic.Height; 
 
             //Creating Black-White Bitmap on the basis of Matrix
 
@@ -139,7 +161,7 @@ namespace CUDAFingerprinting.Common.Matrix
             {
                 for (int y = 0; y < height; ++y)
                 {
-                    if (Matrix[x, y] == 1)
+                    if (matrix[x, y] == 1)
                     {
                         newPic.SetPixel(x, y, Color.White);
                     }
