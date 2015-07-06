@@ -7,7 +7,10 @@
 #include <math.h>
 
 #include "CUDAArray.cuh"
-
+extern "C"
+{ 
+	__declspec(dllexport) float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int bordVar);
+}
 __global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
 {
 	
@@ -152,7 +155,22 @@ CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordV
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	return image;
 }
+float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int bordVar)
+{
+	CUDAArray<float> image = CUDAArray<float>(source, imgWidth, imgHeight);
+	int height = image.Height;
 
+	float mean = CalculateMean(image);
+	float variation = CalculateVariation(image, mean);
+
+	dim3 blockSize = dim3(defaultThreadCount);
+	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
+	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
+	image.GetData(source);
+	return source;
+}
+/*
 void main()
 {
 }
+*/
