@@ -1,0 +1,7 @@
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\obj\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests.csprojResolveAssemblyReference.cache
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\bin\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests.dll
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\bin\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests.pdb
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\bin\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.dll
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\bin\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.pdb
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\obj\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests.dll
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests\obj\Debug\CUDAFingerprinting.Common.BinCylinderCorrelation.Tests.pdb

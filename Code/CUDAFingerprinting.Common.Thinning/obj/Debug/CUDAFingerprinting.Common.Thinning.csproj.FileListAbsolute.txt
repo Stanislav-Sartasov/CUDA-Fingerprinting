@@ -1,0 +1,5 @@
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Thinning\bin\Debug\CUDAFingerprinting.Common.Thinning.dll
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Thinning\bin\Debug\CUDAFingerprinting.Common.Thinning.pdb
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Thinning\obj\Debug\CUDAFingerprinting.Common.Thinning.csprojResolveAssemblyReference.cache
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Thinning\obj\Debug\CUDAFingerprinting.Common.Thinning.dll
+C:\Users\resaglow\Dev\CUDA Fingerprinting\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common.Thinning\obj\Debug\CUDAFingerprinting.Common.Thinning.pdb
