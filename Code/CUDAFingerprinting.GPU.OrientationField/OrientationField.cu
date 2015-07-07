@@ -10,31 +10,31 @@
 #include "CUDAArray.cuh"
 
 __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
-	float numerator = 0;
-	float denominator = 0;
-	int row = blockIdx.y;
-	int column = blockIdx.x;
+	float numerator;
+	float denominator;
 
-	// вычисление числителя и знаменателя
-	// сначала перемножаем соответствующие элементы матрицы, результат помещаем в shared память
-	__shared__ CUDAArray<float> product(gradientX);
-	__shared__ CUDAArray<float> sqrdiff(gradientX);
 	int column = defaultColumn();
 	int row = defaultRow();
 	int threadColumn = threadIdx.x;
 	int threadRow = threadIdx.y;
 	float gradientYValue = gradientY.At(row, column);
+	float gradientXValue = gradientX.At(row, column);
 
-	product.SetAt(threadRow, threadColumn, product.At(threadRow, threadColumn) * gradientYValue); // копируем в общую память произведения соответствующих элементов 
-	sqrdiff.SetAt(threadRow, threadColumn, sqrdiff.At(threadRow, threadColumn) * sqrdiff.At(threadRow, threadColumn) - gradientYValue * gradientYValue); // разность квадратов
+	// вычисление числителя и знаменателя
+	// сначала перемножаем соответствующие элементы матрицы, результат помещаем в shared память
+	__shared__ float product[16][16];
+	__shared__ float sqrdiff[16][16];
+	
+	product[threadRow][threadColumn] = gradientXValue * gradientYValue; // копируем в общую память произведения соответствующих элементов 
+	sqrdiff[threadRow][threadColumn] = gradientXValue * gradientXValue - gradientYValue * gradientYValue; // разность квадратов
 	__syncthreads();  // ждем пока все нити сделают вычисления
 
 	// теперь нужно просуммировать элементы матриц
 	// суммируем элементы строк, результаты суммы будут в первой колонке 
 	for (int s = blockDim.x / 2; s > 0; s = s / 2) {		// суммируем так, чтобы нити не работали с одной и той же памятью
 		if (threadColumn < s) {
-			product.SetAt(threadRow, threadColumn, product.At(threadRow, threadColumn) + product.At(threadRow, threadColumn + s));
-			sqrdiff.SetAt(threadRow, threadColumn, sqrdiff.At(threadRow, threadColumn) + sqrdiff.At(threadRow, threadColumn + s));
+			product[threadRow][threadColumn] += product[threadRow][threadColumn + s];
+			sqrdiff[threadRow][threadColumn] += sqrdiff[threadRow][threadColumn + s];
 		}
 		__syncthreads();
 	}
@@ -42,16 +42,16 @@ __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float
 	if (threadColumn == 0){
 		for (int s = blockDim.y / 2; s > 0; s = s / 2) {		// суммируем так, чтобы нити не работали с одной и той же памятью
 			if (threadRow < s) {
-				product.SetAt(threadRow, threadColumn, product.At(threadRow, threadColumn) + product.At(threadRow + s, threadColumn));
-				sqrdiff.SetAt(threadRow, threadColumn, sqrdiff.At(threadRow, threadColumn) + sqrdiff.At(threadRow + s, threadColumn));
+				product[threadRow][threadColumn] += product[threadRow + s][threadColumn];
+				sqrdiff[threadRow][threadColumn] += sqrdiff[threadRow + s][threadColumn];
 			}
 			__syncthreads();
 		}
 	}
 
-	// после прохода циклов результаты будут находится в находиться в product[0, 0] и sqrdiff[0, 0]
-	numerator = 2 * product.At(0, 0);
-	denominator = sqrdiff.At(0, 0);
+	// после прохода циклов результаты будут находится в находиться в product[0][0] и sqrdiff[0][0]
+	numerator = 2 * product[0][0];
+	denominator = sqrdiff[0][0];
 
 	// определяем значение угла ориентации
 	if (denominator == 0){
@@ -65,8 +65,6 @@ __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float
 	}
 }
 
-
-
 void SetOrientation(CUDAArray<float> orientation, CUDAArray<float> source, int defaultBlockSize, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
 	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
 	dim3 gridSize =
@@ -75,9 +73,9 @@ void SetOrientation(CUDAArray<float> orientation, CUDAArray<float> source, int d
 	cudaSetOrientation <<<gridSize, blockSize >>>(orientation, gradientX, gradientY);
 }
 
-void OrientationField(CUDAArray<float> source, int sizeX, int sizeY){
+void OrientationField(CUDAArray<float> source){
 	const int defaultBlockSize = 16;
-	CUDAArray<float> Orientation(sizeY, sizeX);
+	CUDAArray<float> Orientation(source.Width, source.Height);
 
 	// фильтры Собеля
 	float filterXLinear[9] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
