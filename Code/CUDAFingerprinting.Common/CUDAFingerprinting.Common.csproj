@@ -53,7 +53,6 @@
     <Compile Include="ImageHelper.cs" />
     <Compile Include="KernelHelper.cs" />
     <Compile Include="Minutia.cs" />
-    <Compile Include="Normalization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

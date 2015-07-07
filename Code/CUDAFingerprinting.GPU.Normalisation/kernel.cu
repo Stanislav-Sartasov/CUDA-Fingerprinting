@@ -189,24 +189,23 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 
 void main()
 {
-	BMPHeader* header = (BMPHeader*)malloc(sizeof(BMPHeader));
-	char filename[72] = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\bin\\Debug\\4_8.bmp";
-	int* img = loadBmp(header, filename);
-	int height = header->Height;
-	int width = header->Width;
-	float* source = (float*)malloc(height*width*sizeof(float));
-	for (int i = 0; i < height; i++)
-	for (int j = 0; j < width; j++)
+	int* width = (int*)malloc(sizeof(int));
+	int* height = (int*)malloc(sizeof(int));
+	char filename[80] = "F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\002.bmp";  //Write your way to bmp file
+	int* img = loadBmp(filename, width, height);
+	float* source = (float*)malloc((*height)*(*width)*sizeof(float));
+	for (int i = 0; i < (*height); i++)
+		for (int j = 0; j < (*width); j++)
+		{
+			source[i * (*width) + j] = (float)img[i, j];
+		}
+	float* b = (float*)malloc((*height) * (*width) * sizeof(float));
+	Normalize(source, b, (*width), (*height), 1000, 1000);
+	for (int i = 0; i < (*height) * (*width); i++)
 	{
-		source[i * width + j] = (float)img[i, j];
+		b[i] = (b[i] < 0) ? 0 : (b[i] > 255 ? 255 : b[i]);
 	}
-	float* b = (float*)malloc(height * width * sizeof(float));
-	Normalize(source, b, width, height, 100, 100);
-	for (int i = 0; i < height*width; i++)
-	{
-		printf("%f ", b[i]);
-	}
-	saveBmp(b, header, "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\bin\\Debug\\res.bmp");
+	saveBmp("F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, (*width), (*height));
 //	int n = 100;
 //	float* a = (float*)malloc(n * sizeof(float));
 //	for (int i = 0; i < n; i++)
@@ -219,4 +218,8 @@ void main()
 //	{
 //		printf("%f ", b[i]);
 //	}
+	free(width);
+	free(height);
+	free(img);
+	free(b);
 }

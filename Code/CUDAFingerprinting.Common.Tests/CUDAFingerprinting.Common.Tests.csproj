@@ -80,6 +80,9 @@
   <ItemGroup>
     <None Include="Resources\001.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\002.bmp" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
