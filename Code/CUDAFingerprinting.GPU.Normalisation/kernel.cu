@@ -5,12 +5,11 @@
 #include "constsmacros.h"
 #include <stdlib.h>
 #include <math.h>
-
-
+#include "ImageLoading.cuh"
 #include "CUDAArray.cuh"
 extern "C"
 { 
-	__declspec(dllexport) float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int bordVar);
+	__declspec(dllexport) void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordMean, int bordVar);
 }
 __global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
 {
@@ -61,7 +60,7 @@ float CalculateMean(CUDAArray<float> image)
 
 	cudaCalcMeanRow <<<gridSize, blockSize >>> (image, dev_mean);
 	cudaMemcpy(meanArray, dev_mean, gridSize.x * sizeof(float), cudaMemcpyDeviceToHost);
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < gridSize.x; i++)
 	{
 		mean += meanArray[i];
 	}
@@ -113,7 +112,7 @@ float CalculateVariation(CUDAArray<float> image, float mean)
 
 	cudaCalcVariationRow <<<gridSize, blockSize >>> (image, mean, dev_variation);
 	cudaMemcpy(variationArray, dev_variation, gridSize.x * sizeof(float), cudaMemcpyDeviceToHost);
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < gridSize.x; i++)
 	{
 		variation += variationArray[i];
 	}
@@ -151,7 +150,23 @@ CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordV
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	return image;
 }
-float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int bordVar)
+float* Make1D(float *arr, int width, int height)
+{
+	//var rows = arr.GetLength(0);
+	//	var columns = arr.GetLength(1);
+
+	//	var result = new T[rows * columns];
+	float* result = (float*)malloc(width * height * sizeof(float));
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			result[i * width + j] = arr[i, j];
+		}
+	}
+	return result;
+}
+void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordMean, int bordVar)
 {
 	CUDAArray<float> image = CUDAArray<float>(source, imgWidth, imgHeight);
 	int height = image.Height;
@@ -162,10 +177,46 @@ float* Normalize(float* source, int imgWidth, int imgHeight, int bordMean, int b
 	dim3 blockSize = dim3(defaultThreadCount);
 	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
-	cudaMemcpy(source, image.cudaPtr, image.Width * image.Height, cudaMemcpyDeviceToHost);
-	return source;
+	//cudaMemcpy(source, image.cudaPtr, image.Width * image.Height, cudaMemcpyDeviceToHost);
+	image.GetData(res);
+	//for (int i = 0; i < imgHeight * imgWidth; i++)
+	//{
+	//	printf("%f ", cur[i]);
+	//}
+	///*float * result = Make1D(cur, imgWidth, imgHeight);
+	//return result;*/
 }
 
-//void main()
-//{
-//}
+void main()
+{
+	BMPHeader* header = (BMPHeader*)malloc(sizeof(BMPHeader));
+	char filename[72] = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\bin\\Debug\\4_8.bmp";
+	int* img = loadBmp(header, filename);
+	int height = header->Height;
+	int width = header->Width;
+	float* source = (float*)malloc(height*width*sizeof(float));
+	for (int i = 0; i < height; i++)
+	for (int j = 0; j < width; j++)
+	{
+		source[i * width + j] = (float)img[i, j];
+	}
+	float* b = (float*)malloc(height * width * sizeof(float));
+	Normalize(source, b, width, height, 100, 100);
+	for (int i = 0; i < height*width; i++)
+	{
+		printf("%f ", b[i]);
+	}
+	saveBmp(b, header, "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\bin\\Debug\\res.bmp");
+//	int n = 100;
+//	float* a = (float*)malloc(n * sizeof(float));
+//	for (int i = 0; i < n; i++)
+//	{
+//		a[i] = i;
+//	}
+//	float* b = (float*) malloc(n * sizeof(float));
+//	b = Normalize(a, 2, 50, 100, 100);
+//	for (int i = 0; i < n; i++)
+//	{
+//		printf("%f ", b[i]);
+//	}
+}

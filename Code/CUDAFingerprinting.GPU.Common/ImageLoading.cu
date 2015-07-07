@@ -53,7 +53,7 @@ int* loadBmp(BMPHeader* header, char* filename)
 	return transformedPixels;
 }
 
-void saveBmp(int* data, BMPHeader* header, char* filename)
+void saveBmp(float* data, BMPHeader* header, char* filename)
 {
 	FILE *output;
 

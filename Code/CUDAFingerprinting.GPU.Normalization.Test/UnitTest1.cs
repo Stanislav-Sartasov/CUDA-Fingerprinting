@@ -46,21 +46,48 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
             });
             return bmp;
         }
+        public static T[] Make1D<T>(T[,] arr)
+        {
+            var rows = arr.GetLength(0);
+            var columns = arr.GetLength(1);
 
+            var result = new T[rows * columns];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    result[i * columns + j] = arr[i, j];
+                }
+            }
+            return result;
+        }
         [DllImport("CUDAFingerprinting.GPU.Normalisation.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Normalize")]
        // [return: MarshalAs(UnmanagedType.SafeArray)]
-        public static extern IntPtr Normalize(float[,] source, int imgWidth, int imgHeight, int bordMean, int bordVar);
+        public static extern void Normalize(float[] source, float[] res, int imgWidth, int imgHeight, int bordMean, int bordVar);
+        //static void WriteFloat(IntPtr ptr, float value)
+        //{
+        //    foreach (var b in BitConverter.GetBytes(value))
+        //    {
+        //        Marshal.WriteByte(ptr, b);
+        //        ptr += 1;
+        //    }
+        //}
 
         [TestMethod]
         public void NormalizationTest()
         {
-            var bmp = Resources.SimpleFinger1;
-            var array = LoadImage(bmp);
-
-            IntPtr ptr = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
+            var bmp = Resources.SampleFinger1;
+            var array0 = LoadImage(bmp);
+            var array = Make1D(array0);
             float[] result = new float[bmp.Width * bmp.Height];
-            Marshal.Copy(ptr, result, 0, bmp.Width * bmp.Height);
-       //     array = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
+            Normalize(array, result, bmp.Width, bmp.Height, 1000, 1000);
+            //IntPtr ptr = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
+            //float[] result = new float[bmp.Width * bmp.Height];
+            //float a = (float)1.0;
+            //WriteFloat(ptr, a);
+            //Marshal.Copy(ptr, result, 0, bmp.Width * bmp.Height);
+            //array = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
             float[,] ar = result.Make2D(bmp.Width, bmp.Height);
             var bmp2 = SaveArrayToBitmap(ar);
 

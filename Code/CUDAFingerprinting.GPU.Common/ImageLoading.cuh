@@ -23,6 +23,6 @@ typedef struct
 
 int* loadBmp(BMPHeader* header, char* filename);
 
-void saveBmp(int* data, BMPHeader* header, char* filename);
+void saveBmp(float* data, BMPHeader* header, char* filename);
 
 #endif
