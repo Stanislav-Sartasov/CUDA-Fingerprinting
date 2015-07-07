@@ -1,7 +1,7 @@
 #ifndef CUDAFINGEROPRINTING_CUDAARRAY
 #define CUDAFINGEROPRINTING_CUDAARRAY
 
-//#include "cuda_runtime.h"
+#include "cuda_runtime.h"
 #include "constsmacros.h"
 
 template<typename T> class CUDAArray

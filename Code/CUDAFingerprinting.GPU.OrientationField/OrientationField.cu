@@ -1,14 +1,13 @@
 #define _USE_MATH_DEFINES 
 #include <stdio.h>
-#include <stdlib.h>
-#include <float.h>
 #include <math.h>
 #include "cuda_runtime.h"
+#include <device_functions.h>
 #include "device_launch_parameters.h"
 #include "Convolution.cuh"
 #include "constsmacros.h"
 #include "CUDAArray.cuh"
-
+/////////////////////////////////////////// НОВЫЙ ///////////////////////////////////////////
 __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
 	float numerator;
 	float denominator;
@@ -17,16 +16,16 @@ __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float
 	int row = defaultRow();
 	int threadColumn = threadIdx.x;
 	int threadRow = threadIdx.y;
-	float gradientYValue = gradientY.At(row, column);
-	float gradientXValue = gradientX.At(row, column);
+	float GyValue = gradientY.At(row, column);
+	float GxValue = gradientX.At(row, column);
 
 	// вычисление числителя и знаменателя
 	// сначала перемножаем соответствующие элементы матрицы, результат помещаем в shared память
 	__shared__ float product[16][16];
 	__shared__ float sqrdiff[16][16];
-	
-	product[threadRow][threadColumn] = gradientXValue * gradientYValue; // копируем в общую память произведения соответствующих элементов 
-	sqrdiff[threadRow][threadColumn] = gradientXValue * gradientXValue - gradientYValue * gradientYValue; // разность квадратов
+
+	product[threadRow][threadColumn] = GxValue * GyValue; // копируем в общую память произведения соответствующих элементов 
+	sqrdiff[threadRow][threadColumn] = GxValue * GxValue - GyValue * GyValue; // разность квадратов
 	__syncthreads();  // ждем пока все нити сделают вычисления
 
 	// теперь нужно просуммировать элементы матриц
@@ -70,10 +69,11 @@ void SetOrientation(CUDAArray<float> orientation, CUDAArray<float> source, int d
 	dim3 gridSize =
 		dim3(ceilMod(source.Width, defaultBlockSize),
 		ceilMod(source.Height, defaultBlockSize));
-	cudaSetOrientation <<<gridSize, blockSize >>>(orientation, gradientX, gradientY);
+	cudaSetOrientation << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
 }
 
-void OrientationField(CUDAArray<float> source){
+void OrientationField(float* floatArray, int width, int height){
+	CUDAArray<float> source(floatArray, width, height);
 	const int defaultBlockSize = 16;
 	CUDAArray<float> Orientation(source.Width, source.Height);
 
