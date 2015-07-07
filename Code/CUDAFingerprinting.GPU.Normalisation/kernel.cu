@@ -7,6 +7,8 @@
 #include <math.h>
 #include "ImageLoading.cuh"
 #include "CUDAArray.cuh"
+#include <float.h>
+
 extern "C"
 { 
 	__declspec(dllexport) void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordMean, int bordVar);
@@ -201,10 +203,20 @@ void main()
 		}
 	float* b = (float*)malloc((*height) * (*width) * sizeof(float));
 	Normalize(source, b, (*width), (*height), 1000, 1000);
+
+	float max = FLT_MIN;
+	float min = FLT_MAX;
 	for (int i = 0; i < (*height) * (*width); i++)
 	{
-		b[i] = (b[i] < 0) ? 0 : (b[i] > 255 ? 255 : b[i]);
+		if (max < b[i]) max = b[i];
+		if (min > b[i]) min = b[i];
 	}
+
+	for (int i = 0; i < (*height) * (*width); i++)
+	{
+		b[i] = ((b[i] - min) / (max - min) * 255);
+	}
+
 	saveBmp("F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, (*width), (*height));
 //	int n = 100;
 //	float* a = (float*)malloc(n * sizeof(float));
