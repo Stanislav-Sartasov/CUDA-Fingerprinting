@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "cuda_runtime.h"
 #include <device_functions.h>
