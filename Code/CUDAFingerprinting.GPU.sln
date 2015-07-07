@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField.Test", "CUDAFingerprinting.GPU.OrientationField.CUDATest\OrientationField.Test.vcxproj", "{819C3300-DC79-4202-AB9E-C8CDFBE97881}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OrientationField.Test", "CUDAFingerprinting.GPU.OrientationField.CUDATest\OrientationField.Test.vcxproj", "{819C3300-DC79-4202-AB9E-C8CDFBE97881}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "CUDAFingerprinting.GPU.OrientationField\OrientationField.vcxproj", "{D683F6E7-6722-4A88-BD93-518C7CE5713B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerPrinting.GPU.BinCylinderCorrelation", "CUDAFingerPrinting.GPU.BinCylinderCorrelation\CUDAFingerPrinting.GPU.BinCylinderCorrelation.vcxproj", "{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OrientationField", "CUDAFingerprinting.GPU.OrientationField\OrientationField.vcxproj", "{D683F6E7-6722-4A88-BD93-518C7CE5713B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,14 +41,6 @@ Global
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Win32.Build.0 = Release|Win32
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.ActiveCfg = Release|x64
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.Build.0 = Release|x64
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Debug|Win32.Build.0 = Debug|Win32
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Debug|x64.ActiveCfg = Debug|x64
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Debug|x64.Build.0 = Debug|x64
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Release|Win32.ActiveCfg = Release|Win32
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Release|Win32.Build.0 = Release|Win32
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Release|x64.ActiveCfg = Release|x64
-		{603C10F6-8A08-4BF4-AC93-DF48B13B4F7C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
