@@ -10,18 +10,19 @@ namespace CUDAFingerprinting.Common.Matrix
 {
     public class Matrix
     {
-        private const int edge = 100;
+        private const int edge = 100; //Color edge for block
+        private const int pixEdge = 120; //Color edge for each pixel (for more effective setting)
 
-        private int[,] matrix;
-        private Bitmap pic;
+        private double[,] matrix; //Saves results of using Sobel filter
+        private Bitmap pic; //Saves a source picture
 
         public Matrix(Bitmap picture)
         {
-            matrix = new int[picture.Width, picture.Height];
+            matrix = new double[picture.Width, picture.Height];
             pic = new Bitmap(picture);
         }
 
-        public Bitmap SobelFilter()
+        public void SobelFilter()
         {
             int width = pic.Width;
             int height = pic.Height; 
@@ -41,46 +42,34 @@ namespace CUDAFingerprinting.Common.Matrix
                                     pic.GetPixel(x - 1, y + 1).R * Gx[2, 0] + pic.GetPixel(x + 1, y + 1).R * Gx[2, 2];
                     int sumY = pic.GetPixel(x - 1, y - 1).R * Gy[0, 0] + pic.GetPixel(x, y - 1).R * Gy[0, 1] + pic.GetPixel(x + 1, y - 1).R * Gy[0, 2] +
                         pic.GetPixel(x - 1, y + 1).R * Gy[2, 0] + pic.GetPixel(x, y + 1).R * Gy[2, 1] + pic.GetPixel(x + 1, y + 1).R * Gy[2, 2];
-                    int sqrtXY = (int)System.Math.Sqrt(sumX * sumX + sumY * sumY);
+                    double sqrtXY = System.Math.Sqrt(sumX * sumX + sumY * sumY);
 
-                    if (sqrtXY > 255)
-                    {
-                        sqrtXY = 255;
-                    }
-                    if (sqrtXY < 0)
-                    {
-                        sqrtXY = 0;
-                    }
-
-                    SFPic.SetPixel(x, y, Color.FromArgb(sqrtXY, sqrtXY, sqrtXY));
+                    matrix[x, y] = sqrtXY;
                 }
             }
-
-            return SFPic;
         }
 
-        public void MatrixMaking()
+        public int[,] MatrixMaking()
         {
             int width = pic.Width;
-            int height = pic.Height; 
+            int height = pic.Height;
+
+            int[,] intMatrix = new int [width, height];
 
             //Creating Matrix with '1' for white and '0' for black
-            for (int x = 0; x < width; x = x + 16)
-            {
-                for (int y = 0; y < height - 16; y = y + 16)
-                {
-                    Rectangle cloneRect = new Rectangle(x, y, 16, 16);
-                    PixelFormat format = pic.PixelFormat;
-                    Bitmap block = pic.Clone(cloneRect, format);
 
-                    int averageColor = 0;
+            for (int x = 0; x <= width - 16; x = x + 16)
+            {
+                for (int y = 0; y <= height - 16; y = y + 16)
+                {
+                    double averageColor = 0;
 
                     for (int i = 0; i < 16; i++)
                     {
                         for (int j = 0; j < 16; j++)
                         {
-                            Color pixColor = block.GetPixel(i, j);
-                            averageColor += pixColor.R;
+
+                            averageColor += matrix[x + i, y + j];
                         }
                     }
 
@@ -92,13 +81,13 @@ namespace CUDAFingerprinting.Common.Matrix
                         {
                             for (int j = 0; j < 16; j++)
                             {
-                                if (block.GetPixel(i, j).R >= edge)
+                                if (matrix[x + i, y + j] >= pixEdge)
                                 {
-                                    matrix[x + i, y + j] = 1;
+                                    intMatrix[x + i, y + j] = 1;
                                 }
                                 else
                                 {
-                                    matrix[x + i, y + j] = 0;
+                                    intMatrix[x + i, y + j] = 0;
                                 }
                             }
                         }
@@ -107,47 +96,132 @@ namespace CUDAFingerprinting.Common.Matrix
             }
 
             //Processing the bottom of the image
-            for (int x = 0; x < width; x = x + 16)
+            if (height % 16 != 0)
             {
-
-                Rectangle cloneRect = new Rectangle(x, 352, 16, 12);
-                PixelFormat format = pic.PixelFormat;
-                Bitmap block = pic.Clone(cloneRect, format);
-
-                int averageColor = 0;
-
-                for (int i = 0; i < 16; i++)
+                for (int x = 0; x <= width - 16; x = x + 16)
                 {
-                    for (int j = 0; j < 12; j++)
-                    {
-                        Color pixColor = block.GetPixel(i, j);
-                        averageColor += pixColor.R;
-                    }
-                }
+                    /*Rectangle cloneRect = new Rectangle(x, height - (height % 16), 16, height % 16);
+                    PixelFormat format = pic.PixelFormat;
+                    Bitmap block = pic.Clone(cloneRect, format);*/
 
-                averageColor /= 192;
+                    double averageColor = 0;
 
-                if (averageColor >= edge)
-                {
                     for (int i = 0; i < 16; i++)
                     {
-                        for (int j = 0; j < 12; j++)
+                        for (int j = 0; j < height % 16; j++)
                         {
-                            if (block.GetPixel(i, j).R >= edge)
+                            //Color pixColor = block.GetPixel(i, j);
+                            averageColor += matrix[x + i, height - (height % 16) + j];
+                        }
+                    }
+
+                    averageColor /= (16 * (height % 16));
+
+                    if (averageColor >= edge)
+                    {
+                        for (int i = 0; i < 16; i++)
+                        {
+                            for (int j = 0; j < height % 16; j++)
                             {
-                                matrix[x + i, 352 + j] = 1;
-                            }
-                            else
-                            {
-                                matrix[x + i, 352 + j] = 0;
+                                if (matrix[x + i, height - (height % 16) + j] >= pixEdge)
+                                {
+                                    intMatrix[x + i, height - (height % 16) + j] = 1;
+                                }
+                                else
+                                {
+                                    intMatrix[x + i, height - (height % 16) + j] = 0;
+                                }
                             }
                         }
                     }
                 }
             }
+
+            //Processing the right side of the image
+            if (width % 16 != 0)
+            {
+                for (int y = 0; y <= height - 16; y = y + 16)
+                {
+                    /*Rectangle cloneRect = new Rectangle(width - (width % 16), y, width % 16, 16);
+                    PixelFormat format = pic.PixelFormat;
+                    Bitmap block = pic.Clone(cloneRect, format);*/
+
+                    double averageColor = 0;
+
+                    for (int i = 0; i < width % 16; i++)
+                    {
+                        for (int j = 0; j < 16; j++)
+                        {
+                            //Color pixColor = block.GetPixel(i, j);
+                            averageColor += matrix[width - (width % 16) + i, y + j];
+                        }
+                    }
+
+                    averageColor /= (16 * (width % 16));
+
+                    if (averageColor >= edge)
+                    {
+                        for (int i = 0; i < width % 16; i++)
+                        {
+                            for (int j = 0; j < 16; j++)
+                            {
+                                if (matrix[width - (width % 16) + i, y + j] >= pixEdge)
+                                {
+                                    intMatrix[width - (width % 16) + i, y + j] = 1;
+                                }
+                                else
+                                {
+                                    intMatrix[width - (width % 16) + i, y + j] = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Processing the right bottom square of the image
+            if (width % 16 != 0 && height % 16 != 0)
+            {
+                /*Rectangle cloneRect2 = new Rectangle(width - (width % 16), height - (height % 16), width % 16, height % 16);
+                PixelFormat format2 = pic.PixelFormat;
+                Bitmap block2 = pic.Clone(cloneRect2, format2);*/
+
+                double averageColor2 = 0;
+
+                for (int i = 0; i < 16; i++)
+                {
+                    for (int j = 0; j < 16; j++)
+                    {
+                        //Color pixColor = block2.GetPixel(i, j);
+                        averageColor2 += matrix[width - (width % 16) + i, height - (height % 16) + j];
+                    }
+                }
+
+                averageColor2 /= ((width % 16) * (height % 16));
+
+                if (averageColor2 >= edge)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        for (int j = 0; j < 16; j++)
+                        {
+                            if (matrix[width - (width % 16) + i, height - (height % 16) + j] >= pixEdge)
+                            {
+                                intMatrix[width - (width % 16) + i, height - (height % 16) + j] = 1;
+                            }
+                            else
+                            {
+                                intMatrix[width - (width % 16) + i, height - (height % 16) + j] = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return intMatrix;
         }
 
-        public Bitmap BWPicture()
+        public Bitmap BWPicture(int[,] intMatrix)
         {
             int width = pic.Width;
             int height = pic.Height; 
@@ -160,7 +234,7 @@ namespace CUDAFingerprinting.Common.Matrix
             {
                 for (int y = 0; y < height; ++y)
                 {
-                    if (matrix[x, y] == 1)
+                    if (intMatrix[x, y] == 1)
                     {
                         newPic.SetPixel(x, y, Color.White);
                     }
