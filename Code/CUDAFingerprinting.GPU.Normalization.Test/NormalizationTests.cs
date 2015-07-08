@@ -1,8 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-using System.Text;
-using System.Drawing;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
 
@@ -10,7 +6,7 @@ using CUDAFingerprinting.Common;
 namespace CUDAFingerprinting.GPU.Normalization.Test
 {
     [TestClass]
-    public class UnitTest1
+    public class NormalizationTests
     {
         [DllImport("CUDAFingerprinting.GPU.Normalization.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Normalize")]
         public static extern void Normalize(float[] source, float[] res, int imgWidth, int imgHeight, int bordMean, int bordVar);

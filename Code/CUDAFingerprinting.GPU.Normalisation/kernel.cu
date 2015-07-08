@@ -13,13 +13,16 @@ extern "C"
 { 
 	__declspec(dllexport) void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordMean, int bordVar);
 }
-__global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
+__global__ void cudaCalcMeanRow(CUDAArray<float> image, float* meanArray)
 {
 	
 	int column = defaultColumn();
-	int height = source.Height;
-	int width = source.Width;
-	int pixNum = height * width;
+	__shared__ int height;
+	__shared__ int width;
+	__shared__ int pixNum;
+	height = image.Height;
+	width = image.Width;
+	pixNum = height * width;
 	int tempIndex = threadIdx.x;
 	
 	__shared__ float temp[GPUdefaultThreadCount];
@@ -28,7 +31,7 @@ __global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
 	{
 		for (int j = 0; j < height; j++)
 		{
-			mean += source.At(j, column) / pixNum;
+			mean += image.At(j, column) / pixNum;
 		}
 	}
 	
@@ -72,9 +75,13 @@ __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* 
 {
 
 	int column = defaultColumn();
-	int height = image.Height;
-	int width = image.Width;
-	int pixNum = height * width;
+	__shared__ int height;
+	__shared__ int width;
+	__shared__ int pixNum;
+	height = image.Height;
+	width = image.Width;
+	pixNum = height * width;
+
 	int tempIndex = threadIdx.x;
 
 	__shared__ float temp[GPUdefaultThreadCount];
@@ -122,10 +129,11 @@ __global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float
 {
 	int column = defaultColumn();
 	__shared__ int width;
-	width = image.Width;
 	__shared__ int height;
+	width = image.Width;
 	height = image.Height;
 	int curPix;  
+
 	if (width > column)
 	{
 		for (int j = 0; j < height; j++)
@@ -143,7 +151,7 @@ __global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float
 	}
 }
 
-CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordVar)
+CUDAArray<float> Normalize(CUDAArray<float> image, int bordMean, int bordVar)
 {
 	int height = image.Height;
 
@@ -174,7 +182,7 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 //{
 //	int width;
 //	int height;
-//	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\4_8.bmp";  //Write your way to bmp file
+//	char* filename = "..\\4_8.bmp";  //Write your way to bmp file
 //	int* img = loadBmp(filename, &width, &height);
 //	float* source = (float*)malloc(height*width*sizeof(float));
 //	for (int i = 0; i < height; i++)
@@ -185,7 +193,7 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 //	float* b = (float*)malloc(height * width * sizeof(float));
 //	Normalize(source, b, width, height, 200, 1000);
 //
-//	saveBmp("C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, width, height);
+//	saveBmp("..\\res.bmp", b, width, height);
 //
 //	free(source);
 //	free(img);
