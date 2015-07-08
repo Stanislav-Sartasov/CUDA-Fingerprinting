@@ -90,7 +90,8 @@ __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* 
 	{
 		for (int j = 0; j < height; j++)
 		{
-			variation += pow((image.At(j, column)- mean), 2) / pixNum;
+			float diff = image.At(j, column) - mean;
+			variation += diff * diff / pixNum;
 		}
 	}
 	temp[tempIndex] = variation;
