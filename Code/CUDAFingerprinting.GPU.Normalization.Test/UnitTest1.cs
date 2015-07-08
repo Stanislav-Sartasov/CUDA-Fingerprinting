@@ -13,16 +13,7 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
     public class UnitTest1
     {
         [DllImport("CUDAFingerprinting.GPU.Normalization.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Normalize")]
-       // [return: MarshalAs(UnmanagedType.SafeArray)]
         public static extern void Normalize(float[] source, float[] res, int imgWidth, int imgHeight, int bordMean, int bordVar);
-        //static void WriteFloat(IntPtr ptr, float value)
-        //{
-        //    foreach (var b in BitConverter.GetBytes(value))
-        //    {
-        //        Marshal.WriteByte(ptr, b);
-        //        ptr += 1;
-        //    }
-        //}
 
         [TestMethod]
         public void NormalizationTest()
@@ -32,12 +23,6 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
             float[] array = array0.Make1D();
             float[] result = new float[bmp.Width * bmp.Height];
             Normalize(array, result, bmp.Width, bmp.Height, 100, 1000);
-            //IntPtr ptr = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
-            //float[] result = new float[bmp.Width * bmp.Height];
-            //float a = (float)1.0;
-            //WriteFloat(ptr, a);
-            //Marshal.Copy(ptr, result, 0, bmp.Width * bmp.Height);
-            //array = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
             float[,] ar = result.Make2D(bmp.Height, bmp.Width);
             var bmp2 = ImageHelper.SaveArrayToBitmap(ar);
 

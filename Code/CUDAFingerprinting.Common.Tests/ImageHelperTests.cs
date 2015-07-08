@@ -10,13 +10,6 @@ namespace CUDAFingerprinting.Common.Tests
     public class ImageHelperTests
     {
         [TestMethod]
-        public void PrepeareData()
-        {
-            var array = ImageHelper.LoadImage(@"C:\GitHub\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Normalisation\002.bmp");
-            ImageHelper.SaveArray(array, @"C:\GitHub\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Normalisation\003.bmp");
-        }
-
-        [TestMethod]
         public void TestImageLoadAndSave()
         {
             var bmp = Resources.SampleFinger;
@@ -41,19 +34,6 @@ namespace CUDAFingerprinting.Common.Tests
                         Assert.Fail( "Pixels don't match at ({0}, {1})", x, y);
                 }
             }
-        }
-
-        [TestMethod]
-        public void TestNormalization()
-        {
-            var bmp = Resources.SampleFinger3;
-            var array = ImageHelper.LoadImage(bmp);
-
-            array = array.DoNormalization(100, 1000);
-
-            var bmp2 = ImageHelper.SaveArrayToBitmap(array);
-
-            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
     }
 }
