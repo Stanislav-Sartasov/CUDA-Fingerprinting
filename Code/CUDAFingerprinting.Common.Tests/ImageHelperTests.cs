@@ -42,7 +42,7 @@ namespace CUDAFingerprinting.Common.Tests
             var bmp = Resources.SampleFinger3;
             var array = ImageHelper.LoadImage(bmp);
 
-            array = array.DoNormalization(1000, 1000);
+            array = array.DoNormalization(100, 1000);
 
             var bmp2 = ImageHelper.SaveArrayToBitmap(array);
 

@@ -16,19 +16,19 @@ extern "C"
 __global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
 {
 	
-	int row = defaultColumn();
+	int column = defaultColumn();
 	int height = source.Height;
 	int width = source.Width;
+	int pixNum = height * width;
 	int tempIndex = threadIdx.x;
 	
-	__shared__ float* temp;
-	temp = (float*)malloc(blockDim.x * sizeof(float));
+	__shared__ float temp[GPUdefaultThreadCount];
 	float mean = 0;
-	if (source.Height > row)
+	if (width > column)
 	{
-		for (int j = 0; j < source.Width; j++)
+		for (int j = 0; j < height; j++)
 		{
-			mean += source.At(row, j) / (height * width);
+			mean += source.At(j, column) / pixNum;
 		}
 	}
 	
@@ -41,7 +41,6 @@ __global__ void cudaCalcMeanRow(CUDAArray<float> source, float* meanArray)
 	{
 		if (tempIndex < i) 
 			temp[tempIndex] += temp[tempIndex + i];
-		__syncthreads();
 		i /= 2;
 	}
 	if (tempIndex == 0) 
@@ -72,19 +71,19 @@ float CalculateMean(CUDAArray<float> image)
 __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* variationArray)
 {
 
-	int row = defaultColumn();
+	int column = defaultColumn();
 	int height = image.Height;
 	int width = image.Width;
+	int pixNum = height * width;
 	int tempIndex = threadIdx.x;
 
-	__shared__ float* temp;
-	temp = (float*)malloc(blockDim.x * sizeof(float));
+	__shared__ float temp[GPUdefaultThreadCount];
 	float variation = 0;
-	if (image.Height > row)
+	if (width > column)
 	{
-		for (int j = 0; j < image.Width; j++)
+		for (int j = 0; j < height; j++)
 		{
-			variation += pow((image.At(row,j)- mean), 2) / (height * width);
+			variation += pow((image.At(j, column)- mean), 2) / pixNum;
 		}
 	}
 	temp[tempIndex] = variation;
@@ -95,7 +94,6 @@ __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* 
 	{
 		if (tempIndex < i)
 			temp[tempIndex] += temp[tempIndex + i];
-		__syncthreads();
 		i /= 2;
 	}
 	if (tempIndex == 0)
@@ -122,19 +120,24 @@ float CalculateVariation(CUDAArray<float> image, float mean)
 }
 __global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float variation, int bordMean, int bordVar)
 {
-	int row = defaultColumn();
-
-	if (image.Height > row)
+	int column = defaultColumn();
+	__shared__ int width;
+	width = image.Width;
+	__shared__ int height;
+	height = image.Height;
+	int curPix;  
+	if (width > column)
 	{
-		for (int j = 0; j < image.Width; j++)
+		for (int j = 0; j < height; j++)
 		{
-			if (image.At(row, j) > mean)
+			curPix = image.At(j, column);
+			if (curPix > mean)
 			{
-				image.SetAt(row, j, bordMean + sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
+				image.SetAt(j, column, bordMean + sqrt((bordVar * pow(curPix - mean, 2)) / variation));
 			}
 			else
 			{
-				image.SetAt(row, j, bordMean - sqrt((bordVar * pow(image.At(row, j) - mean, 2)) / variation));
+				image.SetAt(j, column, bordMean - sqrt((bordVar * pow(curPix - mean, 2)) / variation));
 			}
 		}
 	}
@@ -164,21 +167,14 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 	dim3 blockSize = dim3(defaultThreadCount);
 	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
-	//cudaMemcpy(source, image.cudaPtr, image.Width * image.Height, cudaMemcpyDeviceToHost);
 	image.GetData(res);
-	//for (int i = 0; i < imgHeight * imgWidth; i++)
-	//{
-	//	printf("%f ", cur[i]);
-	//}
-	///*float * result = Make1D(cur, imgWidth, imgHeight);
-	//return result;*/
 }
 
 void main()
 {
 	int width;
 	int height;
-	char filename[80] = "F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\002.bmp";  //Write your way to bmp file
+	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\4_8.bmp";  //Write your way to bmp file
 	int* img = loadBmp(filename, &width, &height);
 	float* source = (float*)malloc(height*width*sizeof(float));
 	for (int i = 0; i < height; i++)
@@ -187,9 +183,9 @@ void main()
 			source[i * width + j] = (float)img[i * width + j];
 		}
 	float* b = (float*)malloc(height * width * sizeof(float));
-	Normalize(source, b, width, height, 100, 1000);
+	Normalize(source, b, width, height, 200, 1000);
 
-	saveBmp("F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, width, height);
+	saveBmp("C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, width, height);
 
 	free(source);
 	free(img);

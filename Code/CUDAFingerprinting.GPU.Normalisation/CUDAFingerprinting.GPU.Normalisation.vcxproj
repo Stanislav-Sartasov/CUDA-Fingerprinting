@@ -21,6 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6FAEFE37-4399-46BE-BBA7-14372EFFC3D8}</ProjectGuid>
     <RootNamespace>CUDAFingerprinting_GPU_Normalisation</RootNamespace>
+    <ProjectName>CUDAFingerprinting.GPU.Normalization</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
