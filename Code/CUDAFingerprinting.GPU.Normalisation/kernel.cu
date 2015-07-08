@@ -169,25 +169,25 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	image.GetData(res);
 }
-
-void main()
-{
-	int width;
-	int height;
-	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\4_8.bmp";  //Write your way to bmp file
-	int* img = loadBmp(filename, &width, &height);
-	float* source = (float*)malloc(height*width*sizeof(float));
-	for (int i = 0; i < height; i++)
-		for (int j = 0; j < width; j++)
-		{
-			source[i * width + j] = (float)img[i * width + j];
-		}
-	float* b = (float*)malloc(height * width * sizeof(float));
-	Normalize(source, b, width, height, 200, 1000);
-
-	saveBmp("C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, width, height);
-
-	free(source);
-	free(img);
-	free(b);
-}
+//
+//void main()
+//{
+//	int width;
+//	int height;
+//	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\4_8.bmp";  //Write your way to bmp file
+//	int* img = loadBmp(filename, &width, &height);
+//	float* source = (float*)malloc(height*width*sizeof(float));
+//	for (int i = 0; i < height; i++)
+//		for (int j = 0; j < width; j++)
+//		{
+//			source[i * width + j] = (float)img[i * width + j];
+//		}
+//	float* b = (float*)malloc(height * width * sizeof(float));
+//	Normalize(source, b, width, height, 200, 1000);
+//
+//	saveBmp("C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, width, height);
+//
+//	free(source);
+//	free(img);
+//	free(b);
+//}

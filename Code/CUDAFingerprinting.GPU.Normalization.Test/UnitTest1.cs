@@ -62,7 +62,7 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
             }
             return result;
         }
-        [DllImport("CUDAFingerprinting.GPU.Normalisation.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Normalize")]
+        [DllImport("CUDAFingerprinting.GPU.Normalization.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Normalize")]
        // [return: MarshalAs(UnmanagedType.SafeArray)]
         public static extern void Normalize(float[] source, float[] res, int imgWidth, int imgHeight, int bordMean, int bordVar);
         //static void WriteFloat(IntPtr ptr, float value)
@@ -77,7 +77,7 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
         [TestMethod]
         public void NormalizationTest()
         {
-            var bmp = Resources.SampleFinger1;
+            var bmp = Resources.SampleFinger2;
             var array0 = LoadImage(bmp);
             var array = Make1D(array0);
             float[] result = new float[bmp.Width * bmp.Height];
