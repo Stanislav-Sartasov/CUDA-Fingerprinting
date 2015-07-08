@@ -53,7 +53,6 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
             double correlation = 0;
             if (matchable)
             {
-                uint givenXOR1 = c1GivenCommon[0] ^ c2GivenCommon[0];
                 uint[] givenXOR = c1GivenCommon.Zip(c2GivenCommon, (first, second) => first ^ second).ToArray();
                 double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR));
                 correlation = 1 - givenXORNorm / (c1GivenCommonNorm + c2GivenCommonNorm);
