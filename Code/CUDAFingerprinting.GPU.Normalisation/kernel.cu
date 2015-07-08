@@ -78,7 +78,7 @@ __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* 
 	__shared__ int height;
 	__shared__ int width;
 	__shared__ int pixNum;
-	height = image.Height;
+    height = image.Height;
 	width = image.Width;
 	pixNum = height * width;
 
@@ -133,7 +133,6 @@ __global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float
 	width = image.Width;
 	height = image.Height;
 	int curPix;  
-
 	if (width > column)
 	{
 		for (int j = 0; j < height; j++)
@@ -141,14 +140,15 @@ __global__ void cudaDoNormalizationRow(CUDAArray<float> image, float mean, float
 			curPix = image.At(j, column);
 			if (curPix > mean)
 			{
-				image.SetAt(j, column, bordMean + sqrt((bordVar * pow(curPix - mean, 2)) / variation));
+				image.SetAt(j, column, bordMean + sqrt((bordVar * (curPix - mean) * (curPix - mean)) / variation));
 			}
 			else
 			{
-				image.SetAt(j, column, bordMean - sqrt((bordVar * pow(curPix - mean, 2)) / variation));
+				image.SetAt(j, column, bordMean - sqrt((bordVar * (curPix - mean) * (curPix - mean)) / variation));
 			}
 		}
 	}
+	
 }
 
 CUDAArray<float> Normalize(CUDAArray<float> image, int bordMean, int bordVar)
@@ -177,12 +177,12 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	image.GetData(res);
 }
-//
+
 //void main()
 //{
 //	int width;
 //	int height;
-//	char* filename = "..\\4_8.bmp";  //Write your way to bmp file
+//	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\002.bmp";  //Write your way to bmp file
 //	int* img = loadBmp(filename, &width, &height);
 //	float* source = (float*)malloc(height*width*sizeof(float));
 //	for (int i = 0; i < height; i++)
@@ -191,8 +191,18 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 //			source[i * width + j] = (float)img[i * width + j];
 //		}
 //	float* b = (float*)malloc(height * width * sizeof(float));
+//	cudaEvent_t     start, stop;
+//	cudaEventCreate(&start);
+//	cudaEventCreate(&stop);
+//	cudaEventRecord(start, 0);
 //	Normalize(source, b, width, height, 200, 1000);
-//
+//	cudaEventRecord(stop, 0);
+//	cudaEventSynchronize(stop);
+//	float   elapsedTime;
+//	cudaEventElapsedTime(&elapsedTime, start, stop);
+//	printf("Time to generate:  %3.1f ms\n", elapsedTime);
+//	cudaEventDestroy(start);
+//	cudaEventDestroy(stop);
 //	saveBmp("..\\res.bmp", b, width, height);
 //
 //	free(source);
