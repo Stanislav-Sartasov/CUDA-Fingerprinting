@@ -10,6 +10,13 @@ namespace CUDAFingerprinting.Common.Tests
     public class ImageHelperTests
     {
         [TestMethod]
+        public void PrepeareData()
+        {
+            var array = ImageHelper.LoadImage(@"C:\GitHub\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Normalisation\002.bmp");
+            ImageHelper.SaveArray(array, @"C:\GitHub\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Normalisation\003.bmp");
+        }
+
+        [TestMethod]
         public void TestImageLoadAndSave()
         {
             var bmp = Resources.SampleFinger;

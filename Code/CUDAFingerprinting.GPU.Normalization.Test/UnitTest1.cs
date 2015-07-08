@@ -77,11 +77,11 @@ namespace CUDAFingerprinting.GPU.Normalization.Test
         [TestMethod]
         public void NormalizationTest()
         {
-            var bmp = Resources.SampleFinger2;
+            var bmp = Resources.SampleFinger1;
             var array0 = LoadImage(bmp);
             var array = Make1D(array0);
             float[] result = new float[bmp.Width * bmp.Height];
-            Normalize(array, result, bmp.Width, bmp.Height, 1000, 1000);
+            Normalize(array, result, bmp.Width, bmp.Height, 100, 1000);
             //IntPtr ptr = Normalize(array, bmp.Width, bmp.Height, 1000, 1000);
             //float[] result = new float[bmp.Width * bmp.Height];
             //float a = (float)1.0;
