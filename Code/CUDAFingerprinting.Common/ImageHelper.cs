@@ -119,6 +119,19 @@ namespace CUDAFingerprinting.Common
             return imgBytes;
         }
 
+        public static float[,] LoadImageToFloats(Bitmap bmp)
+        {
+            float[,] imgBytes = new float[bmp.Height, bmp.Width];
+            for (int x = 0; x < bmp.Width; x++)
+            {
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    imgBytes[bmp.Height - 1 - y, x] = bmp.GetPixel(x, y).R;
+                }
+            }
+            return imgBytes;
+        }
+
         // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
         // For the simplicity of geometric transformations everywhere in the project
         // the origin point is BOTTOM left angle.
@@ -142,6 +155,11 @@ namespace CUDAFingerprinting.Common
         public static double[,] LoadImage(string path)
         {
             return LoadImage(new Bitmap(path));
+        }
+
+        public static float[,] LoadImageToFloats(string path)
+        {
+            return LoadImageToFloats(new Bitmap(path));
         }
 
         // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
@@ -191,6 +209,24 @@ namespace CUDAFingerprinting.Common
                 return value;
             });
             return bmp;  
+        }
+
+        public static Bitmap SaveArrayToBitmap(float[,] data, bool applyNormalization = false)
+        {
+            int x = data.GetLength(1);
+            int y = data.GetLength(0);
+            var max = data.Max2D();
+            var min = data.Min2D();
+
+            var bmp = new Bitmap(x, y);
+            data.Select2D((value, row, column) =>
+            {
+                var gray = applyNormalization ? (int)((value - min) / (max - min) * 255) : (int)value;
+                lock (bmp)
+                    bmp.SetPixel(column, bmp.Height - 1 - row, Color.FromArgb(gray, gray, gray));
+                return value;
+            });
+            return bmp;
         }
 
         public static void SaveArrayAndOpen(double[,] data, string path, bool applyNormalization = false)

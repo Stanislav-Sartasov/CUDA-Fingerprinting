@@ -33,9 +33,35 @@ namespace CUDAFingerprinting.Common
             return max;
         }
 
+        public static float Max2D(this float[,] arr)
+        {
+            float max = float.NegativeInfinity;
+            for (int x = 0; x < arr.GetLength(0); x++)
+            {
+                for (int y = 0; y < arr.GetLength(1); y++)
+                {
+                    if (arr[x, y] > max) max = arr[x, y];
+                }
+            }
+            return max;
+        }
+
         public static double Min2D(this double[,] arr)
         {
             double min = double.PositiveInfinity;
+            for (int x = 0; x < arr.GetLength(0); x++)
+            {
+                for (int y = 0; y < arr.GetLength(1); y++)
+                {
+                    if (arr[x, y] < min) min = arr[x, y];
+                }
+            }
+            return min;
+        }
+
+        public static float Min2D(this float[,] arr)
+        {
+            float min = float.PositiveInfinity;
             for (int x = 0; x < arr.GetLength(0); x++)
             {
                 for (int y = 0; y < arr.GetLength(1); y++)

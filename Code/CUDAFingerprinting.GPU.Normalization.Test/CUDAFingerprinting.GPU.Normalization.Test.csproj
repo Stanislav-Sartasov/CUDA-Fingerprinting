@@ -35,9 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUDAFingerprinting.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\CUDAFingerprinting.Common.dll</HintPath>
+    <Reference Include="CUDAFingerprinting.Common">
+      <HintPath>..\bin\Debug\CUDAFingerprinting.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -73,11 +72,14 @@
     <None Include="Resources\001.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CUDAFingerprinting.GPU.Normalization.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\002.bmp" />
     <None Include="Resources\4_8.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.Normalization.dll">
+      <Link>CUDAFingerprinting.GPU.Normalization.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
