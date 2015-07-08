@@ -8,35 +8,53 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
 {
     public class BinCylinderCorrelation
     {
-        public static double GetBinCylinderCorrelation(
-            int[] linearizedCylinder1, int[] linearizedCylinder2,
-            int[] cylinder1Validities, int[] cylinder2Validities,
-            int minMatchableElementsCount)
+        public static uint GetOneBitsCount(uint[] arr)
         {
-            var commonValidities = cylinder1Validities.Zip(cylinder2Validities, (first, second) => first & second).ToArray();
+            uint[] _arr = (uint[])arr.Clone();
+            uint count = 0;
+            for (int i = 0; i < _arr.Length; i++)
+            {
+                for (int j = 31; j >= 0; j--)
+                {
+                    if (_arr[i] % 2 == 1)
+                    {
+                        count++;
+                    }
+                    _arr[i] /= 2;
+                }
+            }
+            return count;
+        }
 
-            int[] c1GivenCommon = linearizedCylinder1.Zip(commonValidities, (first, second) => first & second).ToArray();
-            int[] c2GivenCommon = linearizedCylinder2.Zip(commonValidities, (first, second) => first & second).ToArray();
+        public static double GetBinCylinderCorrelation(
+            uint[] linearizedCylinder1, uint[] linearizedCylinder2,
+            uint[] cylinder1Validities, uint[] cylinder2Validities,
+            uint minMatchableElementsCount)
+        {
+            uint[] commonValidities = cylinder1Validities.Zip(cylinder2Validities, (first, second) => first & second).ToArray();
 
-            var c1GivenCommonNorm = Math.Sqrt(c1GivenCommon.Sum()); // Is this cast necessary?
-            var c2GivenCommonNorm = Math.Sqrt(c2GivenCommon.Sum());
+            uint[] c1GivenCommon = linearizedCylinder1.Zip(commonValidities, (first, second) => first & second).ToArray();
+            uint[] c2GivenCommon = linearizedCylinder2.Zip(commonValidities, (first, second) => first & second).ToArray();
+
+            double c1GivenCommonNorm = Math.Sqrt(GetOneBitsCount(c1GivenCommon));
+            double c2GivenCommonNorm = Math.Sqrt(GetOneBitsCount(c2GivenCommon));
 
             bool matchable = true;
 
-            var matchableElementsCount = commonValidities.Sum();
+            var matchableElementsCount = GetOneBitsCount(commonValidities);
 
             // To be done later (cylinder matching conditions, min interminutiae angle not implemented)
-            //if (matchableElementsCount >= minMatchableElementsCount || 
-            //    c1GivenCommonNorm + c2GivenCommonNorm == 0)
-            //{
-            //    matchable = false;
-            //}
+            if (/* matchableElementsCount >= minMatchableElementsCount || */
+                c1GivenCommonNorm + c2GivenCommonNorm == 0)
+            {
+                matchable = false;
+            }
 
             double correlation = 0;
             if (matchable)
             {
-                int[] givenXOR = c1GivenCommon.Zip(c2GivenCommon, (first, second) => first ^ second).ToArray();
-                var givenXORNorm = Math.Sqrt(givenXOR.Sum());
+                uint[] givenXOR = c1GivenCommon.Zip(c2GivenCommon, (first, second) => first ^ second).ToArray();
+                double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR));
                 correlation = 1 - givenXORNorm / (c1GivenCommonNorm + c2GivenCommonNorm);
             }
 

@@ -9,6 +9,14 @@
 #include <cstring>
 #include <time.h>
 
+extern "C"
+{
+	__declspec(dllexport) float getBinCylinderCorrelation(
+		unsigned int cylinderCapacity,
+		unsigned int *cudaCylinder1, unsigned int *cudaCylinder2,
+		unsigned int *cudaValidities1, unsigned int *cudaValidities2);
+}
+
 void printArray1D(unsigned int* arr, unsigned int length)
 {
 	for (unsigned int i = 0; i < length; i++) {
@@ -89,8 +97,6 @@ __global__ void cudaArrayWordNorm(CUDAArray<unsigned int> arr, unsigned int* sum
 		x = x & 0x0000003F;
 
 		atomicAdd(sum, x);
-
-		__syncthreads();
 	}
 }
 
@@ -114,13 +120,21 @@ unsigned int getOneBitsCount(CUDAArray<unsigned int> arr)
 }
 
 float getBinCylinderCorrelation(
-	CUDAArray<unsigned int> linearizedCylinder1, CUDAArray<unsigned int> linearizedCylinder2,
-	CUDAArray<unsigned int> cylinder1Validities, CUDAArray<unsigned int> cylinder2Validities,
-	unsigned int length, unsigned int minMatchableElementsCount)
+	unsigned int cylinderCapacity,
+	unsigned int *cudaCylinder1, unsigned int *cudaCylinder2,
+	unsigned int *cudaValidities1, unsigned int *cudaValidities2)
 {
-	CUDAArray<unsigned int> commonValidities = BitwiseAndArray(cylinder1Validities, cylinder2Validities);
-	CUDAArray<unsigned int> c1GivenCommon = BitwiseAndArray(linearizedCylinder1, commonValidities);
-	CUDAArray<unsigned int> c2GivenCommon = BitwiseAndArray(linearizedCylinder2, commonValidities);
+	//printArray1D(cudaValidities1, cylinderCapacity);
+
+	CUDAArray<unsigned int> *linearizedCylinder1 = new CUDAArray<unsigned int>(cudaCylinder1, cylinderCapacity, 1);
+	CUDAArray<unsigned int> *linearizedCylinder2 = new CUDAArray<unsigned int>(cudaCylinder2, cylinderCapacity, 1);
+
+	CUDAArray<unsigned int> *cylinder1Validities = new CUDAArray<unsigned int>(cudaValidities1, cylinderCapacity, 1);
+	CUDAArray<unsigned int> *cylinder2Validities = new CUDAArray<unsigned int>(cudaValidities2, cylinderCapacity, 1);
+
+	CUDAArray<unsigned int> commonValidities = BitwiseAndArray(*cylinder1Validities, *cylinder2Validities);
+	CUDAArray<unsigned int> c1GivenCommon = BitwiseAndArray(*linearizedCylinder1, commonValidities);
+	CUDAArray<unsigned int> c2GivenCommon = BitwiseAndArray(*linearizedCylinder2, commonValidities);
 
 	//printf("///\n");
 	//printCUDAArray1D(cylinder1Validities);
@@ -154,32 +168,17 @@ float getBinCylinderCorrelation(
 		correlation = 1 - givenXORNorm / (c1GivenCommonNorm + c2GivenCommonNorm);
 	}
 
+	delete(linearizedCylinder1);
+	delete(linearizedCylinder2);
+	delete(cylinder1Validities);
+	delete(cylinder2Validities);
+
 	return correlation;
 }
 
 unsigned int binToInt(char* s)
 {
 	return (unsigned int)strtoul(s, NULL, 2);
-}
-
-void test(
-	unsigned int cylinderCapacity,
-	unsigned int *cudaCylinder1, unsigned int *cudaCylinder2,
-	unsigned int *cudaValidities1, unsigned int *cudaValidities2)
-{
-	//printArray1D(cudaValidities1, cylinderCapacity);
-
-	CUDAArray<unsigned int> *sampleCylinder1 = new CUDAArray<unsigned int>(cudaCylinder1, cylinderCapacity, 1);
-	CUDAArray<unsigned int> *sampleCylinder2 = new CUDAArray<unsigned int>(cudaCylinder2, cylinderCapacity, 1);
-
-	CUDAArray<unsigned int> *sampleValidities1 = new CUDAArray<unsigned int>(cudaValidities1, cylinderCapacity, 1);
-	CUDAArray<unsigned int> *sampleValidities2 = new CUDAArray<unsigned int>(cudaValidities2, cylinderCapacity, 1);
-
-	// Last argument not implemented/tested yet
-	float correlation =
-		getBinCylinderCorrelation(*sampleCylinder1, *sampleCylinder2, *sampleValidities1, *sampleValidities2, cylinderCapacity, 0);
-
-	printf("%f\n", correlation);
 }
 
 int main()
@@ -197,7 +196,7 @@ int main()
 	//memset(cudaCylinder2, 255, cylinderCapacity * sizeof(unsigned int));
 	//memset(cudaValidities1, 255, cylinderCapacity * sizeof(unsigned int));
 	//memset(cudaValidities2, 255, cylinderCapacity * sizeof(unsigned int));
-	//test(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
 
 
 	// Test 2
@@ -208,7 +207,7 @@ int main()
 	//	cudaValidities1[i] = rand();
 	//	cudaValidities2[i] = rand();
 	//}
-	//test(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
 
 	// Test 3 (only for cylinderCapacity == 1)
 
@@ -218,9 +217,17 @@ int main()
 	cudaCylinder2[0] = binToInt("11010001010100001100000000000000");
 	cudaValidities2[0] = binToInt("11011101111100011100000000000000");
 
-	test(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+	float correlation =
+		getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+
+	printf("Correlation: %f\n", correlation);
 
 	// [end] Test 3
+
+	free(cudaCylinder1);
+	free(cudaCylinder2);
+	free(cudaValidities1);
+	free(cudaValidities2);
 
 	return 0;
 }
