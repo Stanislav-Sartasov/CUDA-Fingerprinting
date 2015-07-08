@@ -6,29 +6,49 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
     [TestClass]
     public class BinCylinderCorrelationTests
     {
-        public static int[] GetValidity(ref int[] linearizedCylinder)
+        public static uint[] ConvertArrayUintToBinary(uint[] intArray)
         {
-            int[] cylinderValidity = new int[linearizedCylinder.Length];
-            for (int i = 0; i < linearizedCylinder.Length; i++)
+            uint[] binaryArray = new uint[(intArray.Length + 32 + 1) / 32]; // Same as ceilMod macro in GPU Solution
+
+            for (int i = 0; i < intArray.Length; i++)
             {
-                if (linearizedCylinder[i] == -1)
+                if (intArray[i] == 1)
                 {
-                    linearizedCylinder[i] = 0;
+                    binaryArray[i / 32] += (uint)Math.Pow(2, (32 - 1 - i % 32));
                 }
-                else
+                else if (intArray[i] != 0)
                 {
-                    cylinderValidity[i] = 1;
+                    throw new Exception("Invalid uintToBinary convertion input");
                 }
             }
 
-            return cylinderValidity;
+            return binaryArray;
         }
 
-        public static int[] Linearize(int[, ,] cylinder)
+        public static uint[] ConvertArrayBinaryToUint(uint[] binaryArray)
+        {
+            uint[] intArray = new uint[binaryArray.Length * 32]; // Same as ceilMod macro in GPU Solution
+
+            for (int i = 0; i < binaryArray.Length; i++)
+            {
+                for (int j = 31; j >= 0; j--)
+                {
+                    if (binaryArray[i] % 2 == 1)
+                    {
+                        intArray[i * 32 + j] = 1;
+                    }
+                    binaryArray[i] /= 2;
+                }
+            }
+
+            return intArray;
+        }
+
+        public static uint[] GetValidities(int[, ,] cylinder)
         {
             int cylinderY = cylinder.GetLength(0);
             int cylinderX = cylinder.GetLength(1);
-            int[] linearizedCylinder = new int[cylinderY * cylinderX * cylinderX];
+            uint[] cylinderValidity = new uint[cylinderY * cylinderX * cylinderX];
 
             for (int i = 0; i < cylinderY; i++)
             {
@@ -36,7 +56,45 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
                 {
                     for (int k = 0; k < cylinderX; k++)
                     {
-                        linearizedCylinder[i * cylinderX * cylinderX + j * cylinderX + k] = cylinder[i, j, k];
+                        if (cylinder[i, j, k] == 0 || cylinder[i, j, k] == 1)
+                        {
+                            cylinderValidity[i * cylinderX * cylinderX + j * cylinderX + k] = 1;
+                        }
+                        else if (cylinder[i, j, k] != -1)
+                        {
+                            throw new Exception("Invalid input cylinder");
+                        }
+                    }
+                }
+            }
+
+            return cylinderValidity;
+        }
+
+        public static uint[] Linearize(int[, ,] cylinder)
+        {
+            int cylinderY = cylinder.GetLength(0);
+            int cylinderX = cylinder.GetLength(1);
+            uint[] linearizedCylinder = new uint[cylinderY * cylinderX * cylinderX];
+
+            for (int i = 0; i < cylinderY; i++)
+            {
+                for (int j = 0; j < cylinderX; j++)
+                {
+                    for (int k = 0; k < cylinderX; k++)
+                    {
+                        if (cylinder[i, j, k] == -1 || cylinder[i, j, k] == 0)
+                        {
+                            linearizedCylinder[i * cylinderX * cylinderX + j * cylinderX + k] = 0;
+                        }
+                        else if (cylinder[i, j, k] == 1)
+                        {
+                            linearizedCylinder[i * cylinderX * cylinderX + j * cylinderX + k] = 1;
+                        }
+                        else
+                        {
+                            throw new Exception("Invalid input cylinder");
+                        }
                     }
                 }
             }
@@ -91,17 +149,20 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
                 }
             };
 
-            int[][] linearizedCylinders = 
+            uint[][] linearizedCylinders = 
             { 
-                Linearize(cylinderZeros), Linearize(cylinderOnes), Linearize(cylinderMixed)
+                ConvertArrayUintToBinary(Linearize(cylinderZeros)), 
+                ConvertArrayUintToBinary(Linearize(cylinderOnes)), 
+                ConvertArrayUintToBinary(Linearize(cylinderMixed))
             };
 
-            int[][] cylinderValidities = 
+            uint[][] cylinderValidities = 
             {
-                GetValidity(ref linearizedCylinders[0]), 
-                GetValidity(ref linearizedCylinders[1]), 
-                GetValidity(ref linearizedCylinders[2])   
+                ConvertArrayUintToBinary(GetValidities(cylinderZeros)), 
+                ConvertArrayUintToBinary(GetValidities(cylinderOnes)), 
+                ConvertArrayUintToBinary(GetValidities(cylinderMixed))
             };
+
 
             // When
             var correlation0 = BinCylinderCorrelation.GetBinCylinderCorrelation(
