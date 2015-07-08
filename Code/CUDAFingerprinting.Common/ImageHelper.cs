@@ -152,12 +152,12 @@ namespace CUDAFingerprinting.Common
             return LoadImageAsInt(new Bitmap(path));
         }
 
-        public static void SaveArray(int[,] data, string path)
+        public static void SaveArray(int[,] data, string path, bool applyNormalization = false)
         {
-            SaveArrayToBitmap(data).Save(path, GetImageFormatFromExtension(path));
+            SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
         }
 
-        public static Bitmap SaveArrayToBitmap(int[,] data)
+        public static Bitmap SaveArrayToBitmap(int[,] data, bool applyNormalization = false)
         {
             int x = data.GetLength(1);
             int y = data.GetLength(0);
@@ -165,7 +165,9 @@ namespace CUDAFingerprinting.Common
             data.Select2D((value, row, column) =>
             {
                 value = Math.Abs(value);
-                value = (value < 0) ? 0 : (value > 255 ? 255 : value);
+                // todo: make a proper normalization
+                if(applyNormalization)
+                    value = (value < 0) ? 0 : (value > 255 ? 255 : value);
                 // note: notice the flipping
                 lock(bmp)bmp.SetPixel(column, y-1-row, Color.FromArgb(value, value, value));
                 return value;
@@ -173,21 +175,17 @@ namespace CUDAFingerprinting.Common
             return bmp;
         }
 
-        public static Bitmap SaveArrayToBitmap(double[,] data)
+        public static Bitmap SaveArrayToBitmap(double[,] data, bool applyNormalization = false)
         {
             int x = data.GetLength(1);
             int y = data.GetLength(0);
-            var max = double.NegativeInfinity;
-            var min = double.PositiveInfinity;
-            foreach (var num in data)
-            {
-                if (num > max) max = num;
-                if (num < min) min = num;
-            }
+            var max = data.Max2D();
+            var min = data.Min2D();
+
             var bmp = new Bitmap(x, y);
             data.Select2D((value, row, column) =>
             {
-                var gray = (int)((value - min) / (max - min) * 255);
+                var gray = applyNormalization?(int)((value - min) / (max - min) * 255):(int)value;
                 lock(bmp)
                     bmp.SetPixel(column, bmp.Height - 1 - row, Color.FromArgb(gray, gray, gray));
                 return value;
@@ -195,15 +193,15 @@ namespace CUDAFingerprinting.Common
             return bmp;  
         }
 
-        public static void SaveArrayAndOpen(double[,] data, string path)
+        public static void SaveArrayAndOpen(double[,] data, string path, bool applyNormalization = false)
         {
-            SaveArray(data, path);
+            SaveArray(data, path, applyNormalization);
             Process.Start(path);
         }
 
-        public static void SaveArray(double[,] data, string path)
+        public static void SaveArray(double[,] data, string path, bool applyNormalization = false)
         {
-            SaveArrayToBitmap(data).Save(path, GetImageFormatFromExtension(path));
+            SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
         }
 
         public static ImageFormat GetImageFormatFromExtension(string path)

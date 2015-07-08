@@ -178,3 +178,72 @@ void saveBmp(char* filename, float* data, int width, int height)
 
 	fclose(output);
 }
+
+void saveBmp(char* filename, int* data, int width, int height)
+{
+	FILE *output;
+
+	output = fopen(filename, "wb");
+
+	BMPHeader header;
+	header.BfType = 0x4D42; // due to the way "BM" being loaded as short integer, thus reverting the bytes order
+
+	header.BfSize = 54 + sizeof(RGBAPixel)* width * height;
+
+	header.BfReserved1 = header.BfReserved2 = 0;
+
+	header.BfOffBits = 54;
+
+	header.BiSize = 40; // size of BITMAPINFOHEADER is 40 bytes
+
+	header.Width = width;
+	header.Height = height;
+
+	header.BiPlanes = 1; // constant
+
+	header.BiBitCount = 32; // right now supporting only 32 bits per pixel
+
+	header.BiCompression = 0; // no compression
+
+	header.BiSizeImage = 0; // dummy, it's ARGB image without compression
+
+	header.BiXPelsPerMeter = header.BiYPelsPerMeter = 3780;
+
+	header.BiClrUsed = 0; // no palette used
+	header.BiClrImportant = 0;
+
+	fwrite(&header.BfType, 2, 1, output);
+	fwrite(&header.BfSize, 4, 1, output);
+	fwrite(&header.BfReserved1, 2, 1, output);
+	fwrite(&header.BfReserved2, 2, 1, output);
+	fwrite(&header.BfOffBits, 4, 1, output);
+	fwrite(&header.BiSize, 4, 1, output);
+	fwrite(&header.Width, 4, 1, output);
+	fwrite(&header.Height, 4, 1, output);
+	fwrite(&header.BiPlanes, 2, 1, output);
+	fwrite(&header.BiBitCount, 2, 1, output);
+	fwrite(&header.BiCompression, 4, 1, output);
+	fwrite(&header.BiSizeImage, 4, 1, output);
+	fwrite(&header.BiXPelsPerMeter, 4, 1, output);
+	fwrite(&header.BiYPelsPerMeter, 4, 1, output);
+	fwrite(&header.BiClrUsed, 4, 1, output);
+	fwrite(&header.BiClrImportant, 4, 1, output);
+
+	RGBAPixel* rawImage = (RGBAPixel*)malloc(sizeof(RGBAPixel)* width * height);
+
+	for (int row = 0; row < height; row++)
+	{
+		for (int column = 0; column < width; column++)
+		{
+			rawImage[row*width + column].A = 255;
+			rawImage[row*width + column].R = rawImage[row*width + column].G = rawImage[row*width + column].B =
+				data[(height - 1 - row)*width + column];
+		}
+	}
+
+	fwrite(rawImage, sizeof(RGBAPixel), width * height, output);
+
+	free(rawImage);
+
+	fclose(output);
+}
