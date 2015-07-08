@@ -152,22 +152,7 @@ CUDAArray<float> DoNormalization(CUDAArray<float> image, int bordMean, int bordV
 	cudaDoNormalizationRow <<<gridSize, blockSize >>> (image, mean, variation, bordMean, bordVar);
 	return image;
 }
-float* Make1D(float *arr, int width, int height)
-{
-	//var rows = arr.GetLength(0);
-	//	var columns = arr.GetLength(1);
 
-	//	var result = new T[rows * columns];
-	float* result = (float*)malloc(width * height * sizeof(float));
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			result[i * width + j] = arr[i, j];
-		}
-	}
-	return result;
-}
 void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordMean, int bordVar)
 {
 	CUDAArray<float> image = CUDAArray<float>(source, imgWidth, imgHeight);
@@ -191,47 +176,22 @@ void Normalize(float* source, float* res, int imgWidth, int imgHeight, int bordM
 
 void main()
 {
-	int* width = (int*)malloc(sizeof(int));
-	int* height = (int*)malloc(sizeof(int));
+	int width;
+	int height;
 	char filename[80] = "F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\002.bmp";  //Write your way to bmp file
-	int* img = loadBmp(filename, width, height);
-	float* source = (float*)malloc((*height)*(*width)*sizeof(float));
-	for (int i = 0; i < (*height); i++)
-		for (int j = 0; j < (*width); j++)
+	int* img = loadBmp(filename, &width, &height);
+	float* source = (float*)malloc(height*width*sizeof(float));
+	for (int i = 0; i < height; i++)
+		for (int j = 0; j < width; j++)
 		{
-			source[i * (*width) + j] = (float)img[i, j];
+			source[i * width + j] = (float)img[i * width + j];
 		}
-	float* b = (float*)malloc((*height) * (*width) * sizeof(float));
-	Normalize(source, b, (*width), (*height), 1000, 1000);
+	float* b = (float*)malloc(height * width * sizeof(float));
+	Normalize(source, b, width, height, 100, 1000);
 
-	float max = FLT_MIN;
-	float min = FLT_MAX;
-	for (int i = 0; i < (*height) * (*width); i++)
-	{
-		if (max < b[i]) max = b[i];
-		if (min > b[i]) min = b[i];
-	}
+	saveBmp("F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, width, height);
 
-	for (int i = 0; i < (*height) * (*width); i++)
-	{
-		b[i] = ((b[i] - min) / (max - min) * 255);
-	}
-
-	saveBmp("F:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\res.bmp", b, (*width), (*height));
-//	int n = 100;
-//	float* a = (float*)malloc(n * sizeof(float));
-//	for (int i = 0; i < n; i++)
-//	{
-//		a[i] = i;
-//	}
-//	float* b = (float*) malloc(n * sizeof(float));
-//	b = Normalize(a, 2, 50, 100, 100);
-//	for (int i = 0; i < n; i++)
-//	{
-//		printf("%f ", b[i]);
-//	}
-	free(width);
-	free(height);
+	free(source);
 	free(img);
 	free(b);
 }
