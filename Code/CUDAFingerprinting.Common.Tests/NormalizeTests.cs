@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CUDAFingerprinting.Common.Tests
 {
@@ -16,6 +17,19 @@ namespace CUDAFingerprinting.Common.Tests
             var bmp2 = ImageHelper.SaveArrayToBitmap(array);
 
             bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
+        }
+
+        [TestMethod]
+        public void CheckMeanAndVariation()
+        {
+            TestNormalization();
+
+            var img = ImageHelper.LoadImage("test.bmp");
+
+            var mean = img.CalculateMean();
+            var var = img.CalculateVariation(mean);
+            if (Math.Abs(mean - 100) / mean * 100 > 1) Assert.Fail();
+            if (Math.Abs(var - 1000) / var * 100 > 1) Assert.Fail();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace CUDAFingerprinting.Common
 {
     static public class Normalization
     {
-        static double CalculateMean(this double[,] image)
+        static public double CalculateMean(this double[,] image)
         {
             int height = image.GetLength(1);
             int width = image.GetLength(0);
@@ -24,7 +24,7 @@ namespace CUDAFingerprinting.Common
             return mean;
         }
 
-        static double CalculateVariation(this double[,] image, double mean)
+        static public double CalculateVariation(this double[,] image, double mean)
         {
             int height = image.GetLength(1);
             int width = image.GetLength(0);
