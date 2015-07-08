@@ -11,5 +11,5 @@
 
 // consts
 const int defaultThreadCount = 32;
-
+__device__ const int GPUdefaultThreadCount = 32;
 #endif

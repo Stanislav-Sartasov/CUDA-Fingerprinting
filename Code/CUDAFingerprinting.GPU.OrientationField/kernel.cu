@@ -1,12 +1,12 @@
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-#include <math_functions.h>
-#include <math_constants.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "Convolution.cuh"
-#include "CUDAArray.cuh"
-#include "ImageLoading.cuh"
+//#include "cuda_runtime.h"
+//#include "device_launch_parameters.h"
+//#include <math_functions.h>
+//#include <math_constants.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include "Convolution.cuh"
+//#include "CUDAArray.cuh"
+//#include "ImageLoading.cuh"
 //extern "C"{
 //	__declspec(dllexport) void makeOrientationField(float* img, int imgWidth, int imgHeight, float* orField, int regionSize, int overlap);
 //}
@@ -212,8 +212,9 @@
 
 void main()
 {
-	//BMPHeader header;
-	//int* img = loadBmp(&header, "C:\\temp\\DB2_bmp\\1_1.bmp");
-	//saveBmp(img, &header, "C:\\temp\\SaveTestfire.bmp");
-	//free(img);
+//	//BMPHeader header;
+//	//int* img = loadBmp(&header, "C:\\temp\\DB2_bmp\\1_1.bmp");
+//	//saveBmp(img, &header, "C:\\temp\\SaveTestfire.bmp");
+//	//free(img);
+//	return 0;
 }
