@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef __CUDACC__ 
+#define __CUDACC__
+#endif
+#include <device_functions.h>
+
 // GPU FUNCTIONS
 
 __global__ void cudaArrayAdd(CUDAArray<float> source, CUDAArray<float> addition)

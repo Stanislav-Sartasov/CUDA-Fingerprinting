@@ -1,7 +1,7 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#include "ImageLoading.cuh"
+#include "..\CUDAFingerprinting.GPU.Common\ImageLoading.cuh"
 #include "CUDAArray.cuh"
 #include "Convolution.cuh"
 
