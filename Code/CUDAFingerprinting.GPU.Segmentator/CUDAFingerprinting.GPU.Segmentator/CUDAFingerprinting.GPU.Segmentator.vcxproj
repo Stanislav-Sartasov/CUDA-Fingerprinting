@@ -68,12 +68,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;</IncludePath>
-    <ExecutablePath>$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);$(SolutionDir)d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;</ExecutablePath>
-    <ReferencePath>$(VC_ReferencesPath_x86);$(SolutionDir)d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;</ReferencePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;</LibraryPath>
-    <LibraryWPath>$(WindowsSDK_MetadataPath);$(SolutionDir)d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;</LibraryWPath>
-    <SourcePath>$(VC_SourcePath);$(SolutionDir)d:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;</SourcePath>
+    <IncludePath>$(VC_IncludePath);$(SolutionDir)D:\Git\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;$(WindowsSDK_IncludePath)</IncludePath>
+    <ExecutablePath>$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath>$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <LibraryWPath>$(WindowsSDK_MetadataPath);</LibraryWPath>
+    <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

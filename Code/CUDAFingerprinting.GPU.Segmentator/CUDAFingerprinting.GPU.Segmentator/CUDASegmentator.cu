@@ -1,7 +1,7 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#include "..\CUDAFingerprinting.GPU.Common\ImageLoading.cuh"
+#include "ImageLoading.cuh"
 #include "CUDAArray.cuh"
 #include "Convolution.cuh"
 
@@ -12,9 +12,8 @@
 #define edge 100
 #define pixEdge 120
 
-void SobelFilter(int* pic, int width, int height, CUDAArray<float> &matrix)
+/*void SobelFilter(float* pic, int width, int height, CUDAArray<float> &matrix)
 {
-	int **Gx;
 	Gx[0][0] = -1; Gx[0][1] = 0; Gx[0][2] = 1;
 	Gx[1][0] = -2; Gx[1][1] = 0; Gx[1][2] = 2;
 	Gx[2][0] = -1; Gx[2][1] = 0; Gx[2][2] = 1;
@@ -22,8 +21,6 @@ void SobelFilter(int* pic, int width, int height, CUDAArray<float> &matrix)
 	int **Gy;
 	Gx[0][0] = 1; Gx[0][1] = 2; Gx[0][2] = 1;
 	Gx[2][0] = -1; Gx[2][1] = -2; Gx[2][2] = -1;
-
-    //Using Sobel Operator
 
 	int x = threadIdx.x;
 	int y = threadIdx.y;
@@ -41,19 +38,37 @@ void SobelFilter(int* pic, int width, int height, CUDAArray<float> &matrix)
 		x += blockDim.x * gridDim.x;
 		y += blockDim.y * gridDim.y;
 	}
-};
+};*/
 
-//CUDAArray<int> Segmentate(int width, int height, int** matrix)
-__global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
+__global__ void cudaSegmentate(CUDAArray<float> segmentation, int defaultBlockSize)
 {
-	//CUDAArray<int> Matrix = CUDAArray<int>(width, height);
+	int column = defaultColumn();
+	int row = defaultRow();
 
-    //Creating Matrix with '1' for white and '0' for black
+	int tX = threadIdx.x;
+	int tY = threadIdx.y;
 
-	int x = threadIdx.x;
-	int y = threadIdx.y;
+	__shared__ int sumX = 0;
+	__shared__ int sumY = 0;
 
-    while ( (x <= width - 16) && (y <= height - 16) )
+	while ( tY < defaultBlockSize )
+	{
+		sumX = 0;
+		while ( tX < defaultBlockSize )
+		{
+			sumX += segmentation.At(tX, tY);
+		}
+		sumY += sumX;
+		__shared__ float average = sumY / ( defaultBlockSize * defaultBlockSize );
+
+		if ( average >= edge )
+		{
+			//TODO: Assignment to result matrix 0 or 1
+		}
+	}
+
+
+    /*while ( (x <= width - 16) && (y <= height - 16) )
     {
         double averageColor = 0;
 
@@ -90,9 +105,9 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
 		y += blockDim.y * gridDim.y;
     }
 
-    //Processing the bottom of the image
+    //Processing the bottom of the image*/
 
-	x = threadIdx.x;
+	/*x = threadIdx.x;
 
     if (height % 16 != 0)
     {
@@ -182,6 +197,7 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
 
     if (width % 16 != 0 && height % 16 != 0)
     {
+
         double averageColor2 = 0;
 
         for (int i = 0; i < 16; i++)
@@ -196,6 +212,7 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
 
         if (averageColor2 >= edge)
         {
+
             for (int i = 0; i < 16; i++)
             {
                 for (int j = 0; j < 16; j++)
@@ -210,44 +227,70 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
                     }
                 }
             }
+
         }
-    }
 
-	//return Matrix;
+    }*/
+
 }
 
-void BWPicture (int* pic, int width, int height, CUDAArray<float> intMatrix)
+void Segmentate (CUDAArray<float> segmentation, CUDAArray<float> source, int defaultBlockSize)
 {
-	//Creating Black-White Bitmap on the basis of Matrix
-	
-	int* newPic;
-
-	int x = threadIdx.x;
-	int y = threadIdx.y;
-
-	while (x < width && y < height)
-	{
-		newPic [x * width + y]= (int)intMatrix.At(x, y);
-		x += blockDim.x * gridDim.x;
-		y += blockDim.y * gridDim.y;
-	}
-
-	saveBmp ("newPic.bmp", newPic, width, height);
+	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
+	dim3 gridSize = dim3(ceilMod(source.Width, defaultBlockSize), ceilMod(source.Height, defaultBlockSize));
+	cudaSegmentate << <gridSize, blockSize >> >(segmentation, defaultBlockSize);
 }
+
+//void BWPicture (int* pic, int width, int height, CUDAArray<float> intMatrix)
+//{
+//	//Creating Black-White Bitmap on the basis of Matrix
+//	
+//	int* newPic;
+//
+//	int x = threadIdx.x;
+//	int y = threadIdx.y;
+//
+//	while (x < width && y < height)
+//	{
+//		newPic [x * width + y]= (int)intMatrix.At(x, y);
+//		x += blockDim.x * gridDim.x;
+//		y += blockDim.y * gridDim.y;
+//	}
+//
+//	saveBmp ("newPic.bmp", newPic, width, height);
+//}
 
 int main()
 {
+	const int defaultBlockSize = 16;
 	int width, height;
 	char* filename = "../1_1.bmp";
 	int* pic = loadBmp (filename, &width, &height);
 
+	cudaSetDevice (0);
+
 	float* arr;
 	CUDAArray<float> matrix = CUDAArray<float> (arr, width, height); //Saves results of Sobel filter
 
-	SobelFilter (pic, width, height, matrix);
-	Segmentate (width, height, matrix);
+	//Sobel Filter
+
+	CUDAArray<float> source((float*)pic, width, height);
+	CUDAArray<float> Segmentation(source.Width, source.Height);
+
+	float filterXLinear[9] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+	float filterYLinear[9] = { -1, -2, -1, 0, 0, 0, 1, 2, 1 };
+
+	CUDAArray<float> filterX(filterXLinear, 3, 3);
+	CUDAArray<float> filterY(filterYLinear, 3, 3);
 	
-	BWPicture (pic, width, height, matrix);
+	CUDAArray<float> Gx(width, height);
+	CUDAArray<float> Gy(width, height);
+	Convolve(Gx, source, filterX);
+	Convolve(Gy, source, filterY);
+
+	Segmentate (Segmentation, source, defaultBlockSize);
+	
+	//BWPicture (pic, width, height, matrix);
 
 	cudaFree(pic);
 	cudaFree (arr);
