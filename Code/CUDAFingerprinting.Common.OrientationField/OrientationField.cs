@@ -97,7 +97,7 @@ namespace CUDAFingerprinting.Common.OrientationField
             int maxX = bytes.GetUpperBound(1) + 1;
             int maxY = bytes.GetUpperBound(0) + 1;
             // разделение на блоки: количество строк и колонок
-            this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
+            this._blocks = new Block[(int)Math.Floor((float) maxY / BlockSize), (int)Math.Floor((float) maxX / BlockSize)];
             for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
             {
                 for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
@@ -117,5 +117,20 @@ namespace CUDAFingerprinting.Common.OrientationField
             int column = x / BlockSize;
 			return this._blocks[row, column].Orientation;
 		}
+        public double[,] GetOrientationMatrix(int height, int width)
+        {
+            double[,] result = new double[height, width];
+            for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
+            {
+                for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
+                {
+                    double curOrientation = _blocks[row, column].Orientation;
+                    for (int i = 0; i < BlockSize; i++)
+                        for (int j = 0; j < BlockSize; j++)
+                            result[row * BlockSize + i, column * BlockSize + j] = curOrientation;
+                }
+            }
+            return result;
+        }
     } 
 }
