@@ -14,8 +14,6 @@
 
 void SobelFilter(int* pic, int width, int height, CUDAArray<float> &matrix)
 {
-	int capacity = ( width - 1 ) * ( height - 1 );
-
 	int **Gx;
 	Gx[0][0] = -1; Gx[0][1] = 0; Gx[0][2] = 1;
 	Gx[1][0] = -2; Gx[1][1] = 0; Gx[1][2] = 2;
@@ -27,8 +25,8 @@ void SobelFilter(int* pic, int width, int height, CUDAArray<float> &matrix)
 
     //Using Sobel Operator
 
-	int x = threadIdx.x + blockIdx.x * blockDim.x;
-	int y = threadIdx.y + blockIdx.y * blockDim.y;
+	int x = threadIdx.x;
+	int y = threadIdx.y;
 
     while ( (x < width - 1) && (y < height - 1) )
     {
@@ -52,8 +50,8 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
 
     //Creating Matrix with '1' for white and '0' for black
 
-	int x = threadIdx.x + blockIdx.x * blockDim.x;
-	int y = threadIdx.y + blockIdx.y * blockDim.y;
+	int x = threadIdx.x;
+	int y = threadIdx.y;
 
     while ( (x <= width - 16) && (y <= height - 16) )
     {
@@ -94,7 +92,7 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
 
     //Processing the bottom of the image
 
-	x = threadIdx.x + blockIdx.x * blockDim.x;
+	x = threadIdx.x;
 
     if (height % 16 != 0)
     {
@@ -179,8 +177,8 @@ __global__ void Segmentate(int width, int height, CUDAArray<float> &matrix)
 
     //Processing the right bottom square of the image
 
-	x = threadIdx.x + blockIdx.x * blockDim.x;
-	y = threadIdx.y + blockIdx.y * blockDim.y;
+	x = threadIdx.x;
+	y = threadIdx.y;
 
     if (width % 16 != 0 && height % 16 != 0)
     {
@@ -224,8 +222,8 @@ void BWPicture (int* pic, int width, int height, CUDAArray<float> intMatrix)
 	
 	int* newPic;
 
-	int x = threadIdx.x + blockIdx.x * blockDim.x;
-	int y = threadIdx.y + blockIdx.y * blockDim.y;
+	int x = threadIdx.x;
+	int y = threadIdx.y;
 
 	while (x < width && y < height)
 	{
