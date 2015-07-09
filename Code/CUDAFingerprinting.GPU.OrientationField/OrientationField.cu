@@ -7,6 +7,7 @@
 #include "device_launch_parameters.h"
 #include "Convolution.cuh"
 #include "constsmacros.h"
+#include "imageLoading.cuh"
 #include "CUDAArray.cuh"
 /////////////////////////////////////////// НОВЫЙ ///////////////////////////////////////////
 __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
@@ -58,7 +59,7 @@ __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float
 		orientation.SetAt(row, column, M_PI_2);
 	}
 	else{
-		orientation.SetAt(row, column, M_PI_2 + atan2(2 * numerator, denominator) / 2.0);
+		orientation.SetAt(row, column, M_PI_2 + atan2(2 * numerator, denominator) / 2.0f);
 		if (orientation.At(row, column) > M_PI_2){
 			orientation.SetAt(row, column, orientation.At(row, column) - M_PI);
 		}
@@ -71,6 +72,7 @@ void SetOrientation(CUDAArray<float> orientation, CUDAArray<float> source, int d
 		dim3(ceilMod(source.Width, defaultBlockSize),
 		ceilMod(source.Height, defaultBlockSize));
 	cudaSetOrientation << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
+	cudaError_t error = cudaDeviceSynchronize();
 }
 
 void OrientationField(float* floatArray, int width, int height){
@@ -84,12 +86,12 @@ void OrientationField(float* floatArray, int width, int height){
 	// фильтры для девайса
 	CUDAArray<float> filterX(filterXLinear, 3, 3);
 	CUDAArray<float> filterY(filterYLinear, 3, 3);
-
+	
 	// Градиенты
-	CUDAArray<float> Gx;
-	CUDAArray<float> Gy;
+	CUDAArray<float> Gx(width, height);
+	CUDAArray<float> Gy(width, height);
 	Convolve(Gx, source, filterX);
-	Convolve(Gy, source, filterX);
+	Convolve(Gy, source, filterY);
 
 	// вычисляем направления
 	SetOrientation(Orientation, source, defaultBlockSize, Gx, Gy);

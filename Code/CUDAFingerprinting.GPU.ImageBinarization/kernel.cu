@@ -5,19 +5,19 @@
 
 extern "C"
 {
-	__declspec(dllexport)  void BinarizateImage(int line, int* dist, int width, int height);
+	__declspec(dllexport)  void BinarizateImage(int line, int* src, int* dist, int width, int height);
 }
 __global__ void ImageBinarization(CUDAArray<int> src, int line, CUDAArray<int> dev_img)
 {
-	int x = defaultRow();
-	int y = defaultColumn();
-	dev_img.SetAt(x, y, src.At(x, y) < line ? 0 : 255);
+	int row = defaultRow();
+	int column = defaultColumn();
+	dev_img.SetAt(row, column, src.At(row, column) < line ? 0 : 255);
 }
 
-void BinarizateImage(int line, int* dist, int width, int height)
+void BinarizateImage(int line, int* src, int* dist, int width, int height)
 {
 	cudaSetDevice(0);
-	CUDAArray<int> img = CUDAArray<int>(dist, width, height);
+	CUDAArray<int> img = CUDAArray<int>(src, width, height);
 	CUDAArray<int> dev_img = CUDAArray<int>(width, height);
 
 	ImageBinarization <<<dim3(ceilMod(img.Width, defaultThreadCount), ceilMod(img.Height, defaultThreadCount)), dim3(defaultThreadCount, defaultThreadCount) >>>(img, line, dev_img);
