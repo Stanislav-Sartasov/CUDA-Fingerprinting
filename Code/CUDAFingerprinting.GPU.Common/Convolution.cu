@@ -96,6 +96,9 @@ void SubtractArray(CUDAArray<float> source, CUDAArray<float> subtract)
 
 void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter)
 {
+	float* t = target.GetData();
+	float* s = source.GetData();
+	float* f = filter.GetData();
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
 	dim3 gridSize =
 		dim3(ceilMod(source.Width, defaultThreadCount),
@@ -103,6 +106,7 @@ void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float>
 
 	cudaConvolve<<<gridSize, blockSize>>>(target, source, filter);
 	cudaError_t error = cudaDeviceSynchronize();
+	float* k = target.GetData();
 }
 
 void ComplexConvolve(CUDAArray<float> targetReal, CUDAArray<float> targetImaginary,

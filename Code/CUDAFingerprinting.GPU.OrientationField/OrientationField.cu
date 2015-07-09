@@ -9,7 +9,8 @@
 #include "constsmacros.h"
 #include "imageLoading.cuh"
 #include "CUDAArray.cuh"
-/////////////////////////////////////////// НОВЫЙ ///////////////////////////////////////////
+
+
 __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
 	float numerator;
 	float denominator;
@@ -92,6 +93,12 @@ void OrientationField(float* floatArray, int width, int height){
 	CUDAArray<float> Gy(width, height);
 	Convolve(Gx, source, filterX);
 	Convolve(Gy, source, filterY);
+
+	/*float* gx = Gx.GetData();
+	float* gy = Gy.GetData();
+	saveBmp("D://Education//CUDA Fingerprinting 2//CUDA-Fingerprinting//Code//gx.bmp", Gx.GetData(), width, height);
+	saveBmp("D://Education//CUDA Fingerprinting 2//CUDA-Fingerprinting//Code//gy.bmp", Gy.GetData(), width, height);*/
+
 
 	// вычисляем направления
 	SetOrientation(Orientation, source, defaultBlockSize, Gx, Gy);
