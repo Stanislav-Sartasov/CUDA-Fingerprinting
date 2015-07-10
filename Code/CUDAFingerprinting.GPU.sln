@@ -16,8 +16,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Filt
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "CUDAFingerprinting.GPU.OrientationField\OrientationField.vcxproj", "{D683F6E7-6722-4A88-BD93-518C7CE5713B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField.Test", "CUDAFingerprinting.GPU.OrientationField.CUDATest\OrientationField.Test.vcxproj", "{819C3300-DC79-4202-AB9E-C8CDFBE97881}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,20 +96,6 @@ Global
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Win32.Build.0 = Release|Win32
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.ActiveCfg = Release|x64
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.Build.0 = Release|x64
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|Win32.ActiveCfg = Debug|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|Win32.Build.0 = Debug|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|x64.ActiveCfg = Debug|x64
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Debug|x64.Build.0 = Debug|x64
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|Any CPU.ActiveCfg = Release|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|Win32.ActiveCfg = Release|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|Win32.Build.0 = Release|Win32
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|x64.ActiveCfg = Release|x64
-		{819C3300-DC79-4202-AB9E-C8CDFBE97881}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
