@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "CUDAFingerprinting.GPU.OrientationField\CUDAFingerprinting.GPU.OrientationField.vcxproj", "{5B48C978-E092-4225-8AB1-777778CA0A29}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Segmentator", "CUDAFingerprinting.GPU.Segmentator\CUDAFingerprinting.GPU.Segmentator\CUDAFingerprinting.GPU.Segmentator.vcxproj", "{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|Win32.Build.0 = Release|Win32
 		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|x64.ActiveCfg = Release|x64
 		{5B48C978-E092-4225-8AB1-777778CA0A29}.Release|x64.Build.0 = Release|x64
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Win32.ActiveCfg = Debug|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Win32.Build.0 = Debug|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|x64.ActiveCfg = Debug|x64
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|x64.Build.0 = Debug|x64
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Win32.ActiveCfg = Release|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Win32.Build.0 = Release|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|x64.ActiveCfg = Release|x64
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
