@@ -107,8 +107,8 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 	}
 }
 
-__global__ void cudaSegmentate (CUDAArray<float> value, int* matrix)
-{	 
+void Segmentate (CUDAArray<float> value, int* matrix)
+{
 	int width = value.Width;
 	int height = value.Height;
 
@@ -116,19 +116,11 @@ __global__ void cudaSegmentate (CUDAArray<float> value, int* matrix)
 	dim3 gridSize = dim3(ceilMod(value.Width, defaultBlockSize), ceilMod(value.Height, defaultBlockSize));
 
 	CUDAArray<int> matrix2D = CUDAArray<int>(matrix, width, height);
-	cudaMatrix <<< gridSize, blockSize >>>(value, matrix2D);
+	cudaMatrix << < gridSize, blockSize >> >(value, matrix2D);
 
 	matrix2D.GetData(matrix);
 
 	matrix2D.Dispose();
-}
-
-void Segmentate (CUDAArray<float> value, int* matrix)
-{
-	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
-	dim3 gridSize = dim3(ceilMod(value.Width, defaultBlockSize), ceilMod(value.Height, defaultBlockSize));
-
-	cudaSegmentate <<< gridSize, blockSize >>>(value, int* matrix);
 }
 
 void BWPicture (int width, int height, int* matrix)
@@ -150,9 +142,12 @@ int main()
 
 	int picWidth, picHeight;
 	int* pic = loadBmp ("1_1.bmp", &picWidth, &picHeight);
-	CUDAArray<float> source = CUDAArray<float> ((float*)&pic, picWidth, picHeight);
+	float* fPic = (float*)malloc(sizeof(float)*picWidth*picHeight);
+	for (int i = 0; i < picWidth*picHeight; i++) fPic[i] = (float)pic[i];
 
 	int *matrix = (int*) malloc (picWidth * picHeight * sizeof(int));
+
+	CUDAArray<float> source = CUDAArray<float>(fPic, picWidth, picHeight);
 
 	CUDAArray<float> value = SobelFilter (source, picWidth, picHeight);	
 	Segmentate (value, matrix);
