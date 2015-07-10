@@ -1,5 +1,4 @@
 ﻿using System;
-using CUDAFingerprinting.Common.GaborFilter;
 namespace CUDAFingerprinting.Common.GaborFilter
 {
     class ImageEnhancement
@@ -7,31 +6,46 @@ namespace CUDAFingerprinting.Common.GaborFilter
         public static double[,] Enhance(double[,] img, double[,] orientMatrix, double frequency, int filterSize,
             int angleNum)
         {
-            double[,] result = new double[img.GetLength(0),img.GetLength(1)];
+            int imgHeight = img.GetLength(0);
+            int imgWidth  = img.GetLength(1);
+            double[,] result = new double[imgHeight,imgWidth];
+
             double [] angles = new double[angleNum];
             double constAngle = Math.PI/angleNum;
             for (int i = 0; i < angleNum; i++)
-                angles[i] = constAngle*i;
+                angles[i] = constAngle * i;
+
             var gabor = new GaborFilter(angleNum, filterSize);
-            for (int i = 0; i < img.GetLength(0); i++)
-                for (int j = 0; j < img.GetLength(1); j++)
+            int center = filterSize / 2; //filter is always a square.
+            for (int i = 0; i < imgHeight; i++)
+            {
+                for (int j = 0; j < imgWidth; j++)
                 {
-                    double enhancedPxl = 0;
-                    for (int u = -filterSize/2; u <= filterSize/2; u++)
-                        for (int v = -filterSize/2; v <= filterSize/2; v++)
+                    for (int u = -center; u <= center; u++)
+                    {
+                        for (int v = -center; v <= center; v++)
                         {
                             double diff = Double.MaxValue;
                             int angle = 0;
                             for (int angInd = 0; angInd < angleNum; angInd++)
-                                if (Math.Abs(angles[angInd] - img[i, j]) < diff)
+                                if (Math.Abs(angles[angInd] - orientMatrix[i, j]) < diff)
                                 {
                                     angle = angInd;
-                                    diff = Math.Abs(angles[angInd] - img[i, j]);
+                                    diff = Math.Abs(angles[angInd] - orientMatrix[i, j]);
                                 }
-                            enhancedPxl += gabor.Filters[angle].Matrix[u, v] * img[i - u, j - v];
+
+                            int indexX = i + u;
+                            int indexY = j + v;
+                            if (indexX < 0) indexX = 0;
+                            if (indexX >= imgHeight) indexX = imgHeight - 1;
+                            if (indexY < 0) indexY = 0;
+                            if (indexY >= imgWidth) indexY = imgWidth - 1;
+                            result[i, j] += gabor.Filters[angle].Matrix[center - u, center - v]*img[indexX, indexY];
                         }
-                    result[i, j] = enhancedPxl;
+                        double check = result[i, j];
+                    }
                 }
+            }
             return result;
         }
     }
