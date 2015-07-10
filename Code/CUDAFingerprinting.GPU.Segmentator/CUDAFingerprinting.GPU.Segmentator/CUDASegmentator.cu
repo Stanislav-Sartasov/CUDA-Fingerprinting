@@ -11,12 +11,6 @@
 #include <fstream>
 #include <iostream>
 
-// For working __syncthreads
-#ifndef __CUDACC__ 
-#define __CUDACC__
-#endif
-#include <device_functions.h>
-
 using namespace std;
 
 #define edge 100
@@ -83,19 +77,8 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 	int row = defaultRow ();
 	int column = defaultColumn ();
 
-	int width = matrix2D.Width;
-	int height = matrix2D.Height;
-
 	__shared__ float buf[16][16];
-
-	for ( int i = 0; i < defaultBlockSize; ++i )
-	{
-		for ( int j = 0; j < defaultBlockSize; ++j )
-		{
-			float pxl = value.At (row, column);
-			buf[i][j] = pxl;
-		}
-	}
+	buf[threadIdx.x][threadIdx.y] = value.At (row, column);
 
 	int val = 0;
 
@@ -105,21 +88,22 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 		float sum = 0;
 		for ( int i = 0; i < defaultBlockSize; ++i )
 		{
-			sum += buf[i][threadIdx.x];
+			sum += buf[i][threadIdx.y];
 		}
-
-		__syncthreads();
-		if ( threadIdx.x == 0 && threadIdx.y == 0 )
+		buf[0][threadIdx.y] = sum;
+	}
+	__syncthreads();
+	if ( threadIdx.x == 0 && threadIdx.y == 0 )
+	{
+		for ( int i = 0; i < defaultBlockSize; ++i )
 		{
-			for ( int i = 0; i < defaultBlockSize; ++i )
-			{
-				val += sum;
-			}
+			val += buf[0][threadIdx.y];
 		}
+		buf[0][0] = val;
 	}
 	__syncthreads();
 
-	val /= ( defaultBlockSize * defaultBlockSize );
+	val = buf[0][0] / ( defaultBlockSize * defaultBlockSize );
 
 	if ( val >= edge )
 	{
@@ -223,7 +207,7 @@ int main()
 
 	MakingMatrix (fPic, picWidth, picHeight, matrix);
 
-	ofstream fout("matrix.txt");
+	/*ofstream fout("matrix.txt");
 	for ( int i = 0; i < picWidth; ++i )
 	{
 		for ( int j = 0; j < picHeight; ++j )
@@ -232,7 +216,7 @@ int main()
 		}
 		fout << endl;
 	}
-	fout.close ();
+	fout.close ();*/
 
 	free(pic);
 	free (fPic);

@@ -210,10 +210,10 @@
 //	return sourceImage;
 //}
 
-void main()
-{
-	//BMPHeader header;
-	//int* img = loadBmp(&header, "C:\\temp\\DB2_bmp\\1_1.bmp");
-	//saveBmp(img, &header, "C:\\temp\\SaveTestfire.bmp");
-	//free(img);
-}
+//void main()
+//{
+//	//BMPHeader header;
+//	//int* img = loadBmp(&header, "C:\\temp\\DB2_bmp\\1_1.bmp");
+//	//saveBmp(img, &header, "C:\\temp\\SaveTestfire.bmp");
+//	//free(img);
+//}
