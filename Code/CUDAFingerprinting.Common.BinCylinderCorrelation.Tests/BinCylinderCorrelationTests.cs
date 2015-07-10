@@ -44,33 +44,6 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             return intArray;
         }
 
-        public static uint[] GetValidities(int[, ,] cylinder)
-        {
-            int cylinderY = cylinder.GetLength(0);
-            int cylinderX = cylinder.GetLength(1);
-            uint[] cylinderValidity = new uint[cylinderY * cylinderX * cylinderX];
-
-            for (int i = 0; i < cylinderY; i++)
-            {
-                for (int j = 0; j < cylinderX; j++)
-                {
-                    for (int k = 0; k < cylinderX; k++)
-                    {
-                        if (cylinder[i, j, k] == 0 || cylinder[i, j, k] == 1)
-                        {
-                            cylinderValidity[i * cylinderX * cylinderX + j * cylinderX + k] = 1;
-                        }
-                        else if (cylinder[i, j, k] != -1)
-                        {
-                            throw new Exception("Invalid input cylinder");
-                        }
-                    }
-                }
-            }
-
-            return cylinderValidity;
-        }
-
         public static uint[] Linearize(int[, ,] cylinder)
         {
             int cylinderY = cylinder.GetLength(0);
@@ -156,30 +129,18 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
                 ConvertArrayUintToBinary(Linearize(cylinderMixed))
             };
 
-            uint[][] cylinderValidities = 
-            {
-                ConvertArrayUintToBinary(GetValidities(cylinderZeros)), 
-                ConvertArrayUintToBinary(GetValidities(cylinderOnes)), 
-                ConvertArrayUintToBinary(GetValidities(cylinderMixed))
-            };
-
-
             // When
             var correlation0 = BinCylinderCorrelation.GetBinCylinderCorrelation(
-                linearizedCylinders[0], linearizedCylinders[1],
-                cylinderValidities[0], cylinderValidities[1], 0); // Min matching elements count not implemented/tested thus far
+                linearizedCylinders[0], linearizedCylinders[1], 0); // Min matching elements count not implemented/tested thus far
 
             var correlation1 = BinCylinderCorrelation.GetBinCylinderCorrelation(
-                linearizedCylinders[1], linearizedCylinders[2],
-                cylinderValidities[1], cylinderValidities[2], 0);
+                linearizedCylinders[1], linearizedCylinders[2], 0);
 
             var correlation2 = BinCylinderCorrelation.GetBinCylinderCorrelation(
-                linearizedCylinders[2], linearizedCylinders[2],
-                cylinderValidities[2], cylinderValidities[2], 0);
+                linearizedCylinders[2], linearizedCylinders[2], 0);
 
             var correlation3 = BinCylinderCorrelation.GetBinCylinderCorrelation(
-                linearizedCylinders[1], linearizedCylinders[1],
-                cylinderValidities[1], cylinderValidities[1], 0);
+                linearizedCylinders[1], linearizedCylinders[1], 0);
 
             // Then
             Assert.AreEqual(correlation0, 0.0);

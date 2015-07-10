@@ -28,34 +28,17 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
 
         public static double GetBinCylinderCorrelation(
             uint[] linearizedCylinder1, uint[] linearizedCylinder2,
-            uint[] cylinder1Validities, uint[] cylinder2Validities,
             uint minMatchableElementsCount)
         {
-            uint[] commonValidities = cylinder1Validities.Zip(cylinder2Validities, (first, second) => first & second).ToArray();
-
-            uint[] c1GivenCommon = linearizedCylinder1.Zip(commonValidities, (first, second) => first & second).ToArray();
-            uint[] c2GivenCommon = linearizedCylinder2.Zip(commonValidities, (first, second) => first & second).ToArray();
-
-            double c1GivenCommonNorm = Math.Sqrt(GetOneBitsCount(c1GivenCommon));
-            double c2GivenCommonNorm = Math.Sqrt(GetOneBitsCount(c2GivenCommon));
-
-            bool matchable = true;
-
-            var matchableElementsCount = GetOneBitsCount(commonValidities);
-
-            // To be done later (cylinder matching conditions, min interminutiae angle not implemented)
-            if (/* matchableElementsCount >= minMatchableElementsCount || */
-                c1GivenCommonNorm + c2GivenCommonNorm == 0)
-            {
-                matchable = false;
-            }
+            double c1Norm = Math.Sqrt(GetOneBitsCount(linearizedCylinder1));
+            double c2Norm = Math.Sqrt(GetOneBitsCount(linearizedCylinder2));
 
             double correlation = 0;
-            if (matchable)
+            if (c1Norm + c2Norm != 0)
             {
-                uint[] givenXOR = c1GivenCommon.Zip(c2GivenCommon, (first, second) => first ^ second).ToArray();
+                uint[] givenXOR = linearizedCylinder1.Zip(linearizedCylinder2, (first, second) => first ^ second).ToArray();
                 double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR));
-                correlation = 1 - givenXORNorm / (c1GivenCommonNorm + c2GivenCommonNorm);
+                correlation = 1 - givenXORNorm / (c1Norm + c2Norm);
             }
 
             return correlation;
