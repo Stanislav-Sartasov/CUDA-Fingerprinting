@@ -15,6 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.Norm
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Filters", "CUDAFingerprinting.GPU.Filters\CUDAFingerprinting.GPU.Filters.vcxproj", "{86750751-B7A7-4A54-B2A9-313A9C1E2199}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8} = {FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "CUDAFingerprinting.GPU.OrientationField\OrientationField.vcxproj", "{D683F6E7-6722-4A88-BD93-518C7CE5713B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +101,20 @@ Global
 		{86750751-B7A7-4A54-B2A9-313A9C1E2199}.Release|Win32.Build.0 = Release|Win32
 		{86750751-B7A7-4A54-B2A9-313A9C1E2199}.Release|x64.ActiveCfg = Release|x64
 		{86750751-B7A7-4A54-B2A9-313A9C1E2199}.Release|x64.Build.0 = Release|x64
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|Win32.Build.0 = Debug|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|x64.ActiveCfg = Debug|x64
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Debug|x64.Build.0 = Debug|x64
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Any CPU.ActiveCfg = Release|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Win32.ActiveCfg = Release|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Win32.Build.0 = Release|Win32
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.ActiveCfg = Release|x64
+		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
