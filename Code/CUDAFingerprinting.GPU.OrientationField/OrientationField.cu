@@ -56,8 +56,10 @@ __global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArr
 	}
 	else{
 		orientation.SetAt(centerRow, centerColumn, M_PI_2 + atan2(2 * numerator, denominator) / 2.0f);
-		if (orientation.At(centerRow, centerColumn) > M_PI_2){
-			orientation.SetAt(centerRow, centerColumn, orientation.At(centerRow, centerColumn) - M_PI);
+		if (orientation.At(centerRow, centerColumn) > M_PI_2)
+		{
+			float index = orientation.At(centerRow, centerColumn) - M_PI;
+			orientation.SetAt(centerRow, centerColumn, index);
 		}
 	}
 }
@@ -137,8 +139,9 @@ void SetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> sourc
 		dim3(ceilMod(source.Width, defaultThreadCount),
 		ceilMod(source.Height, defaultThreadCount));
 	cudaSetOrientationInPixels << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
-	float* o = orientation.GetData();
 	cudaError_t error = cudaDeviceSynchronize();
+	float* o = orientation.GetData();
+	
 }
 
 
