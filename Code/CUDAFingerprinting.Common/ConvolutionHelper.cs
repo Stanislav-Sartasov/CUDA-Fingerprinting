@@ -16,14 +16,16 @@ namespace CUDAFingerprinting.Common
 
             var centerI = I/2;
             var centerJ = J/2;
+            int upperLimitI = (I & 1) == 0 ? centerI - 1 : centerI;
+            int upperLimitJ = (J & 1) == 0 ? centerJ - 1 : centerJ;
 
             for(int x=0;x<X;x++)
             {
                 for (int y = 0; y < Y; y++)
                 {
-                    for(int i=-centerI;i<=centerI;i++)
+                    for (int i = -upperLimitI; i <= centerI; i++)
                     {
-                        for (int j = -centerJ; j <= centerJ; j++)
+                        for (int j = -upperLimitJ; j <= centerJ; j++)
                         {
                             var indexX = x + i;
                             if(indexX<0) indexX = 0;

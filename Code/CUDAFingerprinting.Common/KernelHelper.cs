@@ -98,19 +98,20 @@ namespace CUDAFingerprinting.Common
         {
             double[,] kernel = new double[size,size];
             int center = size/2;
+            int upperLimit = (size & 1) == 0 ? center - 1 : center;
             double sum = 0;
-            for (int x = -center; x <= center; x++)
+            for (int x = -center; x <= upperLimit; x++)
             {
-                for (int y = -center; y <= center; y++)
+                for (int y = -center; y <= upperLimit; y++)
                 {
                     sum += kernel[center + x, center + y] = function(x, y);
                 }
             }
             // normalization
             if (Math.Abs(sum) >0.0000001)
-                for (int x = -center; x <= center; x++)
+                for (int x = -center; x <= upperLimit; x++)
                 {
-                    for (int y = -center; y <= center; y++)
+                    for (int y = -center; y <= upperLimit; y++)
                     {
                         kernel[center + x, center + y] /= sum;
                     }
