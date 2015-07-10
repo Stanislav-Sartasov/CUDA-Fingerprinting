@@ -90,6 +90,7 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 		}
 		buf[0][threadIdx.y] = sum;
 	}
+
 	__syncthreads();
 	if ( threadIdx.x == 0 && threadIdx.y == 0 )
 	{
