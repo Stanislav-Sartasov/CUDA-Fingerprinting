@@ -80,8 +80,6 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 	__shared__ float buf[16][16];
 	buf[threadIdx.x][threadIdx.y] = value.At (row, column);
 
-	int val = 0;
-
 	__syncthreads();
 	if ( threadIdx.x == 0 )
 	{
@@ -95,15 +93,16 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 	__syncthreads();
 	if ( threadIdx.x == 0 && threadIdx.y == 0 )
 	{
+		float sum = 0;
 		for ( int i = 0; i < defaultBlockSize; ++i )
 		{
-			val += buf[0][threadIdx.y];
+			sum += buf[0][threadIdx.y];
 		}
-		buf[0][0] = val;
+		buf[0][0] = sum;
 	}
 	__syncthreads();
 
-	val = buf[0][0] / ( defaultBlockSize * defaultBlockSize );
+	float val = buf[0][0] / ( defaultBlockSize * defaultBlockSize );
 
 	if ( val >= edge )
 	{
