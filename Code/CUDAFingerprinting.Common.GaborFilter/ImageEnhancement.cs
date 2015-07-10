@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+
 namespace CUDAFingerprinting.Common.GaborFilter
 {
     class ImageEnhancement
@@ -44,6 +46,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
                         }
                         double check = result[i, j];
                     }
+                    if (result[i, j] > 255) result[i, j] = 255;
                 }
             }
             return result;
