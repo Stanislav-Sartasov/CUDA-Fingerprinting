@@ -15,15 +15,15 @@ namespace CUDAFingerprinting.Common.GaborFilter
         {
             Matrix = new double[size, size];
 
-            var aCos = Math.Cos(angle);
-            var aSin = Math.Sin(angle);
+            var aCos = Math.Cos(Math.PI / 2 + angle);
+            var aSin = Math.Sin(Math.PI / 2 + angle);
 
             int center = size / 2;
             int upperCenter = (size & 1) == 0 ? center - 1 : center;
 
-            for (int i = -upperCenter; i <= center; i++)
+            for (int i = -upperCenter; i <= upperCenter; i++)
             {
-                for (int j = -upperCenter; j <= center; j++)
+                for (int j = -upperCenter; j <= upperCenter; j++)
                 {
                     Matrix[center - i, center - j] = Math.Exp(-0.5 * (Math.Pow(i * aSin + j * aCos, 2) / 16 + Math.Pow(-i * aCos + j * aSin, 2) / 16)) * Math.Cos(2 * Math.PI * (i * aSin + j * aCos) * frequency);
                 }
