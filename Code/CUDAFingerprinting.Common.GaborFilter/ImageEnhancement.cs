@@ -44,6 +44,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
                         }
                         double check = result[i, j];
                     }
+                    result[i, j] = result[i, j] > 255 ? 255 : (result[i, j] < 0 ? 0 : result[i, j]);
                 }
             }
             return result;
