@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A99E6530-46CC-42A8-B53D-898B8275F77D}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CUDAFingerprinting.Common.GaborFilter</RootNamespace>
     <AssemblyName>CUDAFingerprinting.Common.GaborFilter</AssemblyName>
@@ -30,6 +30,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -77,6 +80,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\002.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\16_3.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\15_8.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
