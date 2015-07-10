@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ConvolutionTests.cs" />
     <Compile Include="ImageHelperTests.cs" />
     <Compile Include="NormalizeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
