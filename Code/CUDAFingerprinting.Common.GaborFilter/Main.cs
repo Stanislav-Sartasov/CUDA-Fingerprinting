@@ -21,7 +21,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
             //}
 
             //mas.Filters[2].WriteMatrix();
-            var bmp = Resources.SampleFinger1;
+            var bmp = Resources.SampleFinger2;
             double[,] imgDoubles = ImageHelper.LoadImage(bmp);
             //int[,] imgInts = ImageHelper.LoadImageAsInt(bmp);
             imgDoubles.DoNormalization(100, 100);
@@ -34,7 +34,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
             OrientationField.OrientationField orf = new OrientationField.OrientationField(imgInts, 16);
           //  orf.SaveToFile(Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
             double[,] orient = orf.GetOrientationMatrix(imgInts.GetLength(0), imgInts.GetLength(1));
-            var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 16, 8);
+            var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 56, 25);
             var bmp2 = ImageHelper.SaveArrayToBitmap(res);
             bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
