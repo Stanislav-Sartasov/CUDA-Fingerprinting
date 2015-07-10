@@ -17,7 +17,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
             for (int i = 0; i < angleNum; i++)
                 angles[i] = constAngle * i;
 
-            var gabor = new GaborFilter(angleNum, filterSize);
+            var gabor = new GaborFilter(angleNum, filterSize, frequency);
             int center = filterSize / 2; //filter is always a square.
             for (int i = 0; i < imgHeight; i++)
             {

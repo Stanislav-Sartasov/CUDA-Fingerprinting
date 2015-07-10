@@ -11,14 +11,14 @@ namespace CUDAFingerprinting.Common.GaborFilter
         public Filter[] Filters;
         public int Count;
 
-        public GaborFilter(int count, int size)
+        public GaborFilter(int count, int size, double frequency)
         {
             var bAngle = Math.PI / count;
             Filters = new Filter[count];
 
             for (int i = 0; i < count; i++)
             {
-                Filters[i] = new Filter(size, bAngle * i);
+                Filters[i] = new Filter(size, bAngle * i, frequency);
             }
         }
     }

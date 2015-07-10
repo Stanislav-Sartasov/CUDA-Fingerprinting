@@ -11,7 +11,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
     {
         public double[,] Matrix;
 
-        public Filter(int size, double angle)
+        public Filter(int size, double angle, double frequency)
         {
             Matrix = new double[size, size];
 
@@ -25,7 +25,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
             {
                 for (int j = -upperCenter; j <= center; j++)
                 {
-                    Matrix[center - i, center - j] = Math.Exp(-0.5 * (Math.Pow(i * aSin + j * aCos, 2) / 16 + Math.Pow(-i * aCos + j * aSin, 2) / 16)) * Math.Cos(2 * Math.PI * (i * aSin + j * aCos) / 9);
+                    Matrix[center - i, center - j] = Math.Exp(-0.5 * (Math.Pow(i * aSin + j * aCos, 2) / 16 + Math.Pow(-i * aCos + j * aSin, 2) / 16)) * Math.Cos(2 * Math.PI * (i * aSin + j * aCos) * frequency);
                 }
             }
         }
