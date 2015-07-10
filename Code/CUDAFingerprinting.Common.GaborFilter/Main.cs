@@ -1,5 +1,5 @@
 ﻿//namespace CUDAFingerprinting.Common.GaborFilter
-//{
+            //{
 //    class Program
 //    {
 //        private static void Main(string[] args)
@@ -15,4 +15,4 @@
 //            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
 //        }
 //    }
-//}
+            //}
