@@ -72,13 +72,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\1_1.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\32_1.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\81_4.bmp" />
+    <None Include="Resources\1_6.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

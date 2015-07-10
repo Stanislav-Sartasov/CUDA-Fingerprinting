@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common.Matrix;
 using System.Drawing;
+using System.IO;
 
 namespace CUDAFingerprinting.Common.Matrix.Tests
 {
@@ -14,10 +15,10 @@ namespace CUDAFingerprinting.Common.Matrix.Tests
             var image = Properties.Resources.SampleFinger;
             Matrix M = new Matrix(image);
 
-            M.SobelFilter();
-            int[,] matrix = M.MatrixMaking();
+            double [,] matrix = M.SobelFilter();
+            M.MatrixMaking();
 
-            Bitmap newPic = M.BWPicture(matrix);
+            Bitmap newPic = M.BWPicture();
             newPic.Save("newPic.bmp");
         }
     }
