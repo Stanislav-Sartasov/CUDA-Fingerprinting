@@ -2,11 +2,11 @@
 //#include "device_launch_parameters.h"
 //#include <math_functions.h>
 //#include <math_constants.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include "Convolution.cuh"
-//#include "CUDAArray.cuh"
-//#include "ImageLoading.cuh"
+#include <stdio.h>
+#include <stdlib.h>
+#include "Convolution.cuh"
+#include "CUDAArray.cuh"
+#include "ImageLoading.cuh"
 //extern "C"{
 //	__declspec(dllexport) void makeOrientationField(float* img, int imgWidth, int imgHeight, float* orField, int regionSize, int overlap);
 //}
@@ -212,9 +212,32 @@
 
 void main()
 {
-//	//BMPHeader header;
-//	//int* img = loadBmp(&header, "C:\\temp\\DB2_bmp\\1_1.bmp");
-//	//saveBmp(img, &header, "C:\\temp\\SaveTestfire.bmp");
+	int width;
+	int height;
+	int* img = loadBmp("C:\\temp\\DB2_bmp\\1_1.bmp", &width, &height);
+	
+	float* fImg = (float*)malloc(sizeof(float)*width*height);
+	for (int i = 0; i < width*height; i++)fImg[i] = 0;
+	CUDAArray<float> target = CUDAArray<float>(fImg, width, height);
+	for (int i = 0; i < width*height; i++)fImg[i] = (float)img[i];
+
+	cudaSetDevice(0);
+	CUDAArray<float> source = CUDAArray<float>(fImg, width, height);
+	float* temp = source.GetData();
+	saveBmp("C:\\temp\\SaveTestfire.bmp", temp, width, height);
+	
+	float sobel[16] = { 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16, 1.0f / 16 };
+	CUDAArray<float> kernel = CUDAArray<float>((float*)&sobel, 4, 4);
+	
+	Convolve(target, source, kernel);
+	float* result = target.GetData();
+	saveBmp("C:\\temp\\SaveTestfire.bmp", result, width, height);
+	source.Dispose();
+	target.Dispose();
+	kernel.Dispose();
+	free(img);
+	free(fImg);
+	free(result);
 //	//free(img);
 //	return 0;
 }
