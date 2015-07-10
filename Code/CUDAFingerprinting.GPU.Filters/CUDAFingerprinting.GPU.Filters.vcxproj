@@ -164,9 +164,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile Include="Filter.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Filter.cuh" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj">
       <Project>{ff7efcd3-be2a-43b4-af3e-91469400e6a8}</Project>
     </ProjectReference>
