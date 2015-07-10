@@ -104,6 +104,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         public void TestBinCylinderCorrelation()
         {
             // Given
+
             int[, ,] cylinderZerosValues = new int[,,]
             {
                 {
@@ -165,47 +166,46 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
 
             // Hardcoding angles
             Cylinder cylinderZeros = 
-                new Cylinder(linearizedCylinders[0], 0.83, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[0]));
+                new Cylinder(linearizedCylinders[0], Math.PI / 6, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[0]));
             Cylinder cylinderOnes = 
-                new Cylinder(linearizedCylinders[1], 1.54, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[1]));
+                new Cylinder(linearizedCylinders[1], Math.PI / 4, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[1]));
             Cylinder cylinderMixed = 
-                new Cylinder(linearizedCylinders[2], 1.77, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[2]));
-
+                new Cylinder(linearizedCylinders[2], Math.PI / 3, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[2]));
 
 
             Template query = new Template(new Cylinder[]
             {
-                cylinderZeros, cylinderOnes
+                cylinderMixed
             });
 
-            //TemplateDb[] db = new TemplateDb[]
-            //{
-            //    new TemplateDb(new CylinderDb[]
-            //    {
-                    
-            //    })
-            //};
+            Template[] db = new Template[]
+            {
+                new Template(new Cylinder[]
+                {
+                    cylinderOnes
+                }),
 
-            // When
-            //var correlation0 = BinCylinderCorrelation.GetTemplateCorrelation(
-            //    linearizedCylinders[0], linearizedCylinders[1]); // Min matching elements count not implemented/tested thus far
+                new Template(new Cylinder[]
+                {
+                    cylinderOnes,
+                    cylinderMixed
+                }),
 
-            //var correlation1 = BinCylinderCorrelation.GetTemplateCorrelation(
-            //    linearizedCylinders[1], linearizedCylinders[2]);
+                new Template(new Cylinder[]
+                {
+                    cylinderMixed,
+                    cylinderMixed,
+                    cylinderMixed,
+                    cylinderMixed
+                })
+            };
 
-            //var correlation2 = BinCylinderCorrelation.GetTemplateCorrelation(
-            //    linearizedCylinders[2], linearizedCylinders[2]);
-
-            //var correlation3 = BinCylinderCorrelation.GetTemplateCorrelation(
-            //    linearizedCylinders[1], linearizedCylinders[1]);
-
-            // Then
-            //Assert.AreEqual(correlation0, 0.0);
-            //Assert.IsTrue(correlation1 > 0.5 && correlation1 < 1.0); // Around 0.65 is a correct value
-            //Assert.AreEqual(correlation2, 1.0);
-            //Assert.AreEqual(correlation3, 1.0);
-
-            //Console.WriteLine(correlation0 + "; " + correlation1 + "; " + correlation2 + "; " + correlation3);
+            double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelation(query, db);
+            for (int i = 0; i < similarityRates.Length; i++)
+            {
+                Console.Write(similarityRates[i] + " ");
+            }
+            Console.WriteLine();
         }
     }
 }

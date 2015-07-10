@@ -20,30 +20,10 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         }
     }
 
-    public class CylinderDb : Cylinder
-    {
-        public uint TemplateIndex { get; private set; }
-
-        public CylinderDb(uint[] givenValues, double givenAngle, double givenNorm, uint givenTemplateIndex)
-            : base(givenValues, givenAngle, givenNorm)
-        {
-            TemplateIndex = givenTemplateIndex;
-        }
-    }
-
     public class Template
     {
         public Cylinder[] Cylinders { get; private set; }
         public Template(Cylinder[] givenCylinders)
-        {
-            Cylinders = givenCylinders;
-        }
-    }
-
-    public class TemplateDb
-    {
-        public CylinderDb[] Cylinders { get; private set; }
-        public TemplateDb(CylinderDb[] givenCylinders)
         {
             Cylinders = givenCylinders;
         }
@@ -54,10 +34,10 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         public static double npParamMu = 20;
         public static double npParamTau = 2.0 / 5.0;
         public static int npParamMin = 4, npParamMax = 12;
-
-        public static uint bucketsCount;
+         
+        public static uint bucketsCount = 64;
         public static uint[] buckets = new uint[bucketsCount];
-        public static double angleThreshold;
+        public static double angleThreshold = Math.PI / 6;
 
         public static int ComputeNumPairs(int template1Count, int template2Count)
         {
@@ -68,7 +48,13 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         public static double CalculateCylinderNorm(uint[] cylinder)
         {
             int sum = 0;
-            for (int i = 0; i < cylinder.Length; i++) sum += i;
+            for (int i = 0; i < cylinder.Length; i++)
+            {
+                if (cylinder[i] == 1)
+                {
+                    sum++;
+                }
+            }
             return Math.Sqrt(sum);
         }
 
@@ -99,14 +85,14 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                 diff;
         }
 
-        public static double[] GetTemplateCorrelation(Template query, TemplateDb[] db)
+        public static double[] GetTemplateCorrelation(Template query, Template[] db)
         {
             double[] similarityRates = new double[db.Length];
 
 
             for (int k = 0; k < db.Length; k++) 
             {
-                TemplateDb templateDb = db[k];
+                Template templateDb = db[k];
 
                 // Reset buckets array
                 // Is this necessary?
@@ -125,9 +111,12 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                             uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
                             //double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR)); // Bitwise case
                             double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid case
-                            double correlation = 1 - givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm);
 
-                            uint bucketIndex = (uint)Math.Floor(correlation * bucketsCount);
+                            uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
+                            if (bucketIndex == bucketsCount)
+                            {
+                                bucketIndex--;
+                            }
                             buckets[bucketIndex]++;
                         }
                     }
@@ -144,7 +133,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                 }
                 sum += t * (int)bucketsCount;
 
-                similarityRates[k] = 1 - sum / (numPairs * bucketsCount);
+                similarityRates[k] = 1 - (float)sum / (numPairs * bucketsCount);
             }
 
             return similarityRates;
