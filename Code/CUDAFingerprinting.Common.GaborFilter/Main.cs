@@ -21,10 +21,10 @@ namespace CUDAFingerprinting.Common.GaborFilter
             //}
 
             //mas.Filters[2].WriteMatrix();
-            var bmp = Resources.SampleFinger2;
+            var bmp = Resources.SampleFinger1;
             double[,] imgDoubles = ImageHelper.LoadImage(bmp);
             //int[,] imgInts = ImageHelper.LoadImageAsInt(bmp);
-            imgDoubles.DoNormalization(80, 100);
+            imgDoubles.DoNormalization(100, 100);
             var bmp001 = ImageHelper.SaveArrayToBitmap(imgDoubles);
             bmp001.Save("test1.bmp", ImageHelper.GetImageFormatFromExtension("test1.bmp"));
             int[,] imgInts = ImageHelper.LoadImageAsInt(bmp001);
@@ -32,9 +32,9 @@ namespace CUDAFingerprinting.Common.GaborFilter
             //var bmp002 = ImageHelper.SaveArrayToBitmap(imgInts);
             //bmp002.Save("test2.bmp", ImageHelper.GetImageFormatFromExtension("test2.bmp"));
             OrientationField.OrientationField orf = new OrientationField.OrientationField(imgInts, 16);
-            orf.SaveToFile(Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
+          //  orf.SaveToFile(Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
             double[,] orient = orf.GetOrientationMatrix(imgInts.GetLength(0), imgInts.GetLength(1));
-            var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 17, 8);
+            var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 51, 8);
             var bmp2 = ImageHelper.SaveArrayToBitmap(res);
             bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
