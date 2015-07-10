@@ -13,8 +13,9 @@ int main()
 	for (int i = 0; i < width * height; i++){
 		floatBmpArray[i] = (float)intBmpArray[i];
 	}
-	OrientationFieldInBlocks(floatBmpArray, width, height);
+	// OrientationFieldInBlocks(floatBmpArray, width, height);
 
+	OrientatiobFieldInPixels(floatBmpArray, width, height);
 
     return 0;
 }
