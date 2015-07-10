@@ -97,7 +97,7 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 		float sum = 0;
 		for ( int i = 0; i < defaultBlockSize; ++i )
 		{
-			sum += buf[0][threadIdx.y];
+			sum += buf[0][i];
 		}
 		buf[0][0] = sum;
 	}
