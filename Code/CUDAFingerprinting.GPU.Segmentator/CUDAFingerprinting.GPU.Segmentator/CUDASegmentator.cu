@@ -8,6 +8,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <fstream>
+#include <iostream>
+
+// For working __syncthreads
+#ifndef __CUDACC__ 
+#define __CUDACC__
+#endif
+#include <device_functions.h>
+
+using namespace std;
 
 #define edge 100
 #define defaultBlockSize 16
@@ -25,9 +35,12 @@ __global__ void cudaCalculate(CUDAArray<float> value, CUDAArray<float> Gx, CUDAA
 	int width = value.Width;
 	int height = value.Height;
 
+	float currentGx = Gx.At(row, column);
+	float currentGy = Gy.At(row, column);
+
 	if( column < width && row < height )
 	{
-		float sqrtXY = sqrt( Gx.At(row, column) * Gx.At(row, column) + Gy.At(row, column) * Gy.At(row, column) );
+		float sqrtXY = sqrt( currentGx * currentGx + currentGy * currentGy );
 		value.SetAt(row, column, sqrtXY);
 	}
 }
@@ -73,7 +86,51 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 	int width = matrix2D.Width;
 	int height = matrix2D.Height;
 
-	if ( column < width && row < height )
+	__shared__ float buf[16][16];
+
+	for ( int i = 0; i < defaultBlockSize; ++i )
+	{
+		for ( int j = 0; j < defaultBlockSize; ++j )
+		{
+			float pxl = value.At (row, column);
+			buf[i][j] = pxl;
+		}
+	}
+
+	int val = 0;
+
+	__syncthreads();
+	if ( threadIdx.x == 0 )
+	{
+		float sum = 0;
+		for ( int i = 0; i < defaultBlockSize; ++i )
+		{
+			sum += buf[i][threadIdx.x];
+		}
+
+		__syncthreads();
+		if ( threadIdx.x == 0 && threadIdx.y == 0 )
+		{
+			for ( int i = 0; i < defaultBlockSize; ++i )
+			{
+				val += sum;
+			}
+		}
+	}
+	__syncthreads();
+
+	val /= ( defaultBlockSize * defaultBlockSize );
+
+	if ( val >= edge )
+	{
+		matrix2D.SetAt (row, column, 1);
+	}
+	else
+	{
+		matrix2D.SetAt (row, column, 0);
+	}
+
+	/*if ( column < width && row < height )
 	{
 		int columnOffset = defaultBlockSize * column;
 		int rowOffset = defaultBlockSize * row;
@@ -104,7 +161,7 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 		{
 			matrix2D.SetAt (defaultRow (), defaultColumn (), 0);
 		}
-	}
+	}*/
 }
 
 void Segmentate (CUDAArray<float> value, int* matrix)
@@ -136,17 +193,8 @@ void BWPicture (int width, int height, int* matrix)
 	saveBmp ("newPic.bmp", newPic, width, height);
 }
 
-int main()
+void MakingMatrix (float* fPic, int picWidth, int picHeight, int* &matrix)
 {
-	cudaSetDevice (0);
-
-	int picWidth, picHeight;
-	int* pic = loadBmp ("1_1.bmp", &picWidth, &picHeight);
-	float* fPic = (float*)malloc(sizeof(float)*picWidth*picHeight);
-	for (int i = 0; i < picWidth*picHeight; i++) fPic[i] = (float)pic[i];
-
-	int *matrix = (int*) malloc (picWidth * picHeight * sizeof(int));
-
 	CUDAArray<float> source = CUDAArray<float>(fPic, picWidth, picHeight);
 
 	CUDAArray<float> value = SobelFilter (source, picWidth, picHeight);	
@@ -156,8 +204,38 @@ int main()
 
 	source.Dispose();
 	value.Dispose ();
+}
+
+int main()
+{
+	cudaSetDevice (0);
+
+	int picWidth, picHeight;
+	int* pic = loadBmp ("1_1.bmp", &picWidth, &picHeight);
+	float* fPic = (float*)malloc(sizeof(float)*picWidth*picHeight);
+	for ( int i = 0; i < picWidth*picHeight; i++ )
+	{
+		fPic[i] = (float) pic[i];
+	}
+
+	int *matrix = (int*) malloc (picWidth * picHeight * sizeof(int));
+	// In this matrix 1 means light shade of gray, and 0 means dark shade of gray 
+
+	MakingMatrix (fPic, picWidth, picHeight, matrix);
+
+	ofstream fout("matrix.txt");
+	for ( int i = 0; i < picWidth; ++i )
+	{
+		for ( int j = 0; j < picHeight; ++j )
+		{
+			fout << matrix[i * picWidth + j] << ' ';
+		}
+		fout << endl;
+	}
+	fout.close ();
 
 	free(pic);
+	free (fPic);
 	free (matrix);
 
 	return 0;
