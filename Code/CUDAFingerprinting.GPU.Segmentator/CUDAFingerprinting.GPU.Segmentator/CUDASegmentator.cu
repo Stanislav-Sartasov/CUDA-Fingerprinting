@@ -100,23 +100,28 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 	int val = 0;
 
 	__syncthreads();
-	if ( threadIdx.x == 0 )
+	if (threadIdx.x == 0)
 	{
 		float sum = 0;
-		for ( int i = 0; i < defaultBlockSize; ++i )
+		for (int i = 0; i < defaultBlockSize; ++i)
 		{
-			sum += buf[i][threadIdx.x];
+			sum += buf[i][threadIdx.y];
 		}
-
-		__syncthreads();
-		if ( threadIdx.x == 0 && threadIdx.y == 0 )
-		{
-			for ( int i = 0; i < defaultBlockSize; ++i )
-			{
-				val += sum;
-			}
-		}
+		buf[0][threadIdx.y] = sum;
 	}
+	
+	__syncthreads();
+	
+	if (threadIdx.x == 0 && threadIdx.y == 0)
+	{
+		float sum = 0;
+		for (int i = 0; i < defaultBlockSize; ++i)
+		{
+			sum += buf[0][i];
+		}
+		buf[0][0] = sum;
+	}
+	
 	__syncthreads();
 
 	val /= ( defaultBlockSize * defaultBlockSize );
