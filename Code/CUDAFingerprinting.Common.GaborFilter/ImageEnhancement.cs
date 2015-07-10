@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+
 namespace CUDAFingerprinting.Common.GaborFilter
 {
     class ImageEnhancement
