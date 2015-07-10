@@ -54,8 +54,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CUDAFingerprinting.GPU.BinCylinderCorrelation.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="..\Debug\CUDAFingerprinting.GPU.BinCylinderCorrelation.dll">
+      <Link>CUDAFingerprinting.GPU.BinCylinderCorrelation.dll</Link>
     </Content>
   </ItemGroup>
   <Choose>
