@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace CUDAFingerprinting.Common.GaborFilter
 {
-    class ImageEnhancement
+    public class ImageEnhancement
     {
         public static double[,] Enhance(double[,] img, double[,] orientMatrix, double frequency, int filterSize,
             int angleNum)
