@@ -109,8 +109,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                             && queryCylinder.Norm + cylinderDb.Norm != 0)
                         {
                             uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
-                            //double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR)); // Bitwise case
-                            double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid case
+                            double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR)); // Bitwise version
+                            //double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid version
 
                             uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
                             if (bucketIndex == bucketsCount)

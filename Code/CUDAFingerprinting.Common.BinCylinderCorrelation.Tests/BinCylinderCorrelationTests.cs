@@ -149,28 +149,37 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             };
 
             // Bitwise version
-            //uint[][] linearizedCylinders = 
-            //{ 
-            //    ConvertArrayUintToBinary(Linearize(cylinderZerosValues)), 
-            //    ConvertArrayUintToBinary(Linearize(cylinderOnesValues)), 
-            //    ConvertArrayUintToBinary(Linearize(cylinderMixedValues))
-            //};
-
-            // Stupid version
             uint[][] linearizedCylinders = 
             { 
-                Linearize(cylinderZerosValues), 
-                Linearize(cylinderOnesValues), 
-                Linearize(cylinderMixedValues)
+                ConvertArrayUintToBinary(Linearize(cylinderZerosValues)), 
+                ConvertArrayUintToBinary(Linearize(cylinderOnesValues)), 
+                ConvertArrayUintToBinary(Linearize(cylinderMixedValues))
             };
 
-            // Hardcoding angles
-            Cylinder cylinderZeros = 
-                new Cylinder(linearizedCylinders[0], Math.PI / 6, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[0]));
-            Cylinder cylinderOnes = 
-                new Cylinder(linearizedCylinders[1], Math.PI / 4, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[1]));
-            Cylinder cylinderMixed = 
-                new Cylinder(linearizedCylinders[2], Math.PI / 3, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[2]));
+            // Stupid version
+            //uint[][] linearizedCylinders = 
+            //{ 
+            //    Linearize(cylinderZerosValues), 
+            //    Linearize(cylinderOnesValues), 
+            //    Linearize(cylinderMixedValues)
+            //};
+
+
+            // Bitwise version 
+            Cylinder cylinderZeros =
+                new Cylinder(linearizedCylinders[0], Math.PI / 6, Math.Sqrt(BinCylinderCorrelation.GetOneBitsCount(linearizedCylinders[0])));
+            Cylinder cylinderOnes =
+                new Cylinder(linearizedCylinders[1], Math.PI / 4, Math.Sqrt(BinCylinderCorrelation.GetOneBitsCount(linearizedCylinders[1])));
+            Cylinder cylinderMixed =
+                new Cylinder(linearizedCylinders[2], Math.PI / 3, Math.Sqrt(BinCylinderCorrelation.GetOneBitsCount(linearizedCylinders[2])));
+
+            // Stupid version
+            //Cylinder cylinderZeros =
+            //    new Cylinder(linearizedCylinders[0], Math.PI / 6, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[0]));
+            //Cylinder cylinderOnes =
+            //    new Cylinder(linearizedCylinders[1], Math.PI / 4, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[1]));
+            //Cylinder cylinderMixed =
+            //    new Cylinder(linearizedCylinders[2], Math.PI / 3, BinCylinderCorrelation.CalculateCylinderNorm(linearizedCylinders[2]));
 
 
             Template query = new Template(new Cylinder[]
