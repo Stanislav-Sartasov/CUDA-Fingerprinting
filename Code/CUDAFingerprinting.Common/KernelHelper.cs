@@ -9,8 +9,8 @@ namespace CUDAFingerprinting.Common
     {
         public static int GetKernelSizeForGaussianSigma(double sigma)
         {
-            return 2*(int) Math.Ceiling(sigma*3.0f) + 1;
-        }   
+            return 2 * (int)Math.Ceiling(sigma * 3.0f) + 1;
+        }
 
         public static Complex[,] MakeComplexKernel(Func<int, int, double> realFunction,
                                                    Func<int, int, double> imaginaryFunction, int size)
@@ -75,9 +75,9 @@ namespace CUDAFingerprinting.Common
         public static Tuple<int, int> Max2dPosition(double[,] arr)
         {
             double max = double.NegativeInfinity;
-            int x=0;
-            int y=0;
-            
+            int x = 0;
+            int y = 0;
+
             for (int i = 0; i < arr.GetLength(0); i++)
             {
                 for (int j = 0; j < arr.GetLength(1); j++)
@@ -91,26 +91,27 @@ namespace CUDAFingerprinting.Common
                 }
             }
 
-            return new Tuple<int,int>(x,y);
+            return new Tuple<int, int>(x, y);
         }
 
         public static double[,] MakeKernel(Func<int, int, double> function, int size)
         {
-            double[,] kernel = new double[size,size];
-            int center = size/2;
+            double[,] kernel = new double[size, size];
+            int center = size / 2;
+            int upperLimit = (size & 1) == 0 ? center - 1 : center;
             double sum = 0;
-            for (int x = -center; x <= center; x++)
+            for (int x = -center; x <= upperLimit; x++)
             {
-                for (int y = -center; y <= center; y++)
+                for (int y = -center; y <= upperLimit; y++)
                 {
                     sum += kernel[center + x, center + y] = function(x, y);
                 }
             }
             // normalization
-            if (Math.Abs(sum) >0.0000001)
-                for (int x = -center; x <= center; x++)
+            if (Math.Abs(sum) > 0.0000001)
+                for (int x = -center; x <= upperLimit; x++)
                 {
-                    for (int y = -center; y <= center; y++)
+                    for (int y = -center; y <= upperLimit; y++)
                     {
                         kernel[center + x, center + y] /= sum;
                     }
@@ -123,11 +124,11 @@ namespace CUDAFingerprinting.Common
             int maxX = real.GetLength(0);
             int maxY = real.GetLength(1);
             Complex[,] result = new Complex[maxX, maxY];
-            for (int x = 0; x <maxX; x++)
+            for (int x = 0; x < maxX; x++)
             {
-                for (int y = 0; y <maxY; y++)
+                for (int y = 0; y < maxY; y++)
                 {
-                    result[x, y] = new Complex(real[x,y],imaginary[x,y]);
+                    result[x, y] = new Complex(real[x, y], imaginary[x, y]);
                 }
             }
             return result;
@@ -143,7 +144,7 @@ namespace CUDAFingerprinting.Common
                 for (int y = 0; y < maxY; y++)
                 {
                     result[x, y] = source[x, y] - value[x, y];
-                 }
+                }
             }
             return result;
         }
@@ -178,8 +179,8 @@ namespace CUDAFingerprinting.Common
 
         public static U[,] Select2D<T, U>(this T[,] array, Func<T, U> f)
         {
-            var result = new U[array.GetLength(0),array.GetLength(1)];
-            Parallel.For(0, array.GetLength(0), new ParallelOptions(){MaxDegreeOfParallelism = Environment.ProcessorCount}, (x,state) =>
+            var result = new U[array.GetLength(0), array.GetLength(1)];
+            Parallel.For(0, array.GetLength(0), new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, (x, state) =>
             {
 
                 for (int y = 0; y < array.GetLength(1); y++)
@@ -224,13 +225,13 @@ namespace CUDAFingerprinting.Common
 
         public static U[] Select2D<T, U>(this T[] array, int rows, int columns, Func<T, int, int, U> f)
         {
-            var result = new U[rows*columns];
+            var result = new U[rows * columns];
 
             for (int row = 0; row < rows; row++)
             {
                 for (int column = 0; column < columns; column++)
                 {
-                    result[row*columns + column] = f(array[row*columns + column], row, column);
+                    result[row * columns + column] = f(array[row * columns + column], row, column);
                 }
             }
 

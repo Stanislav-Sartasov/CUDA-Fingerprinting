@@ -10,7 +10,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
     {
         private static void Main(string[] args)
         {
-            var mas = new GaborFilter(8, 5);
+            var mas = new GaborFilter(8, 6);
 
             mas.Filters[2].WriteMatrix();
 
