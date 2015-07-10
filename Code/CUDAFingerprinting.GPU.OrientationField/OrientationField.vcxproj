@@ -165,7 +165,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="OrientationField.cu" />
   </ItemGroup>
   <ItemGroup>

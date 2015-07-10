@@ -6,7 +6,7 @@
 #include <device_functions.h>
 #include "device_launch_parameters.h"
 #include "Convolution.cuh"
-#include "constsmacros.h"
+//#include "constsmacros.h"
 #include "CUDAArray.cuh"
 /////////////////////////////////////////// мнбши ///////////////////////////////////////////
 __global__ void cudaSetOrientation(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
