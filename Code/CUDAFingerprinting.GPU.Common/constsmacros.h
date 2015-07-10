@@ -11,5 +11,4 @@
 
 // consts
 const int defaultThreadCount = 32;
-
 #endif

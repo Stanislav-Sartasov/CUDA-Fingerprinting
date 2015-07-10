@@ -49,7 +49,8 @@ namespace CUDAFingerprinting.Common.OrientationField
 
 			// градиенты
 			double[,] Gx = ConvolutionHelper.Convolve(_pxl, filterX); 
-			double[,] Gy = ConvolutionHelper.Convolve(_pxl, filterY); 
+			double[,] Gy = ConvolutionHelper.Convolve(_pxl, filterY);
+
             double numerator = 0;
             double denominator = 0;
             for (int i = 0; i < _size; i++)
