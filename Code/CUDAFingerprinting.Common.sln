@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.AdaptiveBinarization", "CUDAFingerprinting.Common.AdaptiveBinarization\CUDAFingerprinting.Common.AdaptiveBinarization.csproj", "{B5572B82-1C20-4D6A-A752-123CD7657007}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.AdaptiveBinarization.Test", "CUDAFingerprinting.Common.AdaptiveBinarization.Test\CUDAFingerprinting.Common.AdaptiveBinarization.Test.csproj", "{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -259,6 +261,20 @@ Global
 		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|Win32.ActiveCfg = Release|Any CPU
 		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|x64.ActiveCfg = Release|Any CPU
 		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|x86.ActiveCfg = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|Win32.ActiveCfg = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -269,6 +285,7 @@ Global
 		{0D060CC8-D377-4A9B-90F3-B189525B77E1} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 		{72A57943-8901-437C-B792-934652F4650A} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 		{112F87EA-2FE2-41AA-8251-BC0A47C79045} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
+		{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD} = {AC5114BA-2AFF-4C60-8B80-19CAE86DD4F7}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = CUDAFingerprinting.vsmdi

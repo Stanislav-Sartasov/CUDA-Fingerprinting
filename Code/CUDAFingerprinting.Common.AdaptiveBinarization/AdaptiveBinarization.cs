@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
-using System.Threading.Tasks;
-using CUDAFingerprinting.Common;
 
 namespace CUDAFingerprinting.Common.AdaptiveBinarization
 {
@@ -14,37 +8,15 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization
         public int Y;
     }
 
-    /*public struct Square
-    {
-        public Point Point0;
-        public Point Point1;
-        public Point Point2;
-        public Point Point3;
-    }*/
-
     public class AdaptiveBinarization
     {
-        public int Width;
-        public int Height;
-        public float[,] ImageArray;
         public const int FieldSize = 16;
-        public AdaptiveBinarization(float[,] array)
-        {
-            Width = array.GetLength(0);
-            Height = array.GetLength(1);
-            ImageArray = array;
-        }
 
         public static Point Turn(int x, int y, int xCentre, int yCentre, double angleCos, double angleSin)
         {
             Point p;
-            
-            p.X = (int)Math.Round(xCentre + (x - xCentre)*angleCos 
-                - (y - yCentre)*angleSin);
-            
-            p.Y = (int)Math.Round(yCentre + (x - xCentre) * angleSin 
-                + (y - yCentre) *angleCos);
-
+            p.X = (int) Math.Round(xCentre + (x - xCentre)*angleCos + (y - yCentre)*angleSin);
+            p.Y = (int)Math.Round(yCentre - (x - xCentre) * angleSin + (y - yCentre) *angleCos);
             return p;
         }
 
@@ -59,35 +31,71 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization
             return (ax * by - ay * bx) / (Math.Sqrt(ax * ax + ay * ay) * Math.Sqrt(bx * bx + by * by));
         }
 
-        public static double[] ProjectionX(int xCentre, int yCenre, int xCurrentPoint, int yCurrentPoint, int[,] arr) //  orthogonal projection on Ox
+        public static int[] ProjectionX(int xCentre, int yCenre, int[,] arr) //  orthogonal projection on Ox
         {
             // просуммировать по игреку все в этом ряду из блока 16х16 ортоганально оси Ох
-            double[] projX = new double[FieldSize]; //16
+            int[] projX = new int[FieldSize]; //16
             OrientationField.OrientationField img = new OrientationField.OrientationField(arr); // size of bmp
-            var angleOfY = img.GetOrientation(xCentre, yCenre);
-            var angleOfX = angleOfY - Math.PI/2.0;
+            var angleOfX = img.GetOrientation(xCentre, yCenre) - Math.PI/2.0;
 
-           // Square orientWindow;
-           // orientWindow.Point0.X = 
             double angleSin, angleCos;
             double localSegment;
             Point tmpPoint;
-            for (int i = -FieldSize/2; i < FieldSize/2 - 1; i++)
+
+            for (int i = -FieldSize/2; i < FieldSize/2; i++)
             {
-                projX[i] = 0;
-                for (int j = -FieldSize / 2; j < FieldSize/2 - 1; j++) //summ all column elements
+                projX[i + FieldSize/2] = 0;
+                for (int j = -FieldSize/2; j < FieldSize/2; j++) //summ all column elements
                 {
                     localSegment = Math.Sqrt(i*i + j*j);
-                    angleSin = Math.Sin(angleOfX) + find_sin(1.0, 0.0, i, j);
-                    angleCos = Math.Cos(angleOfX) + find_cos(1.0, 0.0, i, j);
-                    tmpPoint = Turn(0, (int) Math.Round(localSegment), xCentre, yCenre, angleCos, angleSin);
-                    projX[i] += arr[tmpPoint.X + xCentre, tmpPoint.Y + yCenre];
+                    if (Math.Abs(localSegment) < 0.000001) continue; // double tolerance
                     
+                    angleSin = Math.Sin(angleOfX + Math.Asin(find_sin(1.0, 0.0, i, j)));
+                    angleCos = Math.Cos(angleOfX + Math.Acos(find_cos(1.0, 0.0, i, j)));
+                    tmpPoint = Turn(0, (int) Math.Floor(localSegment), 0, 0, angleCos, angleSin);
+                    projX[i + FieldSize/2] += arr[tmpPoint.X + xCentre, tmpPoint.Y + yCenre]/FieldSize;
                 }
-                
             }
             return projX;
         }
+
+        public static int[,] AdaptiveImageBinarization(int[,] arr)
+        {
+            int[,] resArr = new int[arr.GetLength(0),arr.GetLength(1)]; // values 0 or 255
+
+            for (int xCentre = FieldSize; xCentre < arr.GetLength(0)-FieldSize; xCentre++) //смени границы
+            {
+                for (int yCente = FieldSize; yCente < arr.GetLength(1)-FieldSize; yCente++)
+                {
+                    var projX = ProjectionX(xCentre, yCente, arr);
+                    double max = 0;
+                    for (int k = -FieldSize / 2; k < FieldSize / 2 ; k++)
+                    {
+                        if (k == 0)
+                        {
+                            continue;
+                        }
+                        if (max < projX[k+FieldSize/2])
+                        {
+                            max = projX[k+FieldSize/2];
+                        }
+                    }
+
+                    if (projX[FieldSize / 2] >= max)
+                    {
+                        resArr[xCentre, yCente] = 255;
+                    }
+                    else
+                    {
+                        resArr[xCentre, yCente] = 0;
+                    }
+                }
+                
+            }
+            return resArr;
+        }
+            
+
 
     }
 }
