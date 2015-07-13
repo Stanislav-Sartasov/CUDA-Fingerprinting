@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
-namespace CUDAFingerprinting.GPU.Normalization.Test
+namespace CUDAFingerprinting.GPU.Tests
 {
     [TestClass]
     public class NormalizationTests

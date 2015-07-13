@@ -10,6 +10,10 @@
 #include <math.h>
 #include "CUDAArray.cuh"
 
+extern "C"
+{
+	__declspec(dllexport) void MakeGaborFilters(float* filter, int size, int angleNum, float frequency);
+}
 
 __global__ void cudaCreateGaborFilter(CUDAArray<float>* filters, int size, float frequency, float bAngle)
 {
@@ -28,7 +32,7 @@ __global__ void cudaCreateGaborFilter(CUDAArray<float>* filters, int size, float
 	}
 }
 
-void MakeGaborFilters(int size, int angleNum, float frequency)
+void MakeGaborFilters(float* filter, int size, int angleNum, float frequency)
 {
 	CUDAArray<float>* filters = (CUDAArray<float>*)malloc(angleNum * sizeof(CUDAArray<float>));
 
@@ -43,4 +47,6 @@ void MakeGaborFilters(int size, int angleNum, float frequency)
 	dim3 gridSize = dim3(ceilMod(angleNum, defaultThreadCount));
 
 	cudaCreateGaborFilter << <gridSize, blockSize >> > (filters, size, frequency, bAngle);
+
+	filters[1].GetData(filter);
 }
