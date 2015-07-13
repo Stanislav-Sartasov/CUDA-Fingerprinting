@@ -74,7 +74,7 @@ namespace CUDAFingerprinting.Common.OrientationField
 				}
 			}
 
-			Orientation[centerRow, centerColumn] = SetOrientation();
+			Orientation[centerRow, centerColumn] = _orientation = SetOrientation();
 		}
 
         public double SetOrientation()
@@ -100,7 +100,7 @@ namespace CUDAFingerprinting.Common.OrientationField
 				return orientation;
             }
         }
-    }
+	}
 
 	// ------------------------------------------------------------------------------------
 
@@ -108,8 +108,6 @@ namespace CUDAFingerprinting.Common.OrientationField
     {
         Block[,] _blocks;
         public const int DefaultSize = 16;
-		private bool IsPixelwise;		// true - если вычисляется по пикселям, false - если по блокам
-		private double[,] Orientation;
 		// property
 		public Block[,] Blocks
 		{
@@ -127,7 +125,6 @@ namespace CUDAFingerprinting.Common.OrientationField
 		public OrientationField(int[,] bytes, int blockSize, bool isPixelwise)
         {
             BlockSize = blockSize;
-			IsPixelwise = isPixelwise;
             int maxX = bytes.GetUpperBound(1) + 1;
             int maxY = bytes.GetUpperBound(0) + 1;
 			double[,] filterX = new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
@@ -143,34 +140,15 @@ namespace CUDAFingerprinting.Common.OrientationField
 			// градиенты
 			double[,] Gx = ConvolutionHelper.Convolve(doubleBytes, filterX);
 			double[,] Gy = ConvolutionHelper.Convolve(doubleBytes, filterY);
-
-			if (isPixelwise)
-			{		// рассчет направления для каждого пикселя
-				Orientation = new double[maxY, maxX];
-				// только один блок - персональный для каждого пикселя
-				this._blocks = new Block[1, 1];
-				for (int centerRow = 0; centerRow < maxY; centerRow++)
+			// разделение на блоки
+			this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
+			for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
+			{
+				for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
 				{
-					for (int centerColumn = 0; centerColumn < maxX; centerColumn++)
-					{
-						_blocks[0, 0] = new Block(Orientation, BlockSize, Gx, Gy, centerRow, centerColumn);
-					}
+					_blocks[row, column] = new Block(BlockSize, Gx, Gy, row * BlockSize, column * BlockSize);
 				}
 			}
-			else
-			{		// рассчет направления по блокам
-				// разделение на блоки
-				this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
-				for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
-				{
-					for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
-					{
-						_blocks[row, column] = new Block(BlockSize, Gx, Gy, row * BlockSize, column * BlockSize);
-					}
-				}
-			}
-
-            
         }
 
         public OrientationField(int[,] bytes):this(bytes, DefaultSize)
@@ -184,16 +162,9 @@ namespace CUDAFingerprinting.Common.OrientationField
 
 		public double GetOrientation(int x, int y)                  // метод, определяющий по входным координатам (х, у) поле напрваления в этой точке
 		{
-			if (IsPixelwise)
-			{
-				return Orientation[x, y];
-			}
-			else
-			{
-				int row = y / BlockSize;
-				int column = x / BlockSize;
-				return this._blocks[row, column].Orientation;
-			}
+			int row = y / BlockSize;
+			int column = x / BlockSize;
+			return this._blocks[row, column].Orientation;
 		}
     } 
 }
