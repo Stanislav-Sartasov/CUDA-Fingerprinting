@@ -207,17 +207,6 @@ int main()
 
 	MakingMatrix (fPic, picWidth, picHeight, matrix);
 
-	/*ofstream fout("matrix.txt");
-	for ( int i = 0; i < picWidth; ++i )
-	{
-		for ( int j = 0; j < picHeight; ++j )
-		{
-			fout << matrix[i * picWidth + j] << ' ';
-		}
-		fout << endl;
-	}
-	fout.close ();*/
-
 	free(pic);
 	free (fPic);
 	free (matrix);
