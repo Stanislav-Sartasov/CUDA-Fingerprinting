@@ -22,12 +22,12 @@ extern "C"
 	__declspec( dllexport ) __global__ void cudaSegmentate (CUDAArray<float> value, int* matrix);
 }
 
-__global__ void SobelFilter (CUDAArray<float> source, CUDAArray<float> filterX, CUDAArray<float> filterY)
+__global__ void SobelFilter (CUDAArray<float> source, CUDAArray<float> target, CUDAArray<float> filterX, CUDAArray<float> filterY)
 {
 	int row = defaultRow ();
 	int column = defaultColumn ();
 
-	if (column < source.Width && row < source.Height && column > 0 && row > 0 )
+	if (column < source.Width - 1 && row < source.Height - 1 && column > 0 && row > 0 )
 	{
         float sumX = source.At(row - 1, column - 1) * filterX.At(0, 0) + source.At(row + 1, column - 1) * filterX.At(0, 2) +
                         source.At(row - 1, column) * filterX.At(1, 0) + source.At(row + 1, column) * filterX.At(1, 2) +
@@ -40,7 +40,7 @@ __global__ void SobelFilter (CUDAArray<float> source, CUDAArray<float> filterX, 
 
         sqrtXY = sqrtXY > 255 ? 255 : sqrtXY;
 
-		source.SetAt(row, column, sqrtXY);
+		target.SetAt(row, column, sqrtXY);
     }
 }
 
@@ -82,7 +82,7 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 
 	if ( val >= edge )
 	{
-		if ( buf[tX][tY] < pixEdge )
+		if ( buf[tX][tY] >= pixEdge )
 		{
 			matrix2D.SetAt (row, column, 1);
 		}
@@ -142,6 +142,7 @@ void BWPicture (int width, int height, int* matrix)
 void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 {
 	CUDAArray<float> source = CUDAArray<float>(fPic, picWidth, picHeight);
+	CUDAArray<float> target = CUDAArray<float>(picWidth, picHeight);
 
 	float filterXLinear[9] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
 	float filterYLinear[9] = { -1, -2, -1, 0, 0, 0, 1, 2, 1 };
@@ -152,11 +153,11 @@ void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
 	dim3 gridSize = dim3(ceilMod(picWidth, defaultBlockSize), ceilMod(picHeight, defaultBlockSize));
 
-	SobelFilter <<< gridSize, blockSize >>> (source, filterX, filterY);	
+	SobelFilter <<< gridSize, blockSize >>> (source, target, filterX, filterY);	
 	
 	//Saving image after Sobel Filter
 	float* fSOPic = (float*)malloc(sizeof(float)*source.Width*source.Height);
-	source.GetData (fSOPic);
+	target.GetData (fSOPic);
 	int* SOPic = (int*)malloc(sizeof(int)*source.Width*source.Height);
 	for ( int i = 0; i < picWidth*picHeight; i++ )
 	{
@@ -164,10 +165,11 @@ void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 	}
 	saveBmp ("SOPic.bmp", SOPic, picWidth, picHeight);
 	
-	Segmentate (source, matrix);
+	Segmentate (target, matrix);
 	BWPicture (picWidth, picHeight, matrix);
 
 	source.Dispose();
+	target.Dispose();
 	filterX.Dispose();
 	filterY.Dispose();
 
