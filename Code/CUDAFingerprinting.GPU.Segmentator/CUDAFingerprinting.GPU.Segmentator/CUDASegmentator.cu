@@ -13,7 +13,8 @@
 
 using namespace std;
 
-#define edge 80
+#define edge 50
+#define pixEdge 150
 #define defaultBlockSize 16
 
 extern "C"
@@ -26,7 +27,7 @@ __global__ void SobelFilter (CUDAArray<float> source, CUDAArray<float> filterX, 
 	int row = defaultRow ();
 	int column = defaultColumn ();
 
-	if (column < source.Width && row < source.Height )
+	if (column < source.Width && row < source.Height && column > 0 && row > 0 )
 	{
         float sumX = source.At(row - 1, column - 1) * filterX.At(0, 0) + source.At(row + 1, column - 1) * filterX.At(0, 2) +
                         source.At(row - 1, column) * filterX.At(1, 0) + source.At(row + 1, column) * filterX.At(1, 2) +
@@ -81,7 +82,7 @@ __global__ void cudaMatrix (CUDAArray<float> value, CUDAArray<int> matrix2D)
 
 	if ( val >= edge )
 	{
-		if ( buf[tX][tY] >= edge )
+		if ( buf[tX][tY] < pixEdge )
 		{
 			matrix2D.SetAt (row, column, 1);
 		}
@@ -134,6 +135,8 @@ void BWPicture (int width, int height, int* matrix)
 	}
 
 	saveBmp ("newPic.bmp", newPic, width, height);
+
+	free (newPic);
 }
 
 void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
@@ -151,6 +154,7 @@ void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 
 	SobelFilter <<< gridSize, blockSize >>> (source, filterX, filterY);	
 	
+	//Saving image after Sobel Filter
 	float* fSOPic = (float*)malloc(sizeof(float)*source.Width*source.Height);
 	source.GetData (fSOPic);
 	int* SOPic = (int*)malloc(sizeof(int)*source.Width*source.Height);
@@ -161,10 +165,14 @@ void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 	saveBmp ("SOPic.bmp", SOPic, picWidth, picHeight);
 	
 	Segmentate (source, matrix);
-	
 	BWPicture (picWidth, picHeight, matrix);
 
 	source.Dispose();
+	filterX.Dispose();
+	filterY.Dispose();
+
+	free (fSOPic);
+	free (SOPic);
 }
 
 int main()
