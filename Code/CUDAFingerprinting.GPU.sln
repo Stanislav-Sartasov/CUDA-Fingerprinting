@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Filt
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "CUDAFingerprinting.GPU.OrientationField\OrientationField.vcxproj", "{D683F6E7-6722-4A88-BD93-518C7CE5713B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common", "CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj", "{6FD094CC-0F63-47BD-A377-F054AE615517}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,6 +102,18 @@ Global
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|Win32.Build.0 = Release|Win32
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.ActiveCfg = Release|x64
 		{D683F6E7-6722-4A88-BD93-518C7CE5713B}.Release|x64.Build.0 = Release|x64
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|Win32.ActiveCfg = Release|Any CPU
+		{6FD094CC-0F63-47BD-A377-F054AE615517}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
