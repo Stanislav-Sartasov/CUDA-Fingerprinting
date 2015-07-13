@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
-using CUDAFingerprinting.Common.OrientationField;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CUDAFingerprinting.Common.AdaptiveBinarization.Test
@@ -12,13 +13,26 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization.Test
         public void AdaptiveBinarizationTestMethod()
         {
             int[,] arrayI = ImageHelper.LoadImageAsInt(Resources.test);
-            
-            OrientationField.OrientationField field = new OrientationField.OrientationField(arrayI);
+            int x = 44, y = 14;
+            var proj = AdaptiveBinarization.ProjectionX(x, y, arrayI);
+            int columnWidth = 20;
+            int bmpHeight = 256;
+            int projectionLength = 16;
+            Bitmap barChart = new Bitmap(columnWidth * projectionLength, bmpHeight);
 
-            field.SaveAboveToFile(Resources.test, Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
-            
-            var binarizatedInt = AdaptiveBinarization.AdaptiveImageBinarization(arrayI);
-            ImageHelper.SaveArrayToBitmap(binarizatedInt).Save(Path.GetTempPath() + Guid.NewGuid() + ".bmp");
+            for (int i = 0; i < columnWidth * projectionLength; i += columnWidth)
+            {
+                for (int j = bmpHeight-1; j > bmpHeight - proj[i/columnWidth]; j--)
+                {
+                    for (int k = 0; k < columnWidth; k++)
+                    {
+                        barChart.SetPixel(i + k, j, Color.FromArgb(proj[i / columnWidth], proj[i / columnWidth], proj[i / columnWidth]));
+                    }
+                }
+                Graphics graphics = Graphics.FromImage(barChart);
+                graphics.DrawString(proj[i / columnWidth].ToString(CultureInfo.InvariantCulture), new Font("Times New Roman", 9), new SolidBrush(Color.Crimson), new PointF(i + 0.1f, (float) (bmpHeight - 20))); 
+            }
+            barChart.Save(Path.GetTempPath() + Guid.NewGuid() + ".bmp");
         }
     }
 }
