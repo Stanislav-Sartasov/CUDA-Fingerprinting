@@ -6,16 +6,17 @@
 
 int main()
 {
-	char filepath[] = "D://Education//CUDA Fingerprinting 2//CUDA-Fingerprinting//Code//1_1.bmp";
+	char filepath[] = "C:\\temp\\1.bmp";
 	int width, height;
 	int* intBmpArray = loadBmp(filepath, &width, &height);
 	float* floatBmpArray = (float*)malloc(sizeof(float) * width * height);
 	for (int i = 0; i < width * height; i++){
 		floatBmpArray[i] = (float)intBmpArray[i];
 	}
-	// OrientationFieldInBlocks(floatBmpArray, width, height);
+	float* orientation;
+	//orientation = OrientationFieldInBlocks(floatBmpArray, width, height);
 
-	OrientatiobFieldInPixels(floatBmpArray, width, height);
+	orientation = OrientatiobFieldInPixels(floatBmpArray, width, height);
 
     return 0;
 }

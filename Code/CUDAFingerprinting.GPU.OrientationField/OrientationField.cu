@@ -141,11 +141,10 @@ void SetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> sourc
 	cudaSetOrientationInPixels << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
 	cudaError_t error = cudaDeviceSynchronize();
 	float* o = orientation.GetData();
-	
 }
 
 
-void OrientationFieldInBlocks(float* floatArray, int width, int height){
+float* OrientationFieldInBlocks(float* floatArray, int width, int height){
 	CUDAArray<float> source(floatArray, width, height);
 	const int defaultBlockSize = 16;
 	CUDAArray<float> Orientation(source.Width, source.Height);
@@ -165,9 +164,11 @@ void OrientationFieldInBlocks(float* floatArray, int width, int height){
 
 	// вычисляем направления
 	SetOrientationInBlocks(Orientation, source, defaultBlockSize, Gx, Gy);
+	
+	return Orientation.GetData();
 }
 
-void OrientatiobFieldInPixels(float* floatArray, int width, int height){
+float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
 
 	CUDAArray<float> source(floatArray, width, height);
 	CUDAArray<float> Orientation(source.Width, source.Height);
@@ -186,6 +187,8 @@ void OrientatiobFieldInPixels(float* floatArray, int width, int height){
 	Convolve(Gy, source, filterY);
 
 	SetOrientationInPixels(Orientation, source, Gx, Gy);
+	
+	return Orientation.GetData();
 }
 
 
