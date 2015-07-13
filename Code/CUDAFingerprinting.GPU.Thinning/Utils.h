@@ -1,8 +1,11 @@
 #ifndef CUDAFINGEROPRINTING_UTILS
 #define CUDAFINGEROPRINTING_UTILS
 
+/*Test helpers*/
+
 #include <stdio.h>
 #include <stdlib.h>
+
 double** intToDoubleArray(int* input, int width, int height)
 {
 	double** output = (double**)malloc(sizeof(double*) * height);

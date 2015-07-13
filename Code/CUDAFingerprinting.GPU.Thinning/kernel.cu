@@ -5,25 +5,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 //
+
 #include "Thinning.cuh"
+
 #include "ImageLoading.cuh"
 #include "Utils.h"
 //
 
 int main()
 {
+	cudaSetDevice(0);
 	int width = 0;
 	int height = 0;
-	int* img = loadBmp(".\\f.bmp", &width, &height);//test file from folder with executable file
+	int* img = loadBmp("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\f.bmp", &width, &height);//test file from folder with executable file
+
 	double** skeleton = Thin(intToDoubleArray(img, width, height), width, height);
 	double** res = OverlapArrays(skeleton, intToDoubleArray(img, width, height), width, height);
-	saveBmp(".\\result.bmp", doubleToIntArray(res, width, height), width, height);
+	saveBmp("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\resultCUDA.bmp", doubleToIntArray(res, width, height), width, height);
 	
-	free(img);
 	free(skeleton);
 	free(res);
+	system("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\resultCUDA.bmp");
 
-	system(".\\result.bmp");
-
+	free(img);
 	return 0;
 }
