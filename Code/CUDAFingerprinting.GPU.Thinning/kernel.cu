@@ -17,7 +17,7 @@ int main()
 	cudaSetDevice(0);
 	int width = 0;
 	int height = 0;
-	int* img = loadBmp("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\f.bmp", &width, &height);//test file from folder with executable file
+	int* img = loadBmp("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\idealH.bmp", &width, &height);//test file from folder with executable file
 
 	double** skeleton = Thin(intToDoubleArray(img, width, height), width, height);
 	double** res = OverlapArrays(skeleton, intToDoubleArray(img, width, height), width, height);
