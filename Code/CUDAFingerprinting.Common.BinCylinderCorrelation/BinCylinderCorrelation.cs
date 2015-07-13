@@ -29,6 +29,18 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         }
     }
 
+    public class CylinderDatabase
+    {
+        public Cylinder[] Cylinders { get; private set; }
+        public uint[] TemplateIndices { get; private set; }
+
+        public CylinderDatabase(Cylinder[] givenCylinders, uint[] givenTemplateIndices)
+        {
+            Cylinders = givenCylinders;
+            TemplateIndices = givenTemplateIndices;
+        }
+    }
+
     public static class BinCylinderCorrelation
     {
         public static double npParamMu = 20;
@@ -38,6 +50,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         public static uint bucketsCount = 64;
         public static uint[] buckets = new uint[bucketsCount];
         public static double angleThreshold = Math.PI / 6;
+
+        public static uint[,] bucketMatrix;
 
         public static int ComputeNumPairs(int template1Count, int template2Count)
         {
@@ -89,7 +103,6 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         {
             double[] similarityRates = new double[db.Length];
 
-
             for (int k = 0; k < db.Length; k++) 
             {
                 Template templateDb = db[k];
@@ -129,6 +142,51 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                 {
                     sum += (int)Math.Min(buckets[i], t) * i;
                     t -= (int)Math.Min(buckets[i], t);
+                    i++;
+                }
+                sum += t * (int)bucketsCount;
+
+                similarityRates[k] = 1 - (float)sum / (numPairs * bucketsCount);
+            }
+
+            return similarityRates;
+        }
+
+        public static double[] GetTemplateCorrelationOptimized(Template query, CylinderDatabase db, int[] dbTemplateLengths)
+        {
+            double[] similarityRates = new double[dbTemplateLengths.Length];
+            bucketMatrix = new uint[dbTemplateLengths.Length, bucketsCount];
+
+            for (int k = 0; k < db.Cylinders.Length; k++)
+            {
+                Cylinder cylinderDb = db.Cylinders[k];
+
+                foreach (Cylinder queryCylinder in query.Cylinders)
+                {
+                    uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
+                    double givenXORNorm = Math.Sqrt(GetOneBitsCount(givenXOR)); // Bitwise version
+                    //double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid version
+                    
+                    uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
+                    if (bucketIndex == bucketsCount)
+                    {
+                        bucketIndex--;
+                    }
+
+                    bucketMatrix[db.TemplateIndices[k], bucketIndex]++;
+
+                }
+            }
+
+            for (int k = 0; k < dbTemplateLengths.Length; k++)
+            {
+                int numPairs = ComputeNumPairs(dbTemplateLengths[k], query.Cylinders.Length);
+
+                int sum = 0, t = numPairs, i = 0;
+                while (i < bucketsCount && t > 0)
+                {
+                    sum += (int)Math.Min(bucketMatrix[k, i], t) * i;
+                    t -= (int)Math.Min(bucketMatrix[k, i], t);
                     i++;
                 }
                 sum += t * (int)bucketsCount;

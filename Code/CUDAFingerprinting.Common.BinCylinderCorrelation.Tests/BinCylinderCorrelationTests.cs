@@ -209,7 +209,17 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
                 })
             };
 
-            double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelation(query, db);
+            Cylinder[] contiguousArr = new Cylinder[]
+            {
+                cylinderOnes, cylinderOnes, cylinderMixed, cylinderMixed, cylinderMixed, cylinderMixed, cylinderMixed
+            };
+            uint[] templateIndices = new uint[] { 0, 1, 1, 2, 2, 2, 2 };
+            CylinderDatabase cylinderDb = new CylinderDatabase(contiguousArr, templateIndices);
+            int[] dbTemplatesLengths = new int[] { 1, 2, 4 };
+
+
+            double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelation(query, db); // templateDb version
+            //double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelationOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
             for (int i = 0; i < similarityRates.Length; i++)
             {
                 Console.Write(similarityRates[i] + " ");
