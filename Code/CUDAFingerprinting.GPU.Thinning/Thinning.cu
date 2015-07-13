@@ -6,7 +6,11 @@
 #include "ThinnerUtils.h"
 #include "constsmacros.h"
 
+#define DEBUG
+
 #ifdef DEBUG
+#include "ImageLoading.cuh"
+#include "Utils.h"
 #define DBGM(msg) printf("%s\n", msg)
 #define cudaCheckError() {                                          \
  cudaError_t e=cudaGetLastError();                                 \
@@ -30,7 +34,7 @@ __device__ PixelType PATTERN(int i, int x, int y)
 	return constP[i * 9 + y * 3 + x];
 }
 
-__host__ void InitPatterns(double* arr, int width, int height)
+__host__ void InitPatterns()
 {
 	int patternsArraySize = sizeof(PixelType) * 14 * 3 * 3;
 
@@ -195,7 +199,7 @@ __device__ int MatchPattern(double* array, int x, int y, int width, int height)
 	return -1;
 }
 
-#define BLOCK_DIM 16
+#define BLOCK_DIM 8
 
 __global__ void onePass(double* array, double* buffer, int width, int height, bool* wereNotChangesInBlock)
 {
@@ -235,11 +239,14 @@ __global__ void onePass(double* array, double* buffer, int width, int height, bo
 
 __host__ double** Thin(double** arr, int width, int height)
 {
-	cudaCheckError();
+#ifdef DEBUG
+	int stepC = 0;
+#endif
 	double* arr1D = copy2DArrayTo1D(arr, width, height);	
-	InitPatterns(arr1D, width, height);
+	InitPatterns();
 	bool isSkeleton;
 	double* buffer = copy1DArray(arr1D, width * height);
+	free(arr1D);
 	do
 	{
 		int blocksRowSize = ceilMod(width, BLOCK_DIM);
@@ -303,6 +310,28 @@ __host__ double** Thin(double** arr, int width, int height)
 		}
 
 		free(wereNotChangesInBlock);
+#ifdef DEBUG
+		if (!isSkeleton)
+		{
+			//thinning image trace
+			int widthDBG = width;
+			int heightDBG = height;
+			int* img = doubleToIntArray(arr, width, height);
+			//'trace' folder must exist
+			char path[] = "D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\trace\\step00.bmp\0";
+			path[57] = '0' + stepC % 10;
+			path[56] = '0' + stepC / 10;
+			stepC++;
+			int* res = OverlapArrays(
+				doubleToIntArray(buffer, width, height),
+				img, 
+				widthDBG, heightDBG
+			);
+			saveBmp(path, res, widthDBG, heightDBG);
+			free(img);
+			free(res);
+		}
+#endif
 	} while (!isSkeleton);
 
 	return copy1DArrayTo2D(buffer, width, height);
