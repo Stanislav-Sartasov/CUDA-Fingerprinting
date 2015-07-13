@@ -15,10 +15,10 @@ extern "C"
 	__declspec(dllexport) void MakeGaborFilters(float* filter, int size, int angleNum, float frequency);
 }
 
-__global__ void cudaCreateGaborFilter(CUDAArray<float>* filters, int size, float frequency, float bAngle)
+__global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float frequency, float bAngle)
 {
-	float aCos = cos(M_PI / 2 + bAngle * (blockIdx.x * blockDim.x + threadIdx.x));
-	float aSin = sin(M_PI / 2 + bAngle * (blockIdx.x * blockDim.x + threadIdx.x));
+	float aCos = cos(M_PI / 2 + bAngle * (blockIdx.x));
+	float aSin = sin(M_PI / 2 + bAngle * (blockIdx.x));
 
 	int center = size / 2;
 	int upperCenter = (size & 1) == 1 ? center - 1 : center;
@@ -27,20 +27,15 @@ __global__ void cudaCreateGaborFilter(CUDAArray<float>* filters, int size, float
 	{
 		for (int j = -upperCenter; j < center; j++)
 		{
-			filters[blockIdx.x * blockDim.x + threadIdx.x].SetAt(i, j, exp(-0.5 * ((i * aSin + j * aCos) * (i * aSin + j * aCos) / 16 + (-i *aCos + j * aSin) * (-i *aCos + j * aSin) / 16)) * cos(2 * M_PI * (i * aSin + j * aCos) * frequency));
+			filters.SetAt(blockIdx.x * blockDim.x + center - i , center - j, exp(-0.5 * ((i * aSin + j * aCos) * (i * aSin + j * aCos) / 16 + (-i *aCos + j * aSin) * (-i *aCos + j * aSin) / 16)) * cos(2 * M_PI * (i * aSin + j * aCos) * frequency));
 		}
 	}
 }
 
 void MakeGaborFilters(float* filter, int size, int angleNum, float frequency)
 {
-	CUDAArray<float>* filters = (CUDAArray<float>*)malloc(angleNum * sizeof(CUDAArray<float>));
-
-	for (int i = 0; i < angleNum; i++)
-	{
-		filters[i] = CUDAArray<float>(size, size);
-	}
-
+	CUDAArray<float> filters = CUDAArray<float>(size, size * angleNum);
+	
 	float bAngle = (float) M_PI / angleNum;
 
 	dim3 blockSize = dim3(defaultThreadCount);
@@ -48,5 +43,5 @@ void MakeGaborFilters(float* filter, int size, int angleNum, float frequency)
 
 	cudaCreateGaborFilter << <gridSize, blockSize >> > (filters, size, frequency, bAngle);
 
-	filters[1].GetData(filter);
+	filters.GetData(filter);
 }

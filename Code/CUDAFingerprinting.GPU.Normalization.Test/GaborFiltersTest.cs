@@ -14,10 +14,11 @@ namespace CUDAFingerprinting.GPU.Tests
         [TestMethod]
         public void CreateGaborFilter0Test()
         {
-            var filter0 = new float[16 * 16];
-            MakeGaborFilters(filter0, 16, 8, (float) 1 / 9);
+            var filters = new float[16 * 16 * 8];
 
-            ImageHelper.SaveArray(filter0.Make2D(16, 16), "F0.bmp", true);
+            MakeGaborFilters(filters, 16, 8, (float) 1 / 9);
+
+            ImageHelper.SaveArray(filters.Make2D(16 * 8, 16), "test.bmp", true);
         }
     }
 }

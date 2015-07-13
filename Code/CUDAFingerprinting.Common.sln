@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.GaborFilter", "CUDAFingerprinting.Common.GaborFilter\CUDAFingerprinting.Common.GaborFilter.csproj", "{A99E6530-46CC-42A8-B53D-898B8275F77D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.ImageEnhancmentTest", "ImageEnhancmentTest\CUDAFingerprinting.Common.ImageEnhancmentTest.csproj", "{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.ImageEnhancmentTest", "CUDAFingerprinting.Common.ImageEnhancmentTest\CUDAFingerprinting.Common.ImageEnhancmentTest.csproj", "{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
