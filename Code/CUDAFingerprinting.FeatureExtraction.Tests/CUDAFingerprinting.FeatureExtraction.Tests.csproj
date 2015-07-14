@@ -37,10 +37,10 @@
   <ItemGroup>
     <Reference Include="CUDAFingerprinting.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Debug\CUDAFingerprinting.Common.dll</HintPath>
+      <HintPath>..\obj\Debug\CUDAFingerprinting.Common.dll</HintPath>
     </Reference>
     <Reference Include="CUDAFingerprinting.FeatureExtraction">
-      <HintPath>..\bin\Debug\CUDAFingerprinting.FeatureExtraction.dll</HintPath>
+      <HintPath>..\CUDAFingerprinting.FeatureExtraction\obj\Debug\CUDAFingerprinting.FeatureExtraction.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -66,9 +66,27 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ThinnerTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\yoba.bmp" />
+    <None Include="Resources\X.bmp" />
+    <None Include="Resources\verySmall2.bmp" />
+    <None Include="Resources\verySmall.bmp" />
+    <None Include="Resources\1_1.bmp" />
+    <None Include="Resources\101_8.bmp" />
+    <None Include="Resources\19_4.bmp" />
+    <None Include="Resources\29_4.bmp" />
     <Content Include="Resources\2_6.bmp" />
+    <None Include="Resources\connectedness.bmp" />
+    <None Include="Resources\connectedness2.bmp" />
+    <None Include="Resources\egor.bmp" />
+    <None Include="Resources\H.bmp" />
+    <None Include="Resources\idealH.bmp" />
+    <None Include="Resources\line.bmp" />
+    <None Include="Resources\man.bmp" />
+    <None Include="Resources\patt.bmp" />
+    <None Include="Resources\small.bmp" />
     <Content Include="Resources\test.bmp" />
   </ItemGroup>
   <ItemGroup>
