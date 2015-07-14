@@ -9,12 +9,13 @@
 #include "math_constants.h"
 #include "math_functions.h"
 #include "CUDAArray.cuh"
-
-extern "C"
-{
-	__declspec(dllexport) void MakeGabor16Filters(float* filter, int angleNum, float frequency);
-	__declspec(dllexport) void MakeGabor32Filters(float* filter, int angleNum, float frequency);
-}
+#include <math.h>
+#include "Filter.cuh"
+//extern "C"
+//{
+//	__declspec(dllexport) void MakeGabor16Filters(float* filter, int angleNum, float frequency);
+//	__declspec(dllexport) void MakeGabor32Filters(float* filter, int angleNum, float frequency);
+//}
 
 __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float frequency, float bAngle)
 {
