@@ -20,7 +20,7 @@ namespace CUDAFingerprinting.GPU.Tests
 
             MakeGabor16Filters(filters, 8, (float) 1 / 9);
 
-            ImageHelper.SaveArray(filters.Make2D(16 * 8, 16), "test.bmp", true);
+            ImageHelper.SaveArray(filters.Make2D(16, 16 * 8), "test.bmp", true);
         }
     }
 }

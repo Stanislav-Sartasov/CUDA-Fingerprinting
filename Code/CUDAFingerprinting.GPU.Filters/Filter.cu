@@ -18,64 +18,50 @@ extern "C"
 
 __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float frequency, float bAngle)
 {
-	int column = defaultColumn();
-
 	float aCos = cos(CUDART_PI_F / 2 + bAngle * (blockIdx.x));
 	float aSin = sin(CUDART_PI_F / 2 + bAngle * (blockIdx.x));
 
 	int center = size / 2;
 	int upperCenter = (size & 1) == 0 ? center - 1 : center;
 
-	if (16 > column)
-	{
-		for (int j = -upperCenter; j < center; j++)
-		{
-			int i = column - center;
-			int row = blockDim.x * blockIdx.x + center + j - 1;
+	int dX = threadIdx.x - center;
+	int dY = threadIdx.y - center;
 
-			float xDash = i * aSin + j * aCos;
-			float yDash = -i *aCos + j * aSin;
-			float cellExp = exp(-0.5 * (xDash * xDash / 16 + yDash * yDash / 16));
-			float cellCos = cos(2 * CUDART_PI_F * xDash * frequency);
+	float xDash = dX * aSin + dY * aCos;
+	float yDash = -dX *aCos + dY * aSin;
+	float cellExp = exp(-0.5 * (xDash * xDash / 16 + yDash * yDash / 16));
+	float cellCos = cos(2 * CUDART_PI_F * xDash * frequency);
 
-			filters.SetAt(row, column, cellExp * cellCos);
-		}
-	}
+	filters.SetAt(threadIdx.x, blockDim.x * blockIdx.x + threadIdx.y, cellExp * cellCos);
 }
 
 void MakeGabor16Filters(float* filter, int angleNum, float frequency)
 {
-	CUDAArray<float> filters = CUDAArray<float>(16, 16 * angleNum);
+	CUDAArray<float> filters = CUDAArray<float>(16 * angleNum, 16);
 	
 	float bAngle = (float) CUDART_PI_F / angleNum;
 
-	dim3 blockSize = dim3(16 * 16);
-	dim3 gridSize = dim3(angleNum);
-
-	cudaCreateGaborFilter << < gridSize, blockSize >> > (filters, 16, frequency, bAngle);
+	cudaCreateGaborFilter << < dim3(angleNum), dim3(16, 16) >> > (filters, 16, frequency, bAngle);
 
 	filters.GetData(filter);
 }
 
 void MakeGabor32Filters(float* filter, int angleNum, float frequency)
 {
-	CUDAArray<float> filters = CUDAArray<float>(32, 32 * angleNum);
+	CUDAArray<float> filters = CUDAArray<float>(32 * angleNum, 32);
 
 	float bAngle = (float)CUDART_PI_F / angleNum;
 
-	dim3 blockSize = dim3(defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(angleNum, defaultThreadCount));
-
-	cudaCreateGaborFilter << <gridSize, blockSize >> > (filters, 32, frequency, bAngle);
+	cudaCreateGaborFilter << < dim3(angleNum), dim3(32, 32) >> > (filters, 32, frequency, bAngle);
 
 	filters.GetData(filter);
 }
 
-int main()
-{
-	float* b = (float*)malloc(16*16*8*sizeof(float));
-
-	MakeGabor16Filters(b, 8, (float) 1 / 9);
-
-	return 0;
-}
+//int main()
+//{
+//	float* b = (float*)malloc(16*16*8*sizeof(float));
+//
+//	MakeGabor16Filters(b, 8, (float) 1 / 9);
+//
+//	return 0;
+//}
