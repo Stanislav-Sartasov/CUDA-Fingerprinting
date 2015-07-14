@@ -10,7 +10,7 @@ namespace CUDAFingerprinting.Common
         public static int GetKernelSizeForGaussianSigma(double sigma)
         {
             return 2 * (int)Math.Ceiling(sigma * 3.0f) + 1;
-        }
+        }   
 
         public static Complex[,] MakeComplexKernel(Func<int, int, double> realFunction,
                                                    Func<int, int, double> imaginaryFunction, int size)
@@ -77,7 +77,7 @@ namespace CUDAFingerprinting.Common
             double max = double.NegativeInfinity;
             int x = 0;
             int y = 0;
-
+            
             for (int i = 0; i < arr.GetLength(0); i++)
             {
                 for (int j = 0; j < arr.GetLength(1); j++)
@@ -96,8 +96,8 @@ namespace CUDAFingerprinting.Common
 
         public static double[,] MakeKernel(Func<int, int, double> function, int size)
         {
-            double[,] kernel = new double[size, size];
-            int center = size / 2;
+            double[,] kernel = new double[size,size];
+            int center = size/2;
             int upperLimit = (size & 1) == 0 ? center - 1 : center;
             double sum = 0;
             for (int x = -center; x <= upperLimit; x++)
@@ -108,7 +108,7 @@ namespace CUDAFingerprinting.Common
                 }
             }
             // normalization
-            if (Math.Abs(sum) > 0.0000001)
+            if (Math.Abs(sum) >0.0000001)
                 for (int x = -center; x <= upperLimit; x++)
                 {
                     for (int y = -center; y <= upperLimit; y++)
@@ -144,7 +144,7 @@ namespace CUDAFingerprinting.Common
                 for (int y = 0; y < maxY; y++)
                 {
                     result[x, y] = source[x, y] - value[x, y];
-                }
+                 }
             }
             return result;
         }

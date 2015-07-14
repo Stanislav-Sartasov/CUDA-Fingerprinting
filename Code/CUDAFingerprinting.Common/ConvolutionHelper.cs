@@ -14,8 +14,8 @@ namespace CUDAFingerprinting.Common
 
             var result = new double[X, Y];
 
-            var centerI = I / 2;
-            var centerJ = J / 2;
+            var centerI = I/2;
+            var centerJ = J/2;
             int upperLimitI = (I & 1) == 0 ? centerI - 1 : centerI;
             int upperLimitJ = (J & 1) == 0 ? centerJ - 1 : centerJ;
 
@@ -51,7 +51,7 @@ namespace CUDAFingerprinting.Common
 
             var resultRealPart1 = Convolve(dataReal, kernelReal);
             var resultRealPart2 = Convolve(dataImaginary, kernelImaginary);
-
+            
             var resultImaginaryPart1 = Convolve(dataReal, kernelImaginary);
             var resultImaginaryPart2 = Convolve(dataImaginary, kernelReal);
 

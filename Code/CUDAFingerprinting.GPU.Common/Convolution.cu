@@ -18,23 +18,13 @@ __global__ void cudaArrayAdd(CUDAArray<float> source, CUDAArray<float> addition)
 	}
 }
 
-__global__ void cudaArraySubtract(CUDAArray<float> source, CUDAArray<float> subtract)
-{
-	int row = defaultRow();
-	int column = defaultColumn();
-	if (source.Width>column&&source.Height>row)
-	{
-		float newValue = source.At(row, column) - subtract.At(row, column);
-		source.SetAt(row, column, newValue);
-	}
-}
-
 __global__ void cudaConvolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter)
 {
-	int row = defaultRow();
-	int column = defaultColumn();
+	int row = blockIdx.y*blockDim.y + threadIdx.y;
+	int column = blockIdx.x*blockDim.x + threadIdx.x;
 	if (source.Width>column&&source.Height>row)
 	{
+
 		int tX = threadIdx.x;
 		int tY = threadIdx.y;
 		__shared__ float filterCache[32 * 32];
@@ -48,26 +38,41 @@ __global__ void cudaConvolve(CUDAArray<float> target, CUDAArray<float> source, C
 
 		int center = filter.Width / 2;
 
+		int upperLimit = center;
+
+		if ((filter.Width & 1) == 0)
+		upperLimit = center - 1;
+
 		float sum = 0.0f;
 
-		for (int drow = -center; drow <= center; drow++)
+		for (int drow = -center; drow <= upperLimit; drow++)
 		{
-			for (int dcolumn = -center; dcolumn <= center; dcolumn++)
+			for (int dcolumn = -center; dcolumn <= upperLimit; dcolumn++)
 			{
 				float filterValue1 = filterCache[filter.Width*(drow + center) + dcolumn + center];
-
 				int valueRow = row + drow;
 				int valueColumn = column + dcolumn;
-
+				
 				if (valueRow<0 || valueRow >= source.Height || valueColumn<0 || valueColumn >= source.Width)
 					continue;
-
+				
 				float value = source.At(valueRow, valueColumn);
 				sum += filterValue1*value;
 			}
 		}
 
 		target.SetAt(row, column, sum);
+	}
+}
+
+__global__ void cudaArraySubtract(CUDAArray<float> source, CUDAArray<float> subtract)
+{
+	int row = blockIdx.y*blockDim.y + threadIdx.y;
+	int column = blockIdx.x*blockDim.x + threadIdx.x;
+	if (source.Width>column&&source.Height>row)
+	{
+		float newValue = source.At(row, column) - subtract.At(row, column);
+		source.SetAt(row, column, newValue);
 	}
 }
 
@@ -101,6 +106,7 @@ void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float>
 		ceilMod(source.Height, defaultThreadCount));
 
 	cudaConvolve<<<gridSize, blockSize>>>(target, source, filter);
+
 	cudaError_t error = cudaDeviceSynchronize();
 }
 
