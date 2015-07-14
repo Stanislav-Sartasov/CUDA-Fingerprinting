@@ -51,6 +51,7 @@
     <Compile Include="OrientationField.cs" />
     <Compile Include="OrientationFieldExtensions.cs" />
     <Compile Include="OrientationFieldGenerator.cs" />
+    <Compile Include="PixelwiseOrientationField.cs" />
     <Compile Include="PixelwiseOrientationFieldGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

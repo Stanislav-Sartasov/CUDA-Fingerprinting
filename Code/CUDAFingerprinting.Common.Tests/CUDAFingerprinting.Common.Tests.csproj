@@ -54,12 +54,14 @@
     <Compile Include="ConvolutionTests.cs" />
     <Compile Include="ImageHelperTests.cs" />
     <Compile Include="NormalizeTests.cs" />
+    <Compile Include="PixelwiseOrientationFieldTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="VisualizationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

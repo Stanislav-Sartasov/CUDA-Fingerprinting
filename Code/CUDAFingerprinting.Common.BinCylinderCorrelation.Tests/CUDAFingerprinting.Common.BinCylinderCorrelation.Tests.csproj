@@ -51,6 +51,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BinCylinderCorrelationTests.cs" />
+    <Compile Include="BinTemplateCorrelationTests.cs" />
+    <Compile Include="CylinderTestsHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

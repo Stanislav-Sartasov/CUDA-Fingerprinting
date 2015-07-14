@@ -54,6 +54,9 @@
     <Compile Include="KernelHelper.cs" />
     <Compile Include="Minutia.cs" />
     <Compile Include="Normalization.cs" />
+    <Compile Include="OrientationField\OrientationField.cs" />
+    <Compile Include="OrientationField\OrientationFieldExtensions.cs" />
+    <Compile Include="OrientationField\PixelwiseOrientationField.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
