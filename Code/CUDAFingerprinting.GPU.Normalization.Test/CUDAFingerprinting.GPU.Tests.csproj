@@ -6,8 +6,8 @@
     <ProjectGuid>{6C9696EF-E1A8-4661-94F3-5A2E3E5FC9F3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.GPU.Normalization.Test</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.GPU.Normalization.Test</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.GPU.Tests</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.GPU.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -35,9 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUDAFingerprinting.Common">
-      <HintPath>..\bin\Debug\CUDAFingerprinting.Common.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
@@ -54,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="GaborFiltersTest.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -76,10 +74,20 @@
     <None Include="Resources\4_8.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.Filters.dll">
+      <Link>CUDAFingerprinting.GPU.Filters.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.Normalization.dll">
       <Link>CUDAFingerprinting.GPU.Normalization.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
+      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
+      <Name>CUDAFingerprinting.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
