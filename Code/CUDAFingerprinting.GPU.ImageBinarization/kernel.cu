@@ -1,30 +1,29 @@
-
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "Convolution.cuh"
 #include "constsmacros.h"
 #include "CUDAArray.cuh"
-#include "ImageBinarization.cuh"
-#include "ImageLoading.cuh"
 
-int main()
+extern "C"
 {
-	int width = 256;
-	int height = 364;
-	int *image = loadBmp("2_6.bmp", &width, &height);
-	// how to test?
-	cudaSetDevice(0);
-	CUDAArray<int> cudaImg = CUDAArray<int>(image, width, height);
-	cudaImg.cudaPtr = image;
-
-	BinarizateImage(cudaImg, 128, image);
-
-	saveBmp("1.bmp", image, width, height);
-
-	cudaFree(cudaImg.cudaPtr); // ?
-
-    return 0;
+	__declspec(dllexport)  void BinarizateImage(int line, int* src, int* dist, int width, int height);
+}
+__global__ void ImageBinarization(CUDAArray<int> src, int line, CUDAArray<int> dev_img)
+{
+	int row = defaultRow();
+	int column = defaultColumn();
+	dev_img.SetAt(row, column, src.At(row, column) < line ? 0 : 255);
 }
 
+void BinarizateImage(int line, int* src, int* dist, int width, int height)
+{
+	cudaSetDevice(0);
+	CUDAArray<int> img = CUDAArray<int>(src, width, height);
+	CUDAArray<int> dev_img = CUDAArray<int>(width, height);
+
+	ImageBinarization <<<dim3(ceilMod(img.Width, defaultThreadCount), ceilMod(img.Height, defaultThreadCount)), dim3(defaultThreadCount, defaultThreadCount) >>>(img, line, dev_img);
+
+	dev_img.GetData(dist);
+
+	img.Dispose();
+	dev_img.Dispose();
+}
