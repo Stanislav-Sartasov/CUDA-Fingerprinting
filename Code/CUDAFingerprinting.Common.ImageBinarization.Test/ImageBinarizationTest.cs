@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Drawing;
-using System.Drawing.Imaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common.ImageBinarization;
 using System.IO;
@@ -34,24 +31,24 @@ namespace CUDAFingerprinting.Common.ImageBinarization.Test
                 }
             }
             ImageHelper.SaveArrayToBitmap(binarizatedImageDouble).Save(Path.GetTempPath()+ Guid.NewGuid() + ".bmp");
- 
+            
             int[,] arrayI = ImageHelper.LoadImageAsInt(Resources._2_6);
             var binarizatedImageInt = ImageBinarization.Binarizator2D(arrayI, 128);
             for (int i = 0; i < arrayI.GetLength(0); i++)
             {
                 for (int j = 0; j < arrayI.GetLength(1); j++)
                 {
-                    if (arrayD[i, j] < 128)
+                    if (arrayI[i, j] < 128)
                     {
-                        arrayD[i, j] = 0;
+                        arrayI[i, j] = 0;
                     }
                     else
                     {
-                        arrayD[i, j] = 255;
+                        arrayI[i, j] = 255;
                     }
 
-                    // Check binarizatedImageDouble
-                    Assert.AreEqual(arrayD[i, j], binarizatedImageDouble[i, j]);
+                    // Check binarizatedImageInt
+                    Assert.AreEqual(arrayI[i, j], binarizatedImageInt[i, j]);
                 }
             }
             ImageHelper.SaveArrayToBitmap(binarizatedImageInt).Save(Path.GetTempPath() + Guid.NewGuid() + ".bmp");
