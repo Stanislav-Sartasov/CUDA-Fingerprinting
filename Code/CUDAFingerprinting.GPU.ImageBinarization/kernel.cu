@@ -5,7 +5,7 @@
 
 extern "C"
 {
-	__declspec(dllexport)  void BinarizateImage(int line, int* src, int* dist, int width, int height);
+	__declspec(dllexport)  void BinarizeImage(int line, int* src, int* dist, int width, int height);
 }
 __global__ void ImageBinarization(CUDAArray<int> src, int line, CUDAArray<int> dev_img)
 {
@@ -14,7 +14,7 @@ __global__ void ImageBinarization(CUDAArray<int> src, int line, CUDAArray<int> d
 	dev_img.SetAt(row, column, src.At(row, column) < line ? 0 : 255);
 }
 
-void BinarizateImage(int line, int* src, int* dist, int width, int height)
+void BinarizeImage(int line, int* src, int* dist, int width, int height)
 {
 	cudaSetDevice(0);
 	CUDAArray<int> img = CUDAArray<int>(src, width, height);
