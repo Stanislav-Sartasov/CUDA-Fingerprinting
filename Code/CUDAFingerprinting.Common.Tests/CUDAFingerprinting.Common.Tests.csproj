@@ -79,9 +79,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SampleFinger2.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\001.png" />
   </ItemGroup>
   <ItemGroup>
