@@ -1,46 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6FD094CC-0F63-47BD-A377-F054AE615517}</ProjectGuid>
+    <ProjectGuid>{B5572B82-1C20-4D6A-A752-123CD7657007}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.Common</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.Common</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <RootNamespace>CUDAFingerprinting.Common.AdaptiveBinarization</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.Common.AdaptiveBinarization</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <BaseIntermediateOutputPath>..\obj\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <BaseIntermediateOutputPath>..\obj\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <BaseIntermediateOutputPath>..\obj\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,16 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConvolutionHelper.cs" />
-    <Compile Include="Gaussian.cs" />
-    <Compile Include="ImageHelper.cs" />
-    <Compile Include="KernelHelper.cs" />
-    <Compile Include="Minutia.cs" />
-    <Compile Include="Normalization.cs" />
-    <Compile Include="OrientationField\OrientationField.cs" />
-    <Compile Include="OrientationField\OrientationFieldExtensions.cs" />
-    <Compile Include="OrientationField\PixelwiseOrientationField.cs" />
+    <Compile Include="AdaptiveBinarization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj">
+      <Project>{5eec4bd2-e1b0-4794-948a-45732cd41f99}</Project>
+      <Name>CUDAFingerprinting.Common.OrientationField</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
+      <Project>{6FD094CC-0F63-47BD-A377-F054AE615517}</Project>
+      <Name>CUDAFingerprinting.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

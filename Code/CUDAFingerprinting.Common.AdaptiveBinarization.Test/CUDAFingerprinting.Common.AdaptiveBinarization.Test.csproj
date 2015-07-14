@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}</ProjectGuid>
+    <ProjectGuid>{FBDDA77E-B4A3-492F-90C6-0E3458A6E1FD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.Common.Tests</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.Common.Tests</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.Common.AdaptiveBinarization.Test</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.Common.AdaptiveBinarization.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -51,17 +54,19 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ConvolutionTests.cs" />
-    <Compile Include="ImageHelperTests.cs" />
-    <Compile Include="NormalizeTests.cs" />
-    <Compile Include="PixelwiseOrientationFieldTest.cs" />
+    <Compile Include="AdaptiveBinarizationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="VisualizationTest.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\2_6.bmp" />
+    <Content Include="Resources\3_6.bmp" />
+    <Content Include="Resources\test.bmp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -70,19 +75,18 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\1_1.png" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.AdaptiveBinarization\CUDAFingerprinting.Common.AdaptiveBinarization.csproj">
+      <Project>{b5572b82-1c20-4d6a-a752-123cd7657007}</Project>
+      <Name>CUDAFingerprinting.Common.AdaptiveBinarization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj">
+      <Project>{5EEC4BD2-E1B0-4794-948A-45732CD41F99}</Project>
+      <Name>CUDAFingerprinting.Common.OrientationField</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
-      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
+      <Project>{6FD094CC-0F63-47BD-A377-F054AE615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\001.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\002.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

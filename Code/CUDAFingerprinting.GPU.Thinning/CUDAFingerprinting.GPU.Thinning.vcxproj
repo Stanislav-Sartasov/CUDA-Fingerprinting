@@ -19,13 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D683F6E7-6722-4A88-BD93-518C7CE5713B}</ProjectGuid>
-    <RootNamespace>OrientationField</RootNamespace>
-    <ProjectName>CUDAFingerprinting.GPU.OrientationField</ProjectName>
+    <ProjectGuid>{8B3A73B9-6F93-445F-B4DD-FDB44E50AD50}</ProjectGuid>
+    <RootNamespace>CUDAFingerprinting_GPU_Thinning</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
@@ -37,7 +36,7 @@
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
@@ -69,16 +68,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
-    <OutDir>..\CUDAFingerprinting.GPU.OrientationField.CTest</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.Common\;C:\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.Common;$(SolutionDir)CUDAFingerprinting.GPU.Common;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
-    <OutDir>..\CUDAFingerprinting.GPU.OrientationField.CTest</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,8 +90,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\;%(Include)</Include>
-      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <GPUDebugInfo>false</GPUDebugInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -139,9 +130,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
-    <CudaCompile>
-      <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\;%(Include)</Include>
-    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -168,12 +156,21 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="OrientationField.cu" />
+    <CudaCompile Include="Thinning.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ThinnerUtils.h" />
+    <ClInclude Include="Thinning.cuh" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj">
       <Project>{ff7efcd3-be2a-43b4-af3e-91469400e6a8}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ThinnerUtils.cu" />
+    <ClCompile Include="Utils.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

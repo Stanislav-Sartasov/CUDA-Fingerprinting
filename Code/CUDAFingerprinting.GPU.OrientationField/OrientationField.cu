@@ -10,13 +10,66 @@
 #include "imageLoading.cuh"
 #include "CUDAArray.cuh"
 
+// ----------- GPU ----------- //
+
+__global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
+	int centerRow = defaultRow();
+	int centerColumn = defaultColumn();
+
+	const int size = 16;
+	const int center = size / 2;
+	const int upperLimit = center - 1;
+	
+	float product[size][size];
+	float sqrdiff[size][size];
+
+	for (int i = -center; i <= upperLimit; i++){
+		for (int j = -center; j <= upperLimit; j++){
+			if (i + centerRow < 0 || i + centerRow > gradientX.Height || j + centerColumn < 0 || j + centerColumn > gradientX.Width){		// выход за пределы картинки
+				product[i + center][j + center] = 0;
+				sqrdiff[i + center][j + center] = 0;
+			}
+			else{
+				float GxValue = gradientX.At(i + centerRow, j + centerColumn);
+				float GyValue = gradientY.At(i + centerRow, j + centerColumn);
+				product[i + center][j + center] = GxValue * GyValue;						// поэлементное произведение
+				sqrdiff[i + center][j + center] = GxValue * GxValue - GyValue * GyValue;	// разность квадратов
+			}
+		}
+	}
+	__syncthreads();  // ждем пока все нити сделают вычисления
+
+	float numerator = 0;
+	float denominator = 0;
+	// вычисление сумм
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++){
+			numerator += product[i][j];
+			denominator += sqrdiff[i][j];
+		}
+	}
+	__syncthreads();
+
+	// определяем значение угла ориентации
+	if (denominator == 0){
+		orientation.SetAt(centerRow, centerColumn, M_PI_2);
+	}
+	else{
+		orientation.SetAt(centerRow, centerColumn, M_PI_2 + atan2(2 * numerator, denominator) / 2.0f);
+		if (orientation.At(centerRow, centerColumn) > M_PI_2)
+		{
+			float index = orientation.At(centerRow, centerColumn) - M_PI;
+			orientation.SetAt(centerRow, centerColumn, index);
+		}
+	}
+}
 
 __global__ void cudaSetOrientationInBlocks(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
 	float numerator;
 	float denominator;
 
 	int column = defaultColumn();			// глобальные индексы -- индексы пикселя на целой картинке
-	int row = defaultRow();
+ 	int row = defaultRow();
 	int threadColumn = threadIdx.x;			// локальные индексы -- индексы пикселя в блоке 
 	int threadRow = threadIdx.y;
 	float GyValue = gradientY.At(row, column);
@@ -69,55 +122,7 @@ __global__ void cudaSetOrientationInBlocks(CUDAArray<float> orientation, CUDAArr
 	}
 }
 
-// вычисляет значение направления в пикселе по блоку с центром в этом пикселе
-__global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
-	int centerRow = defaultRow();
-	int centerColumn = defaultColumn();
-
-	const int size = 16;
-	const int center = size / 2;
-	const int upperLimit = center - 1;				
-	
-	float product[size][size];
-	float sqrdiff[size][size];
-
-	for (int i = -center; i <= upperLimit; i++){
-		for (int j = -center; j <= upperLimit; j++){
-			if (i + centerRow < 0 || i + centerColumn > size || j + centerRow < 0 || j + centerColumn > size){		// выход за пределы картинки
-				product[i + center][j + center] = 0;
-			}
-			else{
-				float GxValue = gradientX.At(i + centerRow, j + centerColumn);
-				float GyValue = gradientY.At(i + centerRow, j + centerColumn);
-				product[i + center][j + center] = GxValue * GyValue;						// поэлементное произведение
-				sqrdiff[i + center][j + center] = GxValue * GxValue - GyValue * GyValue;	// разность квадратов
-			}
-		}
-	}
-	__syncthreads();  // ждем пока все нити сделают вычисления
-
-	float numerator = 0;
-	float denominator = 0;
-	// вычисление сумм
-	for (int i = 0; i < size; i++) {	
-		for (int j = 0; j < size; j++){
-			numerator += product[i][j];
-			denominator += sqrdiff[i][j];
-		}
-	}
-	__syncthreads();
-
-	// определяем значение угла ориентации
-	if (denominator == 0){
-		orientation.SetAt(centerRow, centerColumn, M_PI_2);
-	}
-	else{
-		orientation.SetAt(centerRow, centerColumn, M_PI_2 + atan2(2 * numerator, denominator) / 2.0f);
-		if (orientation.At(centerRow, centerColumn) > M_PI_2){
-			orientation.SetAt(centerRow, centerColumn, orientation.At(centerRow, centerColumn) - M_PI);
-		}
-	}
-}
+// ----------- CPU ----------- //
 
 void SetOrientationInBlocks(CUDAArray<float> orientation, CUDAArray<float> source, const int defaultBlockSize, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
 	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
@@ -133,12 +138,13 @@ void SetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> sourc
 	dim3 gridSize =
 		dim3(ceilMod(source.Width, defaultThreadCount),
 		ceilMod(source.Height, defaultThreadCount));
-	cudaSetOrientationInBlocks << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
+	cudaSetOrientationInPixels << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
 	cudaError_t error = cudaDeviceSynchronize();
+	float* o = orientation.GetData();
 }
 
 
-void OrientationFieldInBlocks(float* floatArray, int width, int height){
+float* OrientationFieldInBlocks(float* floatArray, int width, int height){
 	CUDAArray<float> source(floatArray, width, height);
 	const int defaultBlockSize = 16;
 	CUDAArray<float> Orientation(source.Width, source.Height);
@@ -156,19 +162,15 @@ void OrientationFieldInBlocks(float* floatArray, int width, int height){
 	Convolve(Gx, source, filterX);
 	Convolve(Gy, source, filterY);
 
-	/*float* gx = Gx.GetData();
-	float* gy = Gy.GetData();
-	saveBmp("D://Education//CUDA Fingerprinting 2//CUDA-Fingerprinting//Code//gx.bmp", Gx.GetData(), width, height);
-	saveBmp("D://Education//CUDA Fingerprinting 2//CUDA-Fingerprinting//Code//gy.bmp", Gy.GetData(), width, height);*/
-
-
 	// вычисляем направления
 	SetOrientationInBlocks(Orientation, source, defaultBlockSize, Gx, Gy);
+	
+	return Orientation.GetData();
 }
 
-void OrientatiobFieldInPixels(float* floatArray, int width, int height){
+float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
+
 	CUDAArray<float> source(floatArray, width, height);
-	const int defaultBlockSize = 16;
 	CUDAArray<float> Orientation(source.Width, source.Height);
 
 	// фильтры Собеля
@@ -185,4 +187,8 @@ void OrientatiobFieldInPixels(float* floatArray, int width, int height){
 	Convolve(Gy, source, filterY);
 
 	SetOrientationInPixels(Orientation, source, Gx, Gy);
+	
+	return Orientation.GetData();
 }
+
+

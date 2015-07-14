@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 using System.IO;
-using CUDAFingerprinting.Common.OrientationField;
+using CUDAFingerprinting.Common;
 using System.Diagnostics;
 
 namespace CUDAFingerprinting.Common.Thinning.Tests

@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}</ProjectGuid>
+    <ProjectGuid>{9947FE1D-C872-4CEE-97C4-3AEE1E2120A4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.Common.Tests</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.Common.Tests</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.FeatureExtraction.Tests</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.FeatureExtraction.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -36,7 +36,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Drawing" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -51,38 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ConvolutionTests.cs" />
-    <Compile Include="ImageHelperTests.cs" />
-    <Compile Include="NormalizeTests.cs" />
-    <Compile Include="PixelwiseOrientationFieldTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="VisualizationTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\1_1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
-      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
-      <Name>CUDAFingerprinting.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\001.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\002.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
