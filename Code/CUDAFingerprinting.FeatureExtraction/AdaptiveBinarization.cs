@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Net;
 using CUDAFingerprinting.Common;
 
-namespace CUDAFingerprinting.Common.AdaptiveBinarization
+namespace CUDAFingerprinting.FeatureExtraction
 {
     public struct Point
     {
@@ -35,12 +32,12 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization
             return (ax * by - ay * bx) / (Math.Sqrt(ax * ax + ay * ay) * Math.Sqrt(bx * bx + by * by));
         }
 
-        public static int[] ProjectionX(int xCentre, int yCenre, int[,] arr) 
+        public static int[] ProjectionX(int xCentre, int yCentre, int[,] arr) 
         {
             int fieldSizey = FieldSizex / 2;
             int[] projX = new int[FieldSizex];
             OrientationField img = new OrientationField(arr);
-            var angleOfX = img.GetOrientation(xCentre, yCenre) - Math.PI/2.0;
+            var angleOfX = img.GetOrientation(xCentre, yCentre) - Math.PI/2.0;
             Point tmpPoint;
             double angleSin;
             double angleCos;
@@ -62,57 +59,21 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization
                         tmpPoint.Y = 0;
                     }
 
-                    if (tmpPoint.X + xCentre < 0 || tmpPoint.X + xCentre >= arr.GetLength(0) || tmpPoint.Y + yCenre < 0 ||
-                        tmpPoint.Y + yCenre >= arr.GetLength(1))
+                    if (tmpPoint.X + xCentre < 0 || tmpPoint.X + xCentre >= arr.GetLength(0) || tmpPoint.Y + yCentre < 0 ||
+                        tmpPoint.Y + yCentre >= arr.GetLength(1))
                     {
                         continue;
                     }
                     
-                    if (projX[i + FieldSizex/2] >= arr[tmpPoint.X + xCentre, tmpPoint.Y + yCenre])
+                    if (projX[i + FieldSizex/2] >= arr[tmpPoint.X + xCentre, tmpPoint.Y + yCentre])
                     {
-                        projX[i + FieldSizex/2] = arr[tmpPoint.X + xCentre, tmpPoint.Y + yCenre];
+                        projX[i + FieldSizex/2] = arr[tmpPoint.X + xCentre, tmpPoint.Y + yCentre];
                     }
 
                 }
             }
             return projX;   
         }
-
-       /* public static int[,] AdaptiveImageBinarization(int[,] arr)              // неправильная бинаризация
-        {
-            int[,] resArr = new int[arr.GetLength(0),arr.GetLength(1)]; // values 0 or 255
-            
-            for (int xCentre = 0; xCentre < arr.GetLength(0); xCentre++) //смени границы
-            {
-                for (int yCente = 0; yCente < arr.GetLength(1); yCente++)
-                {
-                    var projX = ProjectionX(xCentre, yCente, arr);
-                    double max = 0;
-                    for (int k = -FieldSizex / 2; k < FieldSizex / 2 ; k++)
-                    {
-                        if (k == 0)
-                        {
-                            continue;
-                        }
-                        if (max < projX[k+FieldSizex/2])
-                        {
-                            max = projX[k+FieldSizex/2];
-                        }
-                    }
-
-                    if (projX[FieldSizex / 2] >= max)
-                    {
-                        resArr[xCentre, yCente] = 255;
-                    }
-                    else
-                    {
-                        resArr[xCentre, yCente] = 0;
-                    }
-                }
-                
-            }
-            return resArr;
-        }*/
 
     }
 }

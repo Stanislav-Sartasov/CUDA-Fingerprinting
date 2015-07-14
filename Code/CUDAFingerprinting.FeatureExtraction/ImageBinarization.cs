@@ -1,30 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
-namespace CUDAFingerprinting.Common.ImageBinarization
+namespace CUDAFingerprinting.FeatureExtraction
 {
     public static class ImageBinarization
     {
-        public static Bitmap Binarizator(Bitmap src, int line)
+        public static Bitmap Binarize(Bitmap src, int threshold)
         {
             Bitmap bmp = new Bitmap(src.Width, src.Height);
             for (int i = 0; i < bmp.Width; i++)
             {
                 for (int j = 0; j < bmp.Height; j++)
                 {
-                    bmp.SetPixel(i, j, src.GetPixel(i, j).B < line ? Color.Black : Color.White);
+                    bmp.SetPixel(i, j, src.GetPixel(i, j).B < threshold ? Color.Black : Color.White);
                 }
             }
             return bmp;
         }
 
-        public static int[,] Binarizator2D(int[,] src, int line)
+        public static int[,] Binarize2D(int[,] src, int threshold)
         {
             int srcWidth = src.GetLength(0);
             int srcHeight = src.GetLength(1);
@@ -34,13 +27,13 @@ namespace CUDAFingerprinting.Common.ImageBinarization
             {
                 for (int j = 0; j < srcHeight; j++)
                 {
-                    imgInt[i, j] = src[i, j] < line ? 0 : 255;
+                    imgInt[i, j] = src[i, j] < threshold ? 0 : 255;
                 }
             }
             return imgInt;
         }
 
-        public static double[,] Binarizator2D(double[,] src, int line)
+        public static double[,] Binarize2D(double[,] src, int threshold)
         {
             int srcWidth = src.GetLength(0);
             int srcHeight = src.GetLength(1);
@@ -49,7 +42,7 @@ namespace CUDAFingerprinting.Common.ImageBinarization
             {
                 for (int j = 0; j < srcHeight; j++)
                 {
-                    imgDouble[i, j] = src[i, j] < line ? 0 : 255;
+                    imgDouble[i, j] = src[i, j] < threshold ? 0 : 255;
                 }
             }
             return imgDouble;

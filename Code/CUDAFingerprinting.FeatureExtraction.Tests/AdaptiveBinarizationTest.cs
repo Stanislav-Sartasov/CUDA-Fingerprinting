@@ -2,9 +2,10 @@
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using CUDAFingerprinting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CUDAFingerprinting.Common.AdaptiveBinarization.Test
+namespace CUDAFingerprinting.FeatureExtraction.Tests
 {
     [TestClass]
     public class AdaptiveBinarizationTest

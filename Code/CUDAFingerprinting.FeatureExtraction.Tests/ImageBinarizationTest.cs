@@ -1,9 +1,9 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CUDAFingerprinting.Common.ImageBinarization;
 using System.IO;
+using CUDAFingerprinting.Common;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CUDAFingerprinting.Common.ImageBinarization.Test
+namespace CUDAFingerprinting.FeatureExtraction.Tests
 {
     [TestClass]
     public class ImageBinarizationTest
@@ -12,7 +12,7 @@ namespace CUDAFingerprinting.Common.ImageBinarization.Test
         public void BinarializationTest()
         {
             double[,] arrayD = ImageHelper.LoadImage(Resources._2_6);
-            var binarizatedImageDouble = ImageBinarization.Binarizator2D(arrayD, 128);
+            var binarizatedImageDouble = ImageBinarization.Binarize2D(arrayD, 128);
             for (int i = 0; i < arrayD.GetLength(0); i++)
             {
                 for (int j = 0; j < arrayD.GetLength(1); j++)
@@ -33,7 +33,7 @@ namespace CUDAFingerprinting.Common.ImageBinarization.Test
             ImageHelper.SaveArrayToBitmap(binarizatedImageDouble).Save(Path.GetTempPath()+ Guid.NewGuid() + ".bmp");
             
             int[,] arrayI = ImageHelper.LoadImageAsInt(Resources._2_6);
-            var binarizatedImageInt = ImageBinarization.Binarizator2D(arrayI, 128);
+            var binarizatedImageInt = ImageBinarization.Binarize2D(arrayI, 128);
             for (int i = 0; i < arrayI.GetLength(0); i++)
             {
                 for (int j = 0; j < arrayI.GetLength(1); j++)

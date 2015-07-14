@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CUDAFingerprinting.Common.AdaptiveBinarization.Test {
+namespace CUDAFingerprinting.FeatureExtraction.Tests {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization.Test {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CUDAFingerprinting.Common.AdaptiveBinarization.Test.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CUDAFingerprinting.FeatureExtraction.Tests.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,16 +66,6 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization.Test {
         internal static System.Drawing.Bitmap _2_6 {
             get {
                 object obj = ResourceManager.GetObject("_2_6", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap _3_6 {
-            get {
-                object obj = ResourceManager.GetObject("_3_6", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
