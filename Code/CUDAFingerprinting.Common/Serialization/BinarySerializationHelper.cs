@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-namespace CUDAFingerprinting.Common.SerializationHelper
+namespace CUDAFingerprinting.Common.Serialization
 {
     public class BinarySerializationHelper
     {

@@ -69,10 +69,6 @@
     <None Include="Resources\man.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj">
-      <Project>{5eec4bd2-e1b0-4794-948a-45732cd41f99}</Project>
-      <Name>CUDAFingerprinting.Common.OrientationField</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common.Thinning\CUDAFingerprinting.Common.Thinning.csproj">
       <Project>{5baac4f1-87b1-4ece-8daa-0aeb307045ec}</Project>
       <Name>CUDAFingerprinting.Common.Thinning</Name>

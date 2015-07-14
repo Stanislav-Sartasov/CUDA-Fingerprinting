@@ -79,10 +79,6 @@
       <Project>{b5572b82-1c20-4d6a-a752-123cd7657007}</Project>
       <Name>CUDAFingerprinting.Common.AdaptiveBinarization</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj">
-      <Project>{5EEC4BD2-E1B0-4794-948A-45732CD41F99}</Project>
-      <Name>CUDAFingerprinting.Common.OrientationField</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6FD094CC-0F63-47BD-A377-F054AE615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>

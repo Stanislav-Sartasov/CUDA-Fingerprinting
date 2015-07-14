@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml.Serialization;
 using System.IO;
 
-namespace CUDAFingerprinting.Common.SerializationHelper
+namespace CUDAFingerprinting.Common.Serialization
 {
     public class XmlSerializationHelper
     {
