@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CUDAFingerprinting.Common.Matrix.Tests.Properties {
+namespace CUDAFingerprinting.Common.Segmentator.Tests.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.Common.Matrix.Tests.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CUDAFingerprinting.Common.Matrix.Tests.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CUDAFingerprinting.Common.Segmentator.Tests.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

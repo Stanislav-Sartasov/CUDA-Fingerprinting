@@ -15,7 +15,7 @@ using namespace std;
 
 #define edge 50
 #define pixEdge 150
-#define defaultBlockSize 16
+#define defaultBlockSize 1
 
 extern "C"
 {
@@ -110,7 +110,7 @@ void Segmentate (CUDAArray<float> value, int* matrix)
 
 	matrix2D.GetData(matrix);
 
-	ofstream f;
+	/*ofstream f;
 	f.open ("matrix.txt");
 	for ( int i = 0; i < value.Width; ++i )
 	{
@@ -119,7 +119,7 @@ void Segmentate (CUDAArray<float> value, int* matrix)
 			f << matrix[i * value.Width + j] << ' ';
 		}
 		f << endl;
-	}
+	}*/
 
 	matrix2D.Dispose();
 }

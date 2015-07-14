@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Segmentator", "CUDAFingerprinting.GPU.Segmentator\CUDAFingerprinting.GPU.Segmentator\CUDAFingerprinting.GPU.Segmentator.vcxproj", "{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField.Test", "CUDAFingerprinting.GPU.OrientationField.CUDATest\OrientationField.Test.vcxproj", "{819C3300-DC79-4202-AB9E-C8CDFBE97881}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Normalization", "CUDAFingerprinting.GPU.Normalisation\CUDAFingerprinting.GPU.Normalisation.vcxproj", "{6FAEFE37-4399-46BE-BBA7-14372EFFC3D8}"
@@ -51,10 +52,16 @@ Global
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}.Release|Win32.Build.0 = Release|Win32
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}.Release|x64.ActiveCfg = Release|x64
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}.Release|x64.Build.0 = Release|x64
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Win32.ActiveCfg = Debug|Win32
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|Win32.Build.0 = Debug|Win32
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|x64.ActiveCfg = Debug|x64
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Debug|x64.Build.0 = Debug|x64
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Any CPU.ActiveCfg = Release|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Win32.ActiveCfg = Release|Win32
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|Win32.Build.0 = Release|Win32
 		{61AE1DBD-A33C-4AA4-8A61-7F2AB95A1095}.Release|x64.ActiveCfg = Release|x64

@@ -75,10 +75,6 @@
       <Project>{5eec4bd2-e1b0-4794-948a-45732cd41f99}</Project>
       <Name>CUDAFingerprinting.Common.OrientationField</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.Common.Segmentation\CUDAFingerprinting.Common.Segmentation.csproj">
-      <Project>{6bef775c-e400-4ea6-a220-15be47b27148}</Project>
-      <Name>CUDAFingerprinting.Common.Segmentation</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common.SerializationHelper\CUDAFingerprinting.Common.Serialization.csproj">
       <Project>{c57f6464-8900-4cc8-a08c-5a7b33bdaf60}</Project>
       <Name>CUDAFingerprinting.Common.Serialization</Name>
