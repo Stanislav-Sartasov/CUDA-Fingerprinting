@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Net;
-using CUDAFingerprinting.Common.OrientationField;
+using CUDAFingerprinting.Common;
 
 namespace CUDAFingerprinting.Common.AdaptiveBinarization
 {
@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.Common.AdaptiveBinarization
         {
             int fieldSizey = FieldSizex / 2;
             int[] projX = new int[FieldSizex];
-            OrientationField.OrientationField img = new OrientationField.OrientationField(arr);
+            OrientationField img = new OrientationField(arr);
             var angleOfX = img.GetOrientation(xCentre, yCenre) - Math.PI/2.0;
             Point tmpPoint;
             double angleSin;
