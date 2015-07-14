@@ -82,7 +82,7 @@ void Enhance2(CUDAArray<float> img, float* res, CUDAArray<float> orientMatrix, f
 	for (int i = 0; i < angleNum; i++)
 		angles[i] = constAngle * i - M_PI / 2;
 	float* dev_angles;
-	cudaMalloc((void**)&angles, angleNum * sizeof(float));
+	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
 
 	float* filter = (float*)malloc(filterSize * (filterSize * angleNum) * sizeof(float));
@@ -107,7 +107,7 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	for (int i = 0; i < angleNum; i++)
 		angles[i] = constAngle * i - M_PI / 2;
 	float* dev_angles;
-	cudaMalloc((void**)&angles, angleNum * sizeof(float));
+	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
 
 	float* filter = (float*)malloc(filterSize * (filterSize * angleNum) * sizeof(float));

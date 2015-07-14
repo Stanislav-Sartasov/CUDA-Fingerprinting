@@ -10,6 +10,10 @@
 #include "imageLoading.cuh"
 #include "CUDAArray.cuh"
 
+extern "C"
+{
+	__declspec(dllexport) void OrientatiobFieldInPixels(float* res, float* floatArray, int width, int height);
+}
 // ----------- GPU ----------- //
 
 __global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
@@ -189,6 +193,29 @@ float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
 	SetOrientationInPixels(Orientation, source, Gx, Gy);
 	
 	return Orientation.GetData();
+}
+
+void OrientatiobFieldInPixels(float* res, float* floatArray, int width, int height){
+
+	CUDAArray<float> source(floatArray, width, height);
+	CUDAArray<float> Orientation(source.Width, source.Height);
+
+	// фильтры Собеля
+	float filterXLinear[9] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+	float filterYLinear[9] = { -1, -2, -1, 0, 0, 0, 1, 2, 1 };
+	// фильтры для девайса
+	CUDAArray<float> filterX(filterXLinear, 3, 3);
+	CUDAArray<float> filterY(filterYLinear, 3, 3);
+
+	// Градиенты
+	CUDAArray<float> Gx(width, height);
+	CUDAArray<float> Gy(width, height);
+	Convolve(Gx, source, filterX);
+	Convolve(Gy, source, filterY);
+
+	SetOrientationInPixels(Orientation, source, Gx, Gy);
+
+	Orientation.GetData(res);
 }
 
 
