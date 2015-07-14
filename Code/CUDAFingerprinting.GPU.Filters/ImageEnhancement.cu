@@ -7,6 +7,8 @@
 #include <math.h>
 #include <float.h>
 #include "Filter.cuh"
+#include "ImageLoading.cuh"
+#include "OrientationField.cuh"
 extern "C"
 {
 	__declspec(dllexport) void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
@@ -63,11 +65,11 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 				sum += filterValue * value;
 			}
 		}
-		//if (sum > 255) //is there a way to take a module of a floating-point number?
-		//{
-		//	sum = 255;
-		//}
-		sum = (((int)sum) % 256 + (sum - ((int)sum)));//this IS the elegant way, isn't it?
+		if (sum > 255) //is there a way to take a module of a floating-point number?
+		{
+			sum = 255;
+		}
+		//sum = (((int)sum) % 256 + (sum - ((int)sum)));//this IS the elegant way, isn't it?
 		result.SetAt(row, column, sum);
 	}
 }
@@ -111,7 +113,7 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
 
 	float* filter = (float*)malloc(filterSize * (filterSize * angleNum) * sizeof(float));
-	MakeGabor16Filters(filter, angleNum, frequency);
+	MakeGabor32Filters(filter, angleNum, frequency);
 	CUDAArray<float> filters = CUDAArray<float>(filter, filterSize, filterSize * angleNum);
 
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
@@ -167,7 +169,23 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 //	}
 //	res = result.GetData();
 //}
-//void main()
-//{
-//
-//}
+void main()
+{
+	int width;
+	int height;
+	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\002.bmp";  //Write your way to bmp file
+	int* img = loadBmp(filename, &width, &height);
+	float* source = (float*)malloc(height*width*sizeof(float));
+	for (int i = 0; i < height; i++)
+		for (int j = 0; j < width; j++)
+		{
+			source[i * width + j] = (float)img[i * width + j];
+		}
+	//float* b = (float*)malloc(height * width * sizeof(float));
+	float* orMatr = OrientationFieldInPixels(source, width, height);
+	saveBmp("..\\res.bmp", b, width, height);
+
+	free(source);
+	free(img);
+	free(b);
+}

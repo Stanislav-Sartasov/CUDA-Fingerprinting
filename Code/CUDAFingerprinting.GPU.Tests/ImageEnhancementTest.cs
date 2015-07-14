@@ -15,7 +15,7 @@ namespace CUDAFingerprinting.GPU.Tests
             EntryPoint = "OrientatiobFieldInPixels")]
         public static extern void OrientatiobFieldInPixels(float[] res, float[,] floatArray, int width, int height);
         [TestMethod]
-        public void CreateGaborFilter16Test()
+        public void EnhanceTest()
         {
             var bmp = Resources.SampleFinger1;
             float[,] array = ImageHelper.LoadImageToFloats(bmp);

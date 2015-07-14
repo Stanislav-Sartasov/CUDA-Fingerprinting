@@ -9,7 +9,7 @@
 #include "constsmacros.h"
 #include "imageLoading.cuh"
 #include "CUDAArray.cuh"
-
+#include "OrientationField.cuh"
 extern "C"
 {
 	__declspec(dllexport) void OrientatiobFieldInPixels(float* res, float* floatArray, int width, int height);
@@ -172,7 +172,7 @@ float* OrientationFieldInBlocks(float* floatArray, int width, int height){
 	return Orientation.GetData();
 }
 
-float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
+float* OrientationFieldInPixels(float* floatArray, int width, int height){
 
 	CUDAArray<float> source(floatArray, width, height);
 	CUDAArray<float> Orientation(source.Width, source.Height);
@@ -195,7 +195,7 @@ float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
 	return Orientation.GetData();
 }
 
-void OrientatiobFieldInPixels(float* res, float* floatArray, int width, int height){
+void OrientationFieldInPixels(float* res, float* floatArray, int width, int height){
 
 	CUDAArray<float> source(floatArray, width, height);
 	CUDAArray<float> Orientation(source.Width, source.Height);
