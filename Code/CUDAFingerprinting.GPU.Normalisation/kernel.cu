@@ -25,7 +25,7 @@ __global__ void cudaCalcMeanRow(CUDAArray<float> image, float* meanArray)
 	pixNum = height * width;
 	int tempIndex = threadIdx.x;
 	
-	__shared__ float temp[GPUdefaultThreadCount];
+	__shared__ float temp[defaultThreadCount];
 	float mean = 0;
 	if (width > column)
 	{
@@ -84,7 +84,7 @@ __global__ void cudaCalcVariationRow(CUDAArray<float> image, float mean, float* 
 
 	int tempIndex = threadIdx.x;
 
-	__shared__ float temp[GPUdefaultThreadCount];
+	__shared__ float temp[defaultThreadCount];
 	float variation = 0;
 	if (width > column)
 	{

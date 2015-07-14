@@ -2,35 +2,39 @@
 using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
 
+
+
 namespace CUDAFingerprinting.GPU.OrientationField.Test
 {
 	[TestClass]
 	public class OrientationFieldTest
 	{
 		[DllImport("CUDAFingerprinting.GPU.OrientationField.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "OrientationFieldInBlocks")]
-		public static extern float[] OrientationFieldInBlocks(float[] floatArray, int width, int height);
+		public static extern void OrientationFieldInBlocks(float[] orientation, float[] sourceBytes, int width, int height);
 		[DllImport("CUDAFingerprinting.GPU.OrientationField.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "OrientationFieldInPixels")]
-		public static extern float[] OrientationFieldInPixels(float[] floatArray, int width, int height);
+		public static extern void OrientationFieldInPixels(float[] orientation, float[] sourceBytes, int width, int height);
 
 		[TestMethod]
 		public void OrientationAngleTest()
 		{
-			
 
+			var image = Properties.Resources._1;
+			var bytes = ImageHelper.LoadImageAsInt(Properties.Resources._1);
+			int height = bytes.GetUpperBound(0) + 1;
+			int width = bytes.GetUpperBound(1) + 1;
+			float[] sourceBytes = new float[height* width];
+			float[] field = new float[height * width];
+			for (int i = 0; i < height - 1; i++)
+			{
+				for (int j = 0; j < width - 1; j++)
+				{
+					sourceBytes[i * width + j] = (float)bytes[i, j];
+					field[i * width + j] = 0.0f;
+				}
 
-			//char filepath[] = "C:\\temp\\1.bmp";
-			//int width, height;
-			//int* intBmpArray = loadBmp(filepath, &width, &height);
-			//float* floatBmpArray = (float*)malloc(sizeof(float) * width * height);
-			//for (int i = 0; i < width * height; i++){
-			//	floatBmpArray[i] = (float)intBmpArray[i];
-			//}
-			//float* orientation;
-			////orientation = OrientationFieldInBlocks(floatBmpArray, width, height);
+			}
 
-			//orientation = OrientatiobFieldInPixels(floatBmpArray, width, height);
-
-		
+			OrientationFieldInBlocks(field, sourceBytes, width, height);
 
 
 		}

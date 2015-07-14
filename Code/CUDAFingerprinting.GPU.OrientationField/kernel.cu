@@ -13,8 +13,8 @@
 
 extern "C"
 {
-	__declspec(dllexport) float* OrientationFieldInBlocks(float* floatArray, int width, int height);
-	float* OrientationFieldInPixels(float* floatArray, int width, int height);
+	__declspec(dllexport) void OrientationFieldInBlocks(float* orientation, float* floatArray, int width, int height);
+	void OrientationFieldInPixels(float* orientation, float* floatArray, int width, int height);
 }
 
 
@@ -152,8 +152,8 @@ void SetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> sourc
 }
 
 
-float* OrientationFieldInBlocks(float* floatArray, int width, int height){
-	CUDAArray<float> source(floatArray, width, height);
+void OrientationFieldInBlocks(float* orientation, float* sourceBytes, int width, int height){
+	CUDAArray<float> source(sourceBytes, width, height);
 	const int defaultBlockSize = 16;
 	CUDAArray<float> Orientation(source.Width, source.Height);
 
@@ -173,12 +173,12 @@ float* OrientationFieldInBlocks(float* floatArray, int width, int height){
 	// вычисляем направления
 	SetOrientationInBlocks(Orientation, source, defaultBlockSize, Gx, Gy);
 
-	return Orientation.GetData();
+	orientation = Orientation.GetData();
 }
 
-float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
+void OrientatiobFieldInPixels(float* orientation, float* sourceBytes, int width, int height){
 
-	CUDAArray<float> source(floatArray, width, height);
+	CUDAArray<float> source(sourceBytes, width, height);
 	CUDAArray<float> Orientation(source.Width, source.Height);
 
 	// фильтры Собеля
@@ -196,7 +196,7 @@ float* OrientatiobFieldInPixels(float* floatArray, int width, int height){
 
 	SetOrientationInPixels(Orientation, source, Gx, Gy);
 
-	return Orientation.GetData();
+	orientation = Orientation.GetData();
 }
 
 //int main(){
