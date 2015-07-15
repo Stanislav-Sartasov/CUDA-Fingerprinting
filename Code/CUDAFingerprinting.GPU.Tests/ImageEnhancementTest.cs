@@ -28,7 +28,7 @@ namespace CUDAFingerprinting.GPU.Tests
 
             float[,] ar = result.Make2D(bmp.Height, bmp.Width);
             var bmp2 = ImageHelper.SaveArrayToBitmap(ar);
-            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
+            bmp2.Save("test21.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
     }
 }
