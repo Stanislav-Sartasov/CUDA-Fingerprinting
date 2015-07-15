@@ -9,6 +9,7 @@
 #include "Filter.cuh"
 #include "ImageLoading.cuh"
 #include "OrientationField.cuh"
+#include "math_constants.h"
 extern "C"
 {
 	__declspec(dllexport) void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
@@ -20,7 +21,7 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int filterSize = filters.Height;
+	int filterSize = filters.Width;
 	int center = filterSize / 2; //filter is always a square.
 	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
@@ -36,7 +37,6 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 				diff = abs(angles[angInd] - orientMatrix.At(row, column));
 			}
 		}
-
 		int tX = threadIdx.x;
 		int tY = threadIdx.y;
 		__shared__ float filterCache[32 * 32];
@@ -49,12 +49,12 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 		__syncthreads();
 
 		float sum = 0;
-		for (int drow = -center; drow <= center; drow++)
+		for (int drow = -center; drow < center; drow++)
 		{
-			for (int dcolumn = -center; dcolumn <= center; dcolumn++)
+			for (int dcolumn = -center; dcolumn < center; dcolumn++)
 			{
 				float filterValue = filterCache[filterSize*(drow + center) + dcolumn + center];
-
+				
 				int indexRow = row + drow;
 				int indexColumn = column + dcolumn;
 
@@ -69,6 +69,11 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 		{
 			sum = 255;
 		}
+		else 
+			if (sum < 0 ) 
+			{
+				sum = 0;
+			}
 		//sum = (((int)sum) % 256 + (sum - ((int)sum)));//this IS the elegant way, isn't it?
 		result.SetAt(row, column, sum);
 	}
@@ -105,9 +110,9 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	CUDAArray<float> orientMatrix = CUDAArray<float>(orientationMatrix, imgWidth, imgHeight);
 
 	float* angles = (float*)malloc(angleNum * sizeof(float));//passing small array is better than creating it multiple times, I think.
-	const float constAngle = M_PI / angleNum;
+	const float constAngle = CUDART_PI_F / angleNum;
 	for (int i = 0; i < angleNum; i++)
-		angles[i] = constAngle * i - M_PI / 2;
+		angles[i] = constAngle * i - CUDART_PI_F / 2;
 	float* dev_angles;
 	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
@@ -118,7 +123,7 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
 	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
-	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, angles);
+	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, dev_angles);
 	result.GetData(res);
 }
 //__global__ void Enhance(CUDAArray<float> img, float* res, CUDAArray<float> orientMatrix, float frequency, int filterSize,
@@ -173,7 +178,7 @@ void main()
 {
 	int width;
 	int height;
-	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.Normalisation\\002.bmp";  //Write your way to bmp file
+	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\4_8.bmp";  //Write your way to bmp file
 	int* img = loadBmp(filename, &width, &height);
 	float* source = (float*)malloc(height*width*sizeof(float));
 	for (int i = 0; i < height; i++)
@@ -181,9 +186,10 @@ void main()
 		{
 			source[i * width + j] = (float)img[i * width + j];
 		}
-	//float* b = (float*)malloc(height * width * sizeof(float));
+	float* b = (float*)malloc(height * width * sizeof(float));
 	float* orMatr = OrientationFieldInPixels(source, width, height);
-	saveBmp("..\\res.bmp", b, width, height);
+	Enhance(source, width, height, b, orMatr, (float)1 / 9, 32, 8);
+	saveBmp("C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\res.bmp", b, width, height);
 
 	free(source);
 	free(img);

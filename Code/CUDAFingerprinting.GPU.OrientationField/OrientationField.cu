@@ -10,10 +10,7 @@
 #include "imageLoading.cuh"
 #include "CUDAArray.cuh"
 #include "OrientationField.cuh"
-extern "C"
-{
-	__declspec(dllexport) void OrientatiobFieldInPixels(float* res, float* floatArray, int width, int height);
-}
+
 // ----------- GPU ----------- //
 
 __global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
