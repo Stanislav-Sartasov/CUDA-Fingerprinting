@@ -74,10 +74,11 @@
     <None Include="Resources\X.bmp" />
     <None Include="Resources\verySmall2.bmp" />
     <None Include="Resources\verySmall.bmp" />
-    <None Include="Resources\1_1.bmp" />
     <None Include="Resources\101_8.bmp" />
     <None Include="Resources\19_4.bmp" />
     <None Include="Resources\29_4.bmp" />
+    <None Include="Resources\1_1.bmp" />
+    <None Include="Resources\1_2.bmp" />
     <Content Include="Resources\2_6.bmp" />
     <None Include="Resources\connectedness.bmp" />
     <None Include="Resources\connectedness2.bmp" />

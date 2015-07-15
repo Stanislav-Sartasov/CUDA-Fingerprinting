@@ -175,4 +175,7 @@
   <data name="_29_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\29_4.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="SampleFinger" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\1_2.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
