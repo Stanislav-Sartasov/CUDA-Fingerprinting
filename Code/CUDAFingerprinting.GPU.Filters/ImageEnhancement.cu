@@ -22,7 +22,7 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 	int column = defaultColumn();
 
 	int filterSize = filters.Width;
-	int center = filterSize / 2; //filter is always a square.
+	int center = filterSize / 2;
 	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
 	if (row < img.Height && column < img.Width) {
@@ -37,30 +37,34 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 				diff = abs(angles[angInd] - orientMatrix.At(row, column));
 			}
 		}
-		int tX = threadIdx.x;
-		int tY = threadIdx.y;
-		__shared__ float filterCache[32 * 32];
+		float filterCache[32 * 32];
 
-		if (tX < filterSize && tY < filterSize) //what this condition is about?
+		for (int i = 0; i < filterSize; i++)
 		{
-			int indexLocal = tX + tY * filterSize;
-			filterCache[indexLocal] = filters.At(tY * angle, tX);
+			for (int j = 0; j < filterSize; j++)
+			{
+				int indexLocal = i * filterSize + j;
+				filterCache[indexLocal] = filters.At(i, filterSize * angle + j);
+			}
 		}
 		__syncthreads();
 
 		float sum = 0;
-		for (int drow = -center; drow < center; drow++)
+		for (int drow = -upperCenter; drow <= center; drow++)
 		{
-			for (int dcolumn = -center; dcolumn < center; dcolumn++)
+			for (int dcolumn = -upperCenter; dcolumn <= center; dcolumn++)
 			{
-				float filterValue = filterCache[filterSize*(drow + center) + dcolumn + center];
+				float filterValue = filterCache[filterSize*(center - drow) - dcolumn + center];
 				
 				int indexRow = row + drow;
 				int indexColumn = column + dcolumn;
 
-				if (indexRow < 0 || indexRow >= img.Height || indexColumn < 0 || indexColumn >= img.Width)
-					continue;
-
+				/*if (indexRow < 0 || indexRow >= img.Height || indexColumn < 0 || indexColumn >= img.Width)
+					continue;*/
+				if (indexRow < 0) indexRow = 0;
+				if (indexRow >= img.Height) indexRow = img.Height - 1;
+				if (indexColumn < 0) indexColumn = 0;
+				if (indexColumn >= img.Width) indexColumn = img.Width - 1;
 				float value = img.At(indexRow, indexColumn);
 				sum += filterValue * value;
 			}
@@ -119,7 +123,7 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 
 	float* filter = (float*)malloc(filterSize * (filterSize * angleNum) * sizeof(float));
 	MakeGabor32Filters(filter, angleNum, frequency);
-	CUDAArray<float> filters = CUDAArray<float>(filter, filterSize, filterSize * angleNum);
+	CUDAArray<float> filters = CUDAArray<float>(filter, filterSize * angleNum, filterSize);
 
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
 	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
