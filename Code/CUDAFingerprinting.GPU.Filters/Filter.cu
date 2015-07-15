@@ -14,8 +14,8 @@
 
 __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float frequency, float bAngle)
 {
-	float aCos = cos(/*CUDART_PI_F / 2 +*/ bAngle * (blockIdx.x));
-	float aSin = sin(/*CUDART_PI_F / 2 +*/ bAngle * (blockIdx.x));
+	float aCos = cos(bAngle * blockIdx.x);
+	float aSin = sin(bAngle * blockIdx.x);
 
 	int center = size / 2;
 
@@ -52,9 +52,9 @@ CUDAArray<float> MakeGabor32Filters(int angleNum, float frequency)
 	return filters;
 }
 
-CUDAArray<float> MakeGaborFilters(int size, int angleNum, float frequency)  //For creating filters all sizes. It function don't use.
+CUDAArray<float> MakeGaborFilters(int size, int angleNum, float frequency)  //For creating filters of all sizes. This function isn't used.
 {
-	CUDAArray<float> filters = CUDAArray<float>(16 * angleNum, 16);
+	CUDAArray<float> filters = CUDAArray<float>(size * angleNum, size);
 
 	float bAngle = (float)CUDART_PI_F / angleNum;
 

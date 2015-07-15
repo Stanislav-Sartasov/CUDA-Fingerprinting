@@ -14,6 +14,10 @@ extern "C"
 {
 	__declspec(dllexport) void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
 		float frequency, int filterSize, int angleNum);
+	__declspec(dllexport) void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
+		float frequency, int angleNum);
+	__declspec(dllexport) void Enhance32(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
+		float frequency, int angleNum);
 }
 __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDAArray<float> orientMatrix, float frequency,
 	CUDAArray<float> filters, int angleNum, float* angles)
@@ -59,7 +63,7 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 		result.SetAt(row, column, sum);
 	}
 }
-//For filters of arbitrary size
+//For filters of arbitrary size. Doesn't work due to non-working 'MakeGaborFilters' function.
 void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix, 
 	float frequency, int filterSize, int angleNum)
 {
