@@ -30,6 +30,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Segmentation", "CUDAFingerprinting.GPU.Segmentation\CUDAFingerprinting.GPU.Segmentation.vcxproj", "{46A2794F-DB36-4EDF-803A-46AD50A3A05D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.Segmentation.Test", "CUDAFingerprinting.GPU.Segmentation.Test\CUDAFingerprinting.GPU.Segmentation.Test.csproj", "{2E6C3CDE-F648-45C8-AC14-D3228E02AD7D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{46A2794F-DB36-4EDF-803A-46AD50A3A05D} = {46A2794F-DB36-4EDF-803A-46AD50A3A05D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

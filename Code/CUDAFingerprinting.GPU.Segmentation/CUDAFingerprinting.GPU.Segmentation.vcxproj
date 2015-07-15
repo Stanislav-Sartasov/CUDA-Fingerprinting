@@ -158,6 +158,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj">
+      <Project>{ff7efcd3-be2a-43b4-af3e-91469400e6a8}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.targets" />

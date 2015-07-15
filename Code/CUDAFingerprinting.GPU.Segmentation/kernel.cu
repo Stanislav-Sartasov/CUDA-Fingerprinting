@@ -19,7 +19,7 @@ using namespace std;
 
 extern "C"
 {
-	__declspec( dllexport ) void Segmentate (CUDAArray<float> value, int* matrix);
+	__declspec( dllexport ) void MakeMatrix (float* fPic, int picWidth, int picHeight, int* matrix);
 }
 
 __global__ void SobelFilter (CUDAArray<float> source, CUDAArray<float> target, CUDAArray<float> filterX, CUDAArray<float> filterY)
@@ -114,7 +114,7 @@ void Segmentate (CUDAArray<float> value, int* matrix)
 	matrix2D.Dispose();
 }
 
-void BWPicture (int width, int height, int* matrix)
+/*void BWPicture (int width, int height, int* matrix)
 {
 	int* newPic = (int*) malloc (sizeof (int)*width*height);
 	int capacity = width * height;
@@ -127,9 +127,9 @@ void BWPicture (int width, int height, int* matrix)
 	saveBmp ("newPic.bmp", newPic, width, height);
 
 	free (newPic);
-}
+}*/
 
-void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
+void MakeMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 {
 	CUDAArray<float> source = CUDAArray<float>(fPic, picWidth, picHeight);
 	CUDAArray<float> target = CUDAArray<float>(picWidth, picHeight);
@@ -146,17 +146,17 @@ void MakingMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 	SobelFilter <<< gridSize, blockSize >>> (source, target, filterX, filterY);	
 	
 	//Saving image after Sobel Filter
-	float* fSOPic = (float*)malloc(sizeof(float)*source.Width*source.Height);
+	/*float* fSOPic = (float*)malloc(sizeof(float)*source.Width*source.Height);
 	target.GetData (fSOPic);
 	int* SOPic = (int*)malloc(sizeof(int)*source.Width*source.Height);
 	for ( int i = 0; i < picWidth*picHeight; i++ )
 	{
 		SOPic[i] = (int) fSOPic[i];
 	}
-	saveBmp ("SOPic.bmp", SOPic, picWidth, picHeight);
+	saveBmp ("SOPic.bmp", SOPic, picWidth, picHeight*/
 	
 	Segmentate (target, matrix);
-	BWPicture (picWidth, picHeight, matrix);
+	//BWPicture (picWidth, picHeight, matrix);
 
 	source.Dispose();
 	target.Dispose();
@@ -182,7 +182,7 @@ int main()
 	int *matrix = (int*) malloc (picWidth * picHeight * sizeof(int));
 	// In this matrix 1 means light shade of gray, and 0 means dark shade of gray 
 
-	MakingMatrix (fPic, picWidth, picHeight, matrix);
+	MakeMatrix (fPic, picWidth, picHeight, matrix);
 
 	free(pic);
 	free (fPic);
