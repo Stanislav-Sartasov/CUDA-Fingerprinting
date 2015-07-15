@@ -51,7 +51,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="GaborFiltersTest.cs" />
     <Compile Include="ImageEnhancementTest.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
