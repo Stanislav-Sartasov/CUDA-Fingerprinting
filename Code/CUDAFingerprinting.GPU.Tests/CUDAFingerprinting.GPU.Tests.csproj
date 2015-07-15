@@ -83,7 +83,9 @@
       <Link>CUDAFingerprinting.GPU.Normalization.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="CUDAFingerprinting.GPU.OrientationField.dll" />
+    <Content Include="CUDAFingerprinting.GPU.OrientationField.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">

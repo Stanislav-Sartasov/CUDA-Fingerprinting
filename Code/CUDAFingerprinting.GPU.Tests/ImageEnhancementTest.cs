@@ -12,8 +12,8 @@ namespace CUDAFingerprinting.GPU.Tests
         float frequency, int filterSize, int angleNum);
 
         [DllImport("CUDAFingerprinting.GPU.OrientationField.dll", CallingConvention = CallingConvention.Cdecl,
-            EntryPoint = "OrientatiobFieldInPixels")]
-        public static extern void OrientatiobFieldInPixels(float[] res, float[,] floatArray, int width, int height);
+            EntryPoint = "OrientationFieldInPixels")]
+        public static extern void OrientationFieldInPixels(float[] res, float[,] floatArray, int width, int height);
         [TestMethod]
         public void EnhanceTest()
         {
@@ -21,7 +21,7 @@ namespace CUDAFingerprinting.GPU.Tests
             float[,] array = ImageHelper.LoadImageToFloats(bmp);
             float[] result = new float[bmp.Width * bmp.Height];
             float[] orientLin = new float[bmp.Width * bmp.Height];
-            OrientatiobFieldInPixels(orientLin, array, array.GetLength(0), array.GetLength(1));
+            OrientationFieldInPixels(orientLin, array, array.GetLength(0), array.GetLength(1));
             float[,] orient = orientLin.Make2D(bmp.Height, bmp.Width);
             Enhance(array, array.GetLength(0), array.GetLength(1), result, orient, (float) 1 / 9, 16, 8);
             float[,] ar = result.Make2D(bmp.Height, bmp.Width);
