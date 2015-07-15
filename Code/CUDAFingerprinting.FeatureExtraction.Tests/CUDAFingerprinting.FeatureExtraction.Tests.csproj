@@ -89,6 +89,7 @@
     <None Include="Resources\man.bmp" />
     <None Include="Resources\patt.bmp" />
     <None Include="Resources\small.bmp" />
+    <Content Include="Resources\2_6Test.bmp" />
     <Content Include="Resources\test.bmp" />
   </ItemGroup>
   <ItemGroup>

@@ -164,6 +164,8 @@ namespace CUDAFingerprinting.Common
 		{
 			int row = y / BlockSize;
 			int column = x / BlockSize;
+		    if (row >= _blocks.GetLength(0) || column >= _blocks.GetLength(1))
+		        return 0;
 			return this._blocks[row, column].Orientation;
 		}
     } 
