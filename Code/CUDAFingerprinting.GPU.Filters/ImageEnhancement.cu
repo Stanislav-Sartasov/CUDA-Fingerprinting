@@ -63,7 +63,7 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 		result.SetAt(row, column, sum);
 	}
 }
-//For filters of arbitrary size. Doesn't work due to non-working 'MakeGaborFilters' function.
+//For filters of arbitrary size. Works only for filters with size less or equal to 32.
 void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix, 
 	float frequency, int filterSize, int angleNum)
 {
