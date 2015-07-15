@@ -22,5 +22,14 @@ namespace CUDAFingerprinting.GPU.Tests
 
             ImageHelper.SaveArray(filters.Make2D(16, 16 * 8), "test.bmp", true);
         }
+         [TestMethod]
+        public void CreateGaborFilter32Test()
+        {
+            var filters = new float[32 * 32 * 8];
+
+            MakeGabor32Filters(filters, 8, (float)1 / 9);
+
+            ImageHelper.SaveArray(filters.Make2D(32, 32 * 8), "test32.bmp", true);
+        }
     }
 }

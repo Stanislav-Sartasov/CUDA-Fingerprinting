@@ -21,7 +21,7 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int filterSize = filters.Width;
+	int filterSize = filters.Height;
 	int center = filterSize / 2;
 	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
@@ -37,6 +37,12 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 				diff = abs(angles[angInd] - orientMatrix.At(row, column));
 			}
 		}
+		int stop;
+		if (diff > 0.4)
+		{
+			stop = 1;
+		}
+		diff = stop;
 		float filterCache[32 * 32];
 
 		for (int i = 0; i < filterSize; i++)
@@ -54,6 +60,7 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 		{
 			for (int dcolumn = -upperCenter; dcolumn <= center; dcolumn++)
 			{
+				
 				float filterValue = filterCache[filterSize*(center - drow) - dcolumn + center];
 				
 				int indexRow = row + drow;
@@ -182,7 +189,7 @@ void main()
 {
 	int width;
 	int height;
-	char* filename = "C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\4_8.bmp";  //Write your way to bmp file
+	char* filename = "..\\4_8.bmp";  //Write your way to bmp file
 	int* img = loadBmp(filename, &width, &height);
 	float* source = (float*)malloc(height*width*sizeof(float));
 	for (int i = 0; i < height; i++)
@@ -193,7 +200,7 @@ void main()
 	float* b = (float*)malloc(height * width * sizeof(float));
 	float* orMatr = OrientationFieldInPixels(source, width, height);
 	Enhance(source, width, height, b, orMatr, (float)1 / 9, 32, 8);
-	saveBmp("C:\\Users\\Alexander\\Documents\\CUDA-Fingerprinting\\Code\\res.bmp", b, width, height);
+	saveBmp("..\\res.bmp", b, width, height);
 
 	free(source);
 	free(img);

@@ -19,8 +19,8 @@
 
 __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float frequency, float bAngle)
 {
-	float aCos = cos(CUDART_PI_F / 2 + bAngle * (blockIdx.x));
-	float aSin = sin(CUDART_PI_F / 2 + bAngle * (blockIdx.x));
+	float aCos = cos(/*CUDART_PI_F / 2 +*/ bAngle * (blockIdx.x));
+	float aSin = sin(/*CUDART_PI_F / 2 +*/ bAngle * (blockIdx.x));
 
 	int center = size / 2;
 
