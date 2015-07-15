@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace CUDAFingerprinting.GPU.Tests
@@ -17,16 +16,18 @@ namespace CUDAFingerprinting.GPU.Tests
         [TestMethod]
         public void EnhanceTest()
         {
-            var bmp = Resources.SampleFinger1;
+            var bmp = Resources.SampleFinger2;
             float[,] array = ImageHelper.LoadImageToFloats(bmp);
-            float[] result = new float[bmp.Width * bmp.Height];
+            
             float[] orientLin = new float[bmp.Width * bmp.Height];
-            OrientationFieldInPixels(orientLin, array, array.GetLength(0), array.GetLength(1));
+            OrientationFieldInPixels(orientLin, array, array.GetLength(1), array.GetLength(0));
             float[,] orient = orientLin.Make2D(bmp.Height, bmp.Width);
-            Enhance(array, array.GetLength(0), array.GetLength(1), result, orient, (float) 1 / 9, 16, 8);
+
+            float[] result = new float[bmp.Width * bmp.Height];
+            Enhance(array, array.GetLength(1), array.GetLength(0), result, orient, (float) 1 / 9, 32, 8);
+
             float[,] ar = result.Make2D(bmp.Height, bmp.Width);
             var bmp2 = ImageHelper.SaveArrayToBitmap(ar);
-
             bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
         }
     }

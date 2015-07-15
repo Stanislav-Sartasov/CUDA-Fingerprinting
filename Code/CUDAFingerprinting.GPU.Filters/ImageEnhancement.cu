@@ -21,12 +21,11 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int filterSize = filters.Height;
-	int center = filterSize / 2;
+	int filterSize  = filters.Height;
+	int center      = filterSize / 2;
 	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
 	if (row < img.Height && column < img.Width) {
-
 		float diff = FLT_MAX;
 		int angle = 0;
 		for (int angInd = 0; angInd < angleNum; angInd++)
@@ -37,87 +36,35 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 				diff = abs(angles[angInd] - orientMatrix.At(row, column));
 			}
 		}
-		int stop;
-		if (diff > 0.4)
-		{
-			stop = 1;
-		}
-		diff = stop;
-		float filterCache[32 * 32];
-
-		for (int i = 0; i < filterSize; i++)
-		{
-			for (int j = 0; j < filterSize; j++)
-			{
-				int indexLocal = i * filterSize + j;
-				filterCache[indexLocal] = filters.At(i, filterSize * angle + j);
-			}
-		}
-		__syncthreads();
 
 		float sum = 0;
 		for (int drow = -upperCenter; drow <= center; drow++)
 		{
 			for (int dcolumn = -upperCenter; dcolumn <= center; dcolumn++)
 			{
-				
-				float filterValue = filterCache[filterSize*(center - drow) - dcolumn + center];
+				float filterValue = filters.At(center - drow, filterSize* angle + (center - dcolumn));
 				
 				int indexRow = row + drow;
 				int indexColumn = column + dcolumn;
 
-				/*if (indexRow < 0 || indexRow >= img.Height || indexColumn < 0 || indexColumn >= img.Width)
-					continue;*/
-				if (indexRow < 0) indexRow = 0;
-				if (indexRow >= img.Height) indexRow = img.Height - 1;
+				if (indexRow < 0)    indexRow    = 0;
 				if (indexColumn < 0) indexColumn = 0;
+				if (indexRow >= img.Height)   indexRow    = img.Height - 1;
 				if (indexColumn >= img.Width) indexColumn = img.Width - 1;
-				float value = img.At(indexRow, indexColumn);
-				sum += filterValue * value;
+
+				sum += filterValue * img.At(indexRow, indexColumn);
 			}
 		}
-		if (sum > 255) //is there a way to take a module of a floating-point number?
-		{
-			sum = 255;
-		}
-		else 
-			if (sum < 0 ) 
-			{
-				sum = 0;
-			}
-		//sum = (((int)sum) % 256 + (sum - ((int)sum)));//this IS the elegant way, isn't it?
+		sum = (((int)sum) % 256 + (sum - ((int)sum)));//I would've written 'sum %= 256' if 'sum' was integer.
 		result.SetAt(row, column, sum);
 	}
-}
-
-void Enhance2(CUDAArray<float> img, float* res, CUDAArray<float> orientMatrix, float frequency, int filterSize,
-	int angleNum)
-{
-	CUDAArray<float> result = CUDAArray<float>(img.Width, img.Height);
-
-	float* angles = (float*) malloc(angleNum * sizeof(float));
-	const float constAngle = M_PI / angleNum;
-	for (int i = 0; i < angleNum; i++)
-		angles[i] = constAngle * i - M_PI / 2;
-	float* dev_angles;
-	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
-	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
-
-	float* filter = (float*)malloc(filterSize * (filterSize * angleNum) * sizeof(float));
-	MakeGabor16Filters(filter, angleNum, frequency);
-	CUDAArray<float> filters = CUDAArray<float>(filter, filterSize, filterSize * angleNum);
-
-	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(img.Width, defaultThreadCount), ceilMod(img.Height, defaultThreadCount));
-	EnhancePixel<<<gridSize, blockSize>>>(img, result, orientMatrix, frequency, filters, angleNum, angles);
-	result.GetData(res);
 }
 
 void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix, 
 	float frequency, int filterSize, int angleNum)
 {
-	CUDAArray<float> result = CUDAArray<float>(imgWidth, imgHeight);
-	CUDAArray<float> img = CUDAArray<float>(source, imgWidth, imgHeight);
+	CUDAArray<float> result       = CUDAArray<float>(imgWidth, imgHeight);
+	CUDAArray<float> img          = CUDAArray<float>(source, imgWidth, imgHeight);
 	CUDAArray<float> orientMatrix = CUDAArray<float>(orientationMatrix, imgWidth, imgHeight);
 
 	float* angles = (float*)malloc(angleNum * sizeof(float));//passing small array is better than creating it multiple times, I think.
@@ -133,58 +80,11 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	CUDAArray<float> filters = CUDAArray<float>(filter, filterSize * angleNum, filterSize);
 
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
+	dim3 gridSize  = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, dev_angles);
 	result.GetData(res);
 }
-//__global__ void Enhance(CUDAArray<float> img, float* res, CUDAArray<float> orientMatrix, float frequency, int filterSize,
-//	int angleNum)
-//{
-//	int imgHeight = img.Height;
-//	int imgWidth = img.Width;
-//	CUDAArray<float> result = CUDAArray<float>(imgHeight, imgWidth);
-//	float* angles = (float*)malloc(angleNum * sizeof(float));
-//	const float constAngle = M_PI / angleNum;
-//	for (int i = 0; i < angleNum; i++)
-//		angles[i] = constAngle * i - M_PI / 2;
-//
-//	var gabor = new GaborFilter(angleNum, filterSize, frequency);
-//	int center = filterSize / 2; //filter is always a square.
-//	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
-//
-//	for (int i = 0; i < imgHeight; i++)
-//	{
-//		for (int j = 0; j < imgWidth; j++)
-//		{
-//			float diff = FLT_MAX;
-//			int angle = 0;
-//			for (int angInd = 0; angInd < angleNum; angInd++)
-//			if (abs(angles[angInd] - orientMatrix.At(i, j)) < diff)
-//			{-
-//				angle = angInd;
-//				diff = abs(angles[angInd] - orientMatrix.At(i, j));
-//			}
-//			for (int u = -upperCenter; u <= center; u++)
-//			{
-//				for (int v = -upperCenter; v <= center; v++)
-//				{
-//					int indexX = i + u;
-//					int indexY = j + v;
-//					if (indexX < 0) indexX = 0;
-//					if (indexX >= imgHeight) indexX = imgHeight - 1;
-//					if (indexY < 0) indexY = 0;
-//					if (indexY >= imgWidth) indexY = imgWidth - 1;
-//					result.SetAt(i, j, result.At(i, j) + gabor.Filters[angle].Matrix[center - u, center - v] * img.At(indexX, indexY));
-//				}
-//			}
-//			if (result.At(i, j) > 255)
-//			{
-//				result.SetAt(i, j, 255);
-//			}
-//		}
-//	}
-//	res = result.GetData();
-//}
+
 void main()
 {
 	int width;
