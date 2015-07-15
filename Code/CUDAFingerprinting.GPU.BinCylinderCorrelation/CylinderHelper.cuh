@@ -20,13 +20,13 @@ public:
 class CylinderGPU
 {
 public:
-	CUDAArray<unsigned int> values;
+	CUDAArray<unsigned int> *values;
 	float angle;
 	float norm;
 	unsigned int templateIndex;
 
 	CylinderGPU(unsigned int *givenValues, unsigned int valuesCount, float givenAngle, float givenNorm) :
-		angle(givenAngle), norm(givenNorm), values(CUDAArray<unsigned int>(givenValues, valuesCount, 1)) {}
+		angle(givenAngle), norm(givenNorm), values(new CUDAArray<unsigned int>(givenValues, valuesCount, 1)) {}
 };
 
 #endif CUDAFINGERPRINTING_CYLINDERHELPER

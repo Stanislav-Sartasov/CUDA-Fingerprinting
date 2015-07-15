@@ -23,7 +23,7 @@
 
 #define END_OF_LIST -1
 
-#define ANGLE_THRESHOLD 0.52359877f
+#define ANGLE_THRESHOLD 0.52359877f // == PI / 6
 
 #define THREADS_PER_BLOCK_MATRIX_GEN 192
 #define THREADS_PER_BLOCK_LSS 64
@@ -38,7 +38,7 @@ __device__ CUDAArray<CylinderGPU> cylindersDbGPU;
 __device__ CUDAArray<unsigned int> bucketMatrix;
 __constant__ unsigned int queryLength;
 
-float getAngleDiff(float angle1, float angle2)
+__device__ float getAngleDiff(float angle1, float angle2)
 {
 	float diff = angle1 - angle2;
 	return
@@ -63,54 +63,74 @@ __global__ void computeLUTNumPairs(CUDAArray<unsigned int> LUTNumPairs)
 	}
 }
 
-__global__ void computeLUTAngles(CUDAArray<unsigned int> LUTAngles)
+__global__ void computeLUTAngles(CUDAArray<int> LUTAngles)
 {
 	float curAngle = 2 * CUDART_PI_F * threadIdx.x / QUANTIZED_ANGLES_COUNT;
-	int i;
+	unsigned int i;
+	unsigned int LUTIndex = 0;
 	for (i = 0; i < queryGPU.Width; i++)
 	{
 		if (getAngleDiff(queryGPU.At(i, 1).angle, curAngle) < ANGLE_THRESHOLD
 			&& queryGPU.At(i, 1).norm + queryGPU.At(i, 1).norm != 0)
 		{
-			LUTAngles.SetAt(curAngle, i, i);
+			LUTAngles.SetAt(curAngle, LUTIndex, i);
+			LUTIndex++;
 		}
 	}
-	LUTAngles.SetAt(curAngle, i, END_OF_LIST);
+	LUTAngles.SetAt(threadIdx.x, LUTIndex, -1);
 }
 
-__global__ void generateBucketMatrix(CUDAArray<float> LUTSqrt, CUDAArray<unsigned int> LUTAngles)
+__global__ void computeXorArray(CUDAArray<CylinderGPU> xorArray)
 {
-	int row = defaultRow();
-	int column = defaultRow();
+	unsigned int row = defaultRow();
+	unsigned int column = defaultColumn();
+
+	cudaArrayBitwiseXorDevice(
+		queryGPU.At(row, column).values, cylindersDbGPU.At(row, column).values, xorArray.At(row, column).values);
+}
+
+__global__ void cumputeLUTPopCountXor(unsigned int *LUTArr, CUDAArray<CylinderGPU> xorArray)
+{
+	unsigned int row = defaultRow();
+	unsigned int column = defaultColumn();
+	
+	cudaArrayWordNormDevice(xorArray.At(row / 32, column / 32).values, &LUTArr[column * queryLength + row]);
+}
+
+__global__ void generateBucketMatrix(CUDAArray<float> LUTSqrt, CUDAArray<int> LUTAngles, CUDAArray<unsigned int> LUTPopCountXor)
+{
+	unsigned int row = defaultRow();
+	unsigned int column = defaultRow();
 
 	CylinderGPU curCylinderDb = cylindersDbGPU.At(row, column);
 	float curCylinderDbAngle = cylindersDbGPU.At(row, column).angle;
 
-	for (int i = 0; LUTAngles.At(curCylinderDbAngle, i) != -1; i++)
+	unsigned int angleIndex = (unsigned int)(curCylinderDbAngle * QUANTIZED_ANGLES_COUNT / (2 * CUDART_PI_F));
+	for (unsigned int i = 0; LUTAngles.At(angleIndex, i) != -1; i++)
 	{
-		CylinderGPU curCylinderQuery = queryGPU.At(i, 1);
-		CUDAArray<unsigned int> valuesDb = curCylinderDb.values;
-		CUDAArray<unsigned int> valuesQuery = curCylinderQuery.values;
+		unsigned int curQueryIndex = LUTAngles.At(angleIndex, i);
+		CylinderGPU curCylinderQuery = queryGPU.At(curQueryIndex, 1);
 
-		unsigned int bucketIndex = (unsigned int)floor(
-			LUTSqrt.At(getOneBitsCount(BitwiseXorArray(valuesDb, valuesQuery)), 1)
-			/ (curCylinderDb.norm + curCylinderQuery.norm) * QUANTIZED_SIMILARITIES_COUNT);
+		unsigned int bucketIndex = (unsigned int)floor(LUTSqrt.At(LUTPopCountXor.At(curQueryIndex, 1)
+			/ (curCylinderDb.norm + curCylinderQuery.norm) * QUANTIZED_SIMILARITIES_COUNT, 1));
 
 		bucketMatrix.SetAt(curCylinderDb.templateIndex, bucketIndex, bucketMatrix.At(curCylinderDb.templateIndex, bucketIndex) + 1);
 	}
 }
 
 __global__ void computeLSS(
-	CUDAArray<unsigned int> LUTTemplateDbLengths, CUDAArray<unsigned int>LUTNumPairs, CUDAArray<unsigned int> similarityRates)
+	CUDAArray<unsigned int> LUTTemplateDbLengths, CUDAArray<unsigned int>LUTNumPairs, CUDAArray<float> similarityRates)
 {
+	// Dynamic allocation will probably be better
+	__shared__ unsigned int bucketSubmatrixPerBlock[QUANTIZED_SIMILARITIES_COUNT][THREADS_PER_BLOCK_LSS];
+
 	// Index of the first DB template of the current block
 	unsigned int firstBlockTemplateIndex = THREADS_PER_BLOCK_LSS * blockIdx.x;
-	__shared__ CUDAArray<unsigned int> bucketSubmatrixPerBlock(QUANTIZED_SIMILARITIES_COUNT, THREADS_PER_BLOCK_LSS);
 
 	// Copy appropriate part of bucketMatrix to bucketSubmatrixPerBlock
 	for (int j = 0; j < THREADS_PER_BLOCK_LSS; j++)
 	{
-		bucketSubmatrixPerBlock.SetAt(j, threadIdx.x, bucketMatrix.At(firstBlockTemplateIndex + j, threadIdx.x));
+		bucketSubmatrixPerBlock[j][threadIdx.x] = bucketMatrix.At(firstBlockTemplateIndex + j, threadIdx.x);
 	}
 
 	__syncthreads();
@@ -121,7 +141,7 @@ __global__ void computeLSS(
 	int sum = 0, t = numPairs, i = 0;
 	while (i < QUANTIZED_SIMILARITIES_COUNT && t > 0)
 	{
-		unsigned int curBucketValue = bucketSubmatrixPerBlock.At(threadIdx.x, i);
+		unsigned int curBucketValue = bucketSubmatrixPerBlock[threadIdx.x][i];
 		sum += MIN(curBucketValue, t);
 		t -= MIN(curBucketValue, t);
 		i++;
@@ -131,28 +151,31 @@ __global__ void computeLSS(
 	similarityRates.SetAt(curTemplateIndex, 1, 1 - sum / (numPairs * QUANTIZED_SIMILARITIES_COUNT));
 }
 
-void convertToCylindersGPU(Cylinder *cylinders, unsigned int cylindersCount, CUDAArray<CylinderGPU> cylindersGPU)
+void convertToCylindersGPU(Cylinder *cylinders, unsigned int cylindersCount, CUDAArray<CylinderGPU> *cylindersGPU)
 {
-	for (int i = 0; i < cylindersCount; i++)
+	CylinderGPU *cylindersGPUarr = (CylinderGPU *)malloc(cylindersCount * sizeof(CylinderGPU));
+	for (unsigned int i = 0; i < cylindersCount; i++)
 	{
 		Cylinder *curCylinder = &(cylinders[i]);
-		CylinderGPU *curCylinderGPU = new CylinderGPU(
-			curCylinder->values, curCylinder->valuesCount, curCylinder->angle, curCylinder->norm);
-		cylindersGPU.SetAt(i, 1, *curCylinderGPU);
+		cylindersGPUarr[i] = CylinderGPU(
+			curCylinder->values, curCylinder->valuesCount, curCylinder->angle, curCylinder->norm);		
 	}
+
+	*cylindersGPU = CUDAArray<CylinderGPU>(cylindersGPUarr, cylindersCount, 1);
 }
 
-void getBinTemplateSimilarity(
+float * getBinTemplateSimilarity(
 	Cylinder *query, unsigned int queryLength,
 	Cylinder *cylindersDb, unsigned int cylinderDbCount,
-	unsigned int *templateDbLengths, unsigned int templateDbCount,
-	float *similarityRates)
+	unsigned int *templateDbLengths, unsigned int templateDbCount)
 {
-	queryGPU = CUDAArray<CylinderGPU>(queryLength, 1);
-	convertToCylindersGPU(query, queryLength, queryGPU);
+	CUDAArray<CylinderGPU> preQueryGPU = CUDAArray<CylinderGPU>(queryLength, 1);
+	convertToCylindersGPU(query, queryLength, &preQueryGPU);
+	cudaMemcpy(&queryGPU, &preQueryGPU, sizeof(CUDAArray<CylinderGPU>), cudaMemcpyHostToDevice);
 
-	cylindersDbGPU = CUDAArray<CylinderGPU>(cylinderDbCount, 1);
-	convertToCylindersGPU(cylindersDb, cylinderDbCount, cylindersDbGPU);
+	CUDAArray<CylinderGPU> preCylindersDbGPU = CUDAArray<CylinderGPU>(cylinderDbCount, 1);
+	convertToCylindersGPU(cylindersDb, cylinderDbCount, &preCylindersDbGPU);
+	cudaMemcpy(&cylindersDbGPU, &preCylindersDbGPU, sizeof(CUDAArray<CylinderGPU>), cudaMemcpyHostToDevice);
 
 	CUDAArray<unsigned int> LUTTemplateDbLengths(templateDbLengths, templateDbCount, 1);
 
@@ -161,82 +184,97 @@ void getBinTemplateSimilarity(
 
 	// 0 through cylinderCellsCount (population count values)
 	CUDAArray<float> LUTSqrt(cylinderCellsCount + 1, 1);
-	computeLUTSqrt << <1, CYLINDER_ELEMENTS_COUNT + 1 >> >(LUTSqrt);
+	computeLUTSqrt << <1, cylinderCellsCount + 1 >> >(LUTSqrt);
 
 	CUDAArray<unsigned int> LUTNumPairs(cylinderCellsCount, 1);
 	computeLUTNumPairs << <1, cylinderCellsCount >> >(LUTNumPairs);
 
-	CUDAArray<unsigned int> LUTAngles(QUANTIZED_ANGLES_COUNT, queryLength + 1);
+	CUDAArray<int> LUTAngles(QUANTIZED_ANGLES_COUNT, queryLength + 1);
 	computeLUTAngles << <1, QUANTIZED_ANGLES_COUNT >> >(LUTAngles);
 
-	bucketMatrix = CUDAArray<unsigned int>(QUANTIZED_SIMILARITIES_COUNT, templateDbCount);
-	generateBucketMatrix << <ceilMod(cylinderDbCount, THREADS_PER_BLOCK_MATRIX_GEN), THREADS_PER_BLOCK_MATRIX_GEN >> >(LUTSqrt, LUTAngles);
+	unsigned int *d_LUTArr;
+	cudaMalloc((void **)&d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int));
+	
+	CUDAArray<CylinderGPU> xorArray(queryLength, cylinderDbCount);
+	cumputeLUTPopCountXor << <cylinderDbCount, queryLength >> >(d_LUTArr, xorArray);
+
+	unsigned int *h_LUTArr = new unsigned int[cylinderDbCount * queryLength];	
+	cudaMemcpy(h_LUTArr, d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+	CUDAArray<unsigned int> LUTPopCountXor(h_LUTArr, queryLength, cylinderDbCount);
+
+	CUDAArray<unsigned int> preBucketMatrix = CUDAArray<unsigned int>(QUANTIZED_SIMILARITIES_COUNT, templateDbCount);
+	cudaMemcpy(&bucketMatrix, &preBucketMatrix, sizeof(CUDAArray<unsigned int>), cudaMemcpyHostToDevice);
+	generateBucketMatrix << <ceilMod(cylinderDbCount, THREADS_PER_BLOCK_MATRIX_GEN), THREADS_PER_BLOCK_MATRIX_GEN >> >(
+		LUTSqrt, LUTAngles, LUTPopCountXor);
 
 	CUDAArray<float> similaritiesVector(templateDbCount, 1);
 	computeLSS << <ceilMod(templateDbCount, THREADS_PER_BLOCK_LSS), THREADS_PER_BLOCK_LSS >> >
 		(LUTTemplateDbLengths, LUTNumPairs, similaritiesVector);
 
-	similarityRates = similaritiesVector.GetData(); // Assigning the result
-
 	LUTSqrt.Dispose();
 	LUTAngles.Dispose();
 	LUTNumPairs.Dispose();
 	bucketMatrix.Dispose();
+
+	float* result = similaritiesVector.GetData();
+
 	similaritiesVector.Dispose();
+
+	return result;
 }
-
-unsigned int binToInt(char* s)
-{
-	return (unsigned int)strtoul(s, NULL, 2);
-}
-
-int main()
-{
-	unsigned int cylinderCapacity = 1;
-
-	unsigned int *cudaCylinder1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-	unsigned int *cudaCylinder2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-
-	unsigned int *cudaValidities1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-	unsigned int *cudaValidities2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-
-	// Test 1
-	//memset(cudaCylinder1, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaCylinder2, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaValidities1, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaValidities2, 255, cylinderCapacity * sizeof(unsigned int));
-	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
-
-
-	// Test 2
-	//srand((unsigned int)time(NULL));
-	//for (unsigned int i = 0; i < cylinderCapacity; i++) {
-	//	cudaCylinder1[i] = rand();
-	//	cudaCylinder2[i] = rand();
-	//	cudaValidities1[i] = rand();
-	//	cudaValidities2[i] = rand();
-	//}
-	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
-
-	// Test 3 (only for cylinderCapacity == 1)
-
-	cudaCylinder1[0] = binToInt("11111111111111111100000000000000");
-	cudaValidities1[0] = binToInt("11111111111111111100000000000000");
-
-	cudaCylinder2[0] = binToInt("11010001010100001100000000000000");
-	cudaValidities2[0] = binToInt("11011101111100011100000000000000");
-
-	float correlation =
-		getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
-
-	printf("Correlation: %f\n", correlation);
-
-	// [end] Test 3
-
-	free(cudaCylinder1);
-	free(cudaCylinder2);
-	free(cudaValidities1);
-	free(cudaValidities2);
-
-	return 0;
-}
+//
+//unsigned int binToInt(char* s)
+//{
+//	return (unsigned int)strtoul(s, NULL, 2);
+//}
+//
+//int main()
+//{
+//	unsigned int cylinderCapacity = 1;
+//
+//	unsigned int *cudaCylinder1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//	unsigned int *cudaCylinder2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//
+//	unsigned int *cudaValidities1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//	unsigned int *cudaValidities2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//
+//	// Test 1
+//	//memset(cudaCylinder1, 255, cylinderCapacity * sizeof(unsigned int));
+//	//memset(cudaCylinder2, 255, cylinderCapacity * sizeof(unsigned int));
+//	//memset(cudaValidities1, 255, cylinderCapacity * sizeof(unsigned int));
+//	//memset(cudaValidities2, 255, cylinderCapacity * sizeof(unsigned int));
+//	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+//
+//
+//	// Test 2
+//	//srand((unsigned int)time(NULL));
+//	//for (unsigned int i = 0; i < cylinderCapacity; i++) {
+//	//	cudaCylinder1[i] = rand();
+//	//	cudaCylinder2[i] = rand();
+//	//	cudaValidities1[i] = rand();
+//	//	cudaValidities2[i] = rand();
+//	//}
+//	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+//
+//	// Test 3 (only for cylinderCapacity == 1)
+//
+//	cudaCylinder1[0] = binToInt("11111111111111111100000000000000");
+//	cudaValidities1[0] = binToInt("11111111111111111100000000000000");
+//
+//	cudaCylinder2[0] = binToInt("11010001010100001100000000000000");
+//	cudaValidities2[0] = binToInt("11011101111100011100000000000000");
+//
+//	float correlation =
+//		getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+//
+//	printf("Correlation: %f\n", correlation);
+//
+//	// [end] Test 3
+//
+//	free(cudaCylinder1);
+//	free(cudaCylinder2);
+//	free(cudaValidities1);
+//	free(cudaValidities2);
+//
+//	return 0;
+//}

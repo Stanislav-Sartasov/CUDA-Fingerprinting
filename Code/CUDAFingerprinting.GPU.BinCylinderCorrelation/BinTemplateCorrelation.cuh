@@ -7,6 +7,6 @@ void getBinTemplateSimilarity(
 	Cylinder *query, unsigned int queryLength,
 	Cylinder *cylindersDb, unsigned int cylinderDbCount,
 	unsigned int *templateDbLengths, unsigned int templateDbCount,
-	float *similarityRates)
+	float *similarityRates);
 
 #endif CUDAFINGERPRINTING_BINTEMPLATECORRELATION
