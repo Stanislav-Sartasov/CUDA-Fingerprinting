@@ -36,11 +36,11 @@ namespace CUDAFingerprinting.FetureExtraction
             {
                 for (int y = 1; y < height - 1; y++)
                 {
-                    double sumX = pic[x - 1, y - 1] * filterX[0, 0] + pic[x + 1, y - 1] * filterX[0, 2] +
-                                    pic[x - 1, y] * filterX[1, 0] + pic[x + 1, y] * filterX[1, 2] +
-                                    pic[x - 1, y + 1] * filterX[2, 0] + pic[x + 1, y + 1] * filterX[2, 2];
-                    double sumY = pic[x - 1, y - 1] * filterY[0, 0] + pic[x, y - 1] * filterY[0, 1] + pic[x + 1, y - 1] * filterY[0, 2] +
-                        pic[x - 1, y + 1] * filterY[2, 0] + pic[x, y + 1] * filterY[2, 1] + pic[x + 1, y + 1] * filterY[2, 2];
+                    double sumX = pic[height - 1 - y + 1, x - 1] * filterX[0, 0] + pic[height - 1 - y + 1, x + 1] * filterX[0, 2] +
+                                    pic[height - 1 - y, x - 1] * filterX[1, 0] + pic[height - 1 - y, x + 1] * filterX[1, 2] +
+                                    pic[height - 1 - y - 1, x - 1] * filterX[2, 0] + pic[height - 1 - y - 1, x + 1] * filterX[2, 2];
+                    double sumY = pic[height - 1 - y + 1, x - 1] * filterY[0, 0] + pic[height - 1 - y, x] * filterY[0, 1] + pic[height - 1 - y + 1, x + 1] * filterY[0, 2] +
+                        pic[height - 1 - y - 1, x - 1] * filterY[2, 0] + pic[height - 1 - y - 1, x] * filterY[2, 1] + pic[height - 1 - y - 1, x + 1] * filterY[2, 2];
                     double sqrtXY = System.Math.Sqrt(sumX * sumX + sumY * sumY);
 
                     sqrtXY = sqrtXY > 255 ? 255 : sqrtXY;
