@@ -25,7 +25,7 @@ void printCUDAArray1D(CUDAArray<unsigned int> arr)
 	printf("[end] Print CUDAArray\n");
 }
 
-__global__ void cudaArrayBitwiseAnd(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
+__device__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
 {
 	int row = defaultRow();
 	int column = defaultColumn();
@@ -36,6 +36,11 @@ __global__ void cudaArrayBitwiseAnd(CUDAArray<unsigned int> fst, CUDAArray<unsig
 	}
 }
 
+__global__ void cudaArrayBitwiseAndGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
+{
+	cudaArrayBitwiseAndDevice(fst, snd, result);
+}
+
 CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd)
 {
 	dim3 gridSize = dim3(ceilMod(fst.Width, defaultThreadCount), 1, 1);
@@ -43,13 +48,13 @@ CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<u
 
 	CUDAArray<unsigned int> *result = new CUDAArray<unsigned int>(fst.Width, 1);
 
-	cudaArrayBitwiseAnd << <gridSize, blockSize >> >(fst, snd, *result);
+	cudaArrayBitwiseAndGlobal << <gridSize, blockSize >> >(fst, snd, *result);
 
 	return *result;
 }
 
 
-__global__ void cudaArrayBitwiseXor(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
+__device__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
 {
 	int row = defaultRow();
 	int column = defaultColumn();
@@ -60,6 +65,12 @@ __global__ void cudaArrayBitwiseXor(CUDAArray<unsigned int> fst, CUDAArray<unsig
 	}
 }
 
+__global__ void cudaArrayBitwiseXorGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
+{
+	cudaArrayBitwiseXorDevice(fst, snd, result);
+}
+
+
 CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd)
 {
 	dim3 gridSize = dim3(ceilMod(fst.Width, defaultThreadCount), 1, 1);
@@ -67,14 +78,14 @@ CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<u
 
 	CUDAArray<unsigned int> *result = new CUDAArray<unsigned int>(fst.Width, 1);
 
-	cudaArrayBitwiseXor << <gridSize, blockSize >> >(fst, snd, *result);
+	cudaArrayBitwiseXorGlobal << <gridSize, blockSize >> >(fst, snd, *result);
 
 	//printCUDAArray1D(*result);
 
 	return *result;
 }
 
-__global__ void cudaArrayWordNorm(CUDAArray<unsigned int> arr, unsigned int* sum)
+__device__ void cudaArrayWordNormDevice(CUDAArray<unsigned int> arr, unsigned int* sum)
 {
 	int row = defaultRow();
 	int column = defaultColumn();
@@ -93,6 +104,11 @@ __global__ void cudaArrayWordNorm(CUDAArray<unsigned int> arr, unsigned int* sum
 	}
 }
 
+__global__ void cudaArrayWordNormGlobal(CUDAArray<unsigned int> arr, unsigned int* sum)
+{
+	cudaArrayWordNormDevice(arr, sum);
+}
+
 unsigned int getOneBitsCount(CUDAArray<unsigned int> arr)
 {
 	dim3 gridSize = dim3(ceilMod(arr.Width, defaultThreadCount), 1, 1);
@@ -105,7 +121,7 @@ unsigned int getOneBitsCount(CUDAArray<unsigned int> arr)
 	cudaMalloc((unsigned int **)&d_sum, sizeof(unsigned int));
 	cudaMemcpy(d_sum, sum, sizeof(unsigned int), cudaMemcpyHostToDevice);
 
-	cudaArrayWordNorm << <gridSize, blockSize >> >(arr, d_sum);
+	cudaArrayWordNormGlobal << <gridSize, blockSize >> >(arr, d_sum);
 
 	cudaMemcpy(sum, d_sum, sizeof(unsigned int), cudaMemcpyDeviceToHost);
 

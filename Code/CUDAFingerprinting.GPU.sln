@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
@@ -19,6 +19,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.BinCylinderCorrelation", "CUDAFingerprinting.GPU.BinCylinderCorrelation\CUDAFingerprinting.GPU.BinCylinderCorrelation.vcxproj", "{3F634018-B841-428F-858E-082AE3EFC94F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests", "CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests\CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests.csproj", "{A8CD4FB8-1948-42C2-86C0-AD39FADF24A3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F634018-B841-428F-858E-082AE3EFC94F} = {3F634018-B841-428F-858E-082AE3EFC94F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.ImageBinarization", "CUDAFingerprinting.GPU.ImageBinarization\CUDAFingerprinting.GPU.ImageBinarization.vcxproj", "{2AA43362-8E1A-4DBF-9F93-67489055E963}"
 EndProject
