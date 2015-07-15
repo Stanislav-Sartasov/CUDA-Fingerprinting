@@ -8,9 +8,9 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
 {
     public static class BinTemplateCorrelation
     {
-        public static double npParamMu = 20;
+        public static int npParamMin = 11, npParamMax = 13;
+        public static double npParamMu = 30;
         public static double npParamTau = 2.0 / 5.0;
-        public static int npParamMin = 4, npParamMax = 12;
          
         public static uint bucketsCount = 64;
         public static uint[] buckets = new uint[bucketsCount];
