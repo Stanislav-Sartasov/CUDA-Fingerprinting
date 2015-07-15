@@ -12,7 +12,7 @@ namespace CUDAFingerprinting.Common.Tests
             var bmp   = Resources.SampleFinger3;
             var array = ImageHelper.LoadImage(bmp);
 
-            array = array.DoNormalization(100, 100);
+            array = array.DoNormalization(100, 1000);
 
             var mean = array.CalculateMean();
             var var  = array.CalculateVariation(mean);
