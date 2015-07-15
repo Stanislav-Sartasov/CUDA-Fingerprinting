@@ -57,6 +57,17 @@ CUDAArray<float> MakeGabor32Filters(int angleNum, float frequency)
 	return filters;
 }
 
+CUDAArray<float> MakeGaborFilters(int size, int angleNum, float frequency)  //For creating filters all sizes. It function don't use.
+{
+	CUDAArray<float> filters = CUDAArray<float>(16 * angleNum, 16);
+
+	float bAngle = (float)CUDART_PI_F / angleNum;
+
+	cudaCreateGaborFilter << < dim3(angleNum), dim3(size, size) >> > (filters, size, frequency, bAngle);
+
+	return filters;
+}
+
 //int main()
 //{
 //	float* b = (float*)malloc(16*16*8*sizeof(float));

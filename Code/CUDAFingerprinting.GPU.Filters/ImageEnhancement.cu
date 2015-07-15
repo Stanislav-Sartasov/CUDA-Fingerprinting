@@ -55,7 +55,8 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 				sum += filterValue * img.At(indexRow, indexColumn);
 			}
 		}
-		sum = (((int)sum) % 256 + (sum - ((int)sum)));//I would've written 'sum %= 256' if 'sum' was integer.
+		//sum = (((int)sum) % 256 + (sum - ((int)sum)));//I would've written 'sum %= 256' if 'sum' was integer.
+		if (sum < 0) sum = 0;
 		result.SetAt(row, column, sum);
 	}
 }
@@ -74,10 +75,8 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	float* dev_angles;
 	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
-
-	float* filter = (float*)malloc(filterSize * (filterSize * angleNum) * sizeof(float));
-	MakeGabor32Filters(filter, angleNum, frequency);
-	CUDAArray<float> filters = CUDAArray<float>(filter, filterSize * angleNum, filterSize);
+	
+	CUDAArray<float> filters = MakeGabor32Filters(angleNum, frequency);
 
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
 	dim3 gridSize  = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
