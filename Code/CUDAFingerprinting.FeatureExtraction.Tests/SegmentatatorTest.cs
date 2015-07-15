@@ -12,7 +12,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
         [TestMethod]
         public void SegmentatorTest()
         {
-            var image = Properties.Resources.SampleFinger;
+            var image = Resources.SampleFinger;
             Segmentator M = new Segmentator(image);
 
             float [,] matrix = M.SobelFilter();
