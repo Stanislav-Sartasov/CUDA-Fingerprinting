@@ -35,7 +35,7 @@ __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float 
 	filters.SetAt(threadIdx.x, blockDim.x * blockIdx.x + threadIdx.y, cellExp * cellCos);
 }
 
-void MakeGabor16Filters(float* filter, int angleNum, float frequency)
+CUDAArray<float> MakeGabor16Filters(int angleNum, float frequency)
 {
 	CUDAArray<float> filters = CUDAArray<float>(16 * angleNum, 16);
 	
@@ -43,10 +43,10 @@ void MakeGabor16Filters(float* filter, int angleNum, float frequency)
 
 	cudaCreateGaborFilter << < dim3(angleNum), dim3(16, 16) >> > (filters, 16, frequency, bAngle);
 
-	filters.GetData(filter);
+	return filters;
 }
 
-void MakeGabor32Filters(float* filter, int angleNum, float frequency)
+CUDAArray<float> MakeGabor32Filters(int angleNum, float frequency)
 {
 	CUDAArray<float> filters = CUDAArray<float>(32 * angleNum, 32);
 
@@ -54,7 +54,7 @@ void MakeGabor32Filters(float* filter, int angleNum, float frequency)
 
 	cudaCreateGaborFilter << < dim3(angleNum), dim3(32, 32) >> > (filters, 32, frequency, bAngle);
 
-	filters.GetData(filter);
+	return filters;
 }
 
 //int main()
