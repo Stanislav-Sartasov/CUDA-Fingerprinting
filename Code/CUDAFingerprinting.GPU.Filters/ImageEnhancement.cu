@@ -133,24 +133,24 @@ void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* or
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, dev_angles);
 	result.GetData(res);
 }
-void main()
-{
-	int width;
-	int height;
-	char* filename = "..\\4_8.bmp";  //Write your way to bmp file
-	int* img = loadBmp(filename, &width, &height);
-	float* source = (float*)malloc(height*width*sizeof(float));
-	for (int i = 0; i < height; i++)
-		for (int j = 0; j < width; j++)
-		{
-			source[i * width + j] = (float)img[i * width + j];
-		}
-	float* b = (float*)malloc(height * width * sizeof(float));
-	float* orMatr = OrientationFieldInPixels(source, width, height);
-	Enhance(source, width, height, b, orMatr, (float)1 / 9, 32, 8);
-	saveBmp("..\\res.bmp", b, width, height);
-
-	free(source);
-	free(img);
-	free(b);
-}
+//void main()
+//{
+//	int width;
+//	int height;
+//	char* filename = "..\\4_8.bmp";  //Write your way to bmp file
+//	int* img = loadBmp(filename, &width, &height);
+//	float* source = (float*)malloc(height*width*sizeof(float));
+//	for (int i = 0; i < height; i++)
+//		for (int j = 0; j < width; j++)
+//		{
+//			source[i * width + j] = (float)img[i * width + j];
+//		}
+//	float* b = (float*)malloc(height * width * sizeof(float));
+//	float* orMatr = OrientationFieldInPixels(source, width, height);
+//	Enhance(source, width, height, b, orMatr, (float)1 / 9, 32, 8);
+//	saveBmp("..\\res.bmp", b, width, height);
+//
+//	free(source);
+//	free(img);
+//	free(b);
+//}
