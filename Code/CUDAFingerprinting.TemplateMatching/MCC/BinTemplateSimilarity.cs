@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUDAFingerprinting.Common.BinCylinderCorrelation
+namespace CUDAFingerprinting.TemplateMatching.MCC
 {
-    public static class BinTemplateCorrelation
+    public class BinTemplateSimilarity
     {
         public static double npParamMu = 20;
         public static double npParamTau = 2.0 / 5.0;
         public static int npParamMin = 4, npParamMax = 12;
-         
+
         public static uint bucketsCount = 64;
         public static uint[] buckets = new uint[bucketsCount];
         public static double angleThreshold = Math.PI / 6;
@@ -24,11 +24,11 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
             return npParamMin + (int)(Math.Round((npParamMax - npParamMin) / denom));
         }
 
-        public static double[] GetTemplateCorrelationMultiple(Template query, Template[] db)
+        public static double[] GetTemplateSimilarity(Template query, Template[] db)
         {
             double[] similarityRates = new double[db.Length];
 
-            for (int k = 0; k < db.Length; k++) 
+            for (int k = 0; k < db.Length; k++)
             {
                 Template templateDb = db[k];
 
@@ -77,7 +77,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
             return similarityRates;
         }
 
-        public static double[] GetTemplateCorrelationMultipleOptimized(Template query, CylinderDatabase db, int[] dbTemplateLengths)
+        public static double[] GetTemplateSimilarityOptimized(Template query, CylinderDatabase db, int[] dbTemplateLengths)
         {
             double[] similarityRates = new double[dbTemplateLengths.Length];
             bucketMatrix = new uint[dbTemplateLengths.Length, bucketsCount];
@@ -91,7 +91,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                     uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
                     double givenXORNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(givenXOR)); // Bitwise version
                     //double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid version
-                    
+
                     uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
                     if (bucketIndex == bucketsCount)
                     {
