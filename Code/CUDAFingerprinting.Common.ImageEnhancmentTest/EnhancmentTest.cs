@@ -1,6 +1,4 @@
-﻿using System;
-using CUDAFingerprinting.Common;
-using CUDAFingerprinting.Common.OrientationField;
+﻿using CUDAFingerprinting.Common;
 using CUDAFingerprinting.Common.GaborFilter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
