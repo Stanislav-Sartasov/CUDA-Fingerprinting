@@ -38,7 +38,6 @@ namespace CUDAFingerprinting.FeatureExtraction
             int[] projX = new int[FieldSizex];
             OrientationField img = new OrientationField(arr);
             var angleOfX = img.GetOrientation(xCentre, yCentre) - Math.PI/2.0;
-            //var angle = img.GetOrientation(xCentre, yCentre);
             Point tmpPoint;
             double angleSin = Math.Sin(angleOfX);
             double angleCos = Math.Cos(angleOfX);
@@ -51,10 +50,9 @@ namespace CUDAFingerprinting.FeatureExtraction
                     if (Math.Abs(localSegment) > 0.000001)  //  double tolerance
                     {
                         
-                       // angleSin = Math.Sin(angleOfX + Math.Asin(find_sin(1.0, 0.0, i, j)));
-                        //angleCos = Math.Cos(angleOfX + Math.Acos(find_cos(1.0, 0.0, i, j)));
-                       // tmpPoint = Turn(0, (int) Math.Round(localSegment), 0, 0, angleCos, -angleSin);
-                        tmpPoint = Turn(i, j, 0, 0, angleCos, angleSin);
+                        angleSin = Math.Sin(angleOfX + Math.Asin(find_sin(1.0, 0.0, i, j)));
+                        angleCos = Math.Cos(angleOfX + Math.Acos(find_cos(1.0, 0.0, i, j)));
+                        tmpPoint = Turn(0, (int) Math.Round(localSegment), 0, 0, angleCos, angleSin);
                     }
                     else
                     {
@@ -82,8 +80,7 @@ namespace CUDAFingerprinting.FeatureExtraction
             
             int[,] arr = new int[img.GetLength(0), img.GetLength(1)];
             const int projDiviation = 2;        // +-2  pixels from peak
-            const int almostMinThreshold = 110;
-            int peakNeibourDiv = 100;
+            const int almostMinThreshold = 100;
             for (int xCurrent = 0; xCurrent < img.GetLength(0); xCurrent++)
             {
                 for (int yCurrent = 0; yCurrent < img.GetLength(1); yCurrent++)
@@ -99,10 +96,7 @@ namespace CUDAFingerprinting.FeatureExtraction
                             min = projX[t];
                             minIndex = t;
                         }
-                       // peakNeibourDiv += projX[t];
-
                     }
-                   // peakNeibourDiv /= FieldSizex;
                     for (int t = 0; t < projX.Length; t++)
                     {
                         if (projX[t] < almostMin && projX[t] > min && Math.Abs(minIndex - t) > projDiviation)
@@ -118,31 +112,9 @@ namespace CUDAFingerprinting.FeatureExtraction
                         if (projX[i] == min || (projX[i] == almostMin && almostMin < almostMinThreshold))
                         {
                             arr[xCurrent, yCurrent] = 0;
-                            /*for (int k = i - projDiviation; k <= i + projDiviation; k++)
-                            {
-                                if (projX[k] >= peakNeibourDiv)
-                                {
-                                    arr[xCurrent, yCurrent] = 255;
-                                    break;
-                                }
-                            }
-                           */
                             break;
                         }
                     }
-                    
-                   /* if (projX[FieldSizex/2] == min || (projX[FieldSizex/2] == almostMin && almostMin < almostMinThreshold))
-                    {
-                        arr[xCurrent, yCurrent] = 0;
-                        for (int k = FieldSizex / 2 - projDiviation; k <= FieldSizex / 2 + projDiviation; k++)
-                        {
-                            if (projX[k] >=  peakNeibourDiv)
-                            {
-                                arr[xCurrent, yCurrent] = 255;
-                                break;
-                            }
-                        }
-                    }*/
                 }
             }
             return arr;

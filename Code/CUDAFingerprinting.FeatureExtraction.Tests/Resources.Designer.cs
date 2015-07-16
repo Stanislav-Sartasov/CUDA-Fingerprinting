@@ -93,6 +93,16 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _1test {
+            get {
+                object obj = ResourceManager.GetObject("_1test", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _2_6 {
             get {
                 object obj = ResourceManager.GetObject("_2_6", resourceCulture);
