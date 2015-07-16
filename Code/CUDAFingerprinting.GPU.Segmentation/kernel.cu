@@ -163,8 +163,8 @@ void MakeMatrix (float* fPic, int picWidth, int picHeight, int* matrix)
 	filterX.Dispose();
 	filterY.Dispose();
 
-	free (fSOPic);
-	free (SOPic);
+	//free (fSOPic);
+	//free (SOPic);
 }
 
 int main()

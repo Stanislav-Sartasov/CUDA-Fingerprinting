@@ -185,6 +185,11 @@ namespace CUDAFingerprinting.Common
             SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
         }
 
+        public static void SaveArray(float[,] data, string path, bool applyNormalization = false)
+        {
+            SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
+        }
+
         public static Bitmap SaveArrayToBitmap(int[,] data, bool applyNormalization = false)
         {
             int x = data.GetLength(1);

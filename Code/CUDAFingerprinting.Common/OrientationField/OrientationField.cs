@@ -9,73 +9,80 @@ namespace CUDAFingerprinting.Common
     public class Block
     {
         private int _size;
-        private double[,] _gx;			// пиксели градиентов блока
-		private double[,] _gy;		
-		private double _orientation;		// направление в данном блоке
+        private double[,] _gx; // пиксели градиентов блока
+        private double[,] _gy;
+        private double _orientation; // направление в данном блоке
 
-		public double[,] Gx
-		{
-			get { return _gx; }
-		}
-		public double[,] Gy
-		{
-			get { return _gy; }
-		}
-		public double Orientation
-		{
-			get { return _orientation; }
+        public double[,] Gx
+        {
+            get { return _gx; }
+        }
+
+        public double[,] Gy
+        {
+            get { return _gy; }
+        }
+
+        public double Orientation
+        {
+            get { return _orientation; }
             set { _orientation = value; }
-		}
-		public int Size
-		{
-			get { return _size; }
-		}
+        }
 
-        public Block(int size, double[,] gradientX, double[,] gradientY, int i, int j)		// параметры: размер блока; градиенты; координаты, с которых начать копирование
+        public int Size
+        {
+            get { return _size; }
+        }
+
+        public Block(int size, double[,] gradientX, double[,] gradientY, int i, int j)
+            // параметры: размер блока; градиенты; координаты, с которых начать копирование
         {
             this._size = size;
             this._gx = new double[size, size];
-			this._gy = new double[size, size];
-			// копируем необходимые части градиентов
+            this._gy = new double[size, size];
+            // копируем необходимые части градиентов
             for (int x = 0; x < size; x++)
-			{
+            {
                 for (int y = 0; y < size; y++)
-				{
-					this._gx[x, y] = gradientX[x + i, y + j];
-					this._gy[x, y] = gradientY[x + i, y + j];
-				}
-			}
-			// вычисляем направления
-			_orientation = this.SetOrientation();
+                {
+                    this._gx[x, y] = gradientX[x + i, y + j];
+                    this._gy[x, y] = gradientY[x + i, y + j];
+                }
+            }
+            // вычисляем направления
+            _orientation = this.SetOrientation();
         }
 
-		public Block(double[,] Orientation, int size, double[,] gradientX, double[,] gradientY, int centerRow, int centerColumn)				// вычисляет направление в пикселе [i, j], результат помещает в Orientation
-		{
-			this._size = size;
-			this._gx = new double[size, size];
-			this._gy = new double[size, size];
-			int center = size / 2;
-			int upperLimit = center - 1;
-			// копируем необходимые части градиентов
-			for (int i = -center; i <= upperLimit; i++)
-			{
-				for (int j = -center; j <= upperLimit; j++)
-				{
-					if (i + centerRow < 0 || i + centerRow >= gradientX.GetUpperBound(0) || j + centerColumn < 0 || j + centerColumn >= gradientX.GetUpperBound(1))
-					{	// выход за пределы картинки
-						_gx[i + center, j + center] = 0;
-						_gy[i + center, j + center] = 0;
-					}
-					else
-					{
-						_gx[i + center, j + center] = gradientX[i + centerRow, j + centerColumn];
-						_gy[i + center, j + center] = gradientY[i + centerRow, j + centerColumn];
-					}
-				}
-			}
+        public Block(double[,] Orientation, int size, double[,] gradientX, double[,] gradientY, int centerRow,
+            int centerColumn) // вычисляет направление в пикселе [i, j], результат помещает в Orientation
+        {
+            this._size = size;
+            this._gx = new double[size, size];
+            this._gy = new double[size, size];
+            int center = size/2;
+            int upperLimit = center - 1;
+            // копируем необходимые части градиентов
+            for (int i = -center; i <= upperLimit; i++)
+            {
+                for (int j = -center; j <= upperLimit; j++)
+                {
+                    if (i + centerRow < 0 || i + centerRow >= gradientX.GetUpperBound(0) || j + centerColumn < 0 ||
+                        j + centerColumn >= gradientX.GetUpperBound(1))
+                    {
+                        // выход за пределы картинки
+                        _gx[i + center, j + center] = 0;
+                        _gy[i + center, j + center] = 0;
+                    }
+                    else
+                    {
+                        _gx[i + center, j + center] = gradientX[i + centerRow, j + centerColumn];
+                        _gy[i + center, j + center] = gradientY[i + centerRow, j + centerColumn];
+                    }
+                }
+            }
 
-			Orientation[centerRow, centerColumn] = _orientation = SetOrientation();
-		}
+            Orientation[centerRow, centerColumn] = _orientation = SetOrientation();
+        }
 
         public double SetOrientation()
         {
@@ -85,24 +92,24 @@ namespace CUDAFingerprinting.Common
             {
                 for (int j = 0; j < _size; j++)
                 {
-                    numerator += _gx[i, j] * _gy[i, j];
-					denominator += _gx[i, j] * _gx[i, j] - _gy[i, j] * _gy[i, j];
+                    numerator += _gx[i, j]*_gy[i, j];
+                    denominator += _gx[i, j]*_gx[i, j] - _gy[i, j]*_gy[i, j];
                 }
             }
             if (denominator == 0)
             {
-                return Math.PI / 2;
+                return Math.PI/2;
             }
             else
             {
-                double orientation = Math.PI / 2 + Math.Atan2(2 * numerator, denominator) / 2;
-				if (orientation > Math.PI / 2) orientation -= Math.PI;
-				return orientation;
+                double orientation = Math.PI/2 + Math.Atan2(2*numerator, denominator)/2;
+                if (orientation > Math.PI/2) orientation -= Math.PI;
+                return orientation;
             }
         }
-	}
+    }
 
-	// ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
 
     public class OrientationField
     {
@@ -142,13 +149,13 @@ namespace CUDAFingerprinting.Common
 			double[,] Gy = ConvolutionHelper.Convolve(doubleBytes, filterY);
 			// разделение на блоки
 			this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
-			for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
-			{
-				for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
-				{
-					_blocks[row, column] = new Block(BlockSize, Gx, Gy, row * BlockSize, column * BlockSize);
-				}
-			}
+		    for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
+		    {
+		        for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
+		        {
+		            _blocks[row, column] = new Block(BlockSize, Gx, Gy, row*BlockSize, column*BlockSize);
+		        }
+		    }
         }
 
         public OrientationField(int[,] bytes):this(bytes, DefaultSize)
@@ -158,15 +165,30 @@ namespace CUDAFingerprinting.Common
 		public OrientationField(int[,] bytes, int blockSize): this(bytes, blockSize, false)
 		{
 		}
-		
+
 
 		public double GetOrientation(int x, int y)                  // метод, определяющий по входным координатам (х, у) поле напрваления в этой точке
 		{
-			int row = y / BlockSize;
-			int column = x / BlockSize;
+            int row = y / BlockSize;
+            int column = x / BlockSize;
 		    if (row >= _blocks.GetLength(0) || column >= _blocks.GetLength(1))
 		        return 0;
 			return this._blocks[row, column].Orientation;
 		}
+        public double[,] GetOrientationMatrix(int height, int width)
+        {
+            double[,] result = new double[height, width];
+            for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
+            {
+                for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
+                {
+                    double curOrientation = _blocks[row, column].Orientation;
+                    for (int i = 0; i < BlockSize; i++)
+                        for (int j = 0; j < BlockSize; j++)
+                            result[row * BlockSize + i, column * BlockSize + j] = curOrientation;
+                }
+            }
+            return result;
+        }
     } 
 }
