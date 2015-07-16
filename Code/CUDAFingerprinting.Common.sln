@@ -13,10 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AC5114BA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.Tests", "CUDAFingerprinting.Common.Tests\CUDAFingerprinting.Common.Tests.csproj", "{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.ImageBinarization", "CUDAFingerprinting.Common.ImageBinarization\CUDAFingerprinting.Common.ImageBinarization.csproj", "{F8561965-146A-405B-8048-C78164578D71}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.AdaptiveBinarization", "CUDAFingerprinting.Common.AdaptiveBinarization\CUDAFingerprinting.Common.AdaptiveBinarization.csproj", "{B5572B82-1C20-4D6A-A752-123CD7657007}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.FeatureExtraction", "CUDAFingerprinting.FeatureExtraction\CUDAFingerprinting.FeatureExtraction.csproj", "{004C8B66-4BFC-4337-B4AD-12E125189051}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.ImageEnhancement", "CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageEnhancement.csproj", "{6B1354D8-3B37-4946-93C0-5FBC2EF11544}"
@@ -112,34 +108,6 @@ Global
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}.Release|Win32.ActiveCfg = Release|Any CPU
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}.Release|x64.ActiveCfg = Release|Any CPU
 		{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}.Release|x86.ActiveCfg = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|Win32.ActiveCfg = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|x64.ActiveCfg = Release|Any CPU
-		{F8561965-146A-405B-8048-C78164578D71}.Release|x86.ActiveCfg = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|Win32.ActiveCfg = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|x64.ActiveCfg = Release|Any CPU
-		{B5572B82-1C20-4D6A-A752-123CD7657007}.Release|x86.ActiveCfg = Release|Any CPU
 		{004C8B66-4BFC-4337-B4AD-12E125189051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{004C8B66-4BFC-4337-B4AD-12E125189051}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{004C8B66-4BFC-4337-B4AD-12E125189051}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

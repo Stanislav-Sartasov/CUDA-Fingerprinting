@@ -53,6 +53,7 @@
     <Compile Include="ImageHelper.cs" />
     <Compile Include="ImageSizeHelper.cs" />
     <Compile Include="KernelHelper.cs" />
+    <Compile Include="LocalRidgeFrequency.cs" />
     <Compile Include="Minutia.cs" />
     <Compile Include="Normalization.cs" />
     <Compile Include="OrientationField\OrientationField.cs" />
