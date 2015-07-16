@@ -29,4 +29,39 @@ namespace CUDAFingerprinting.Common
             return gaus;
         }
     }
+    public class Filter
+    {
+        public double[,] Matrix;
+
+        public Filter(int size, double sigma)
+        {
+            Matrix = new double[size, size];
+
+            int center = size / 2;
+            int upperCenter = (size & 1) == 0 ? center - 1 : center;
+
+            for (int i = -upperCenter; i <= upperCenter; i++)
+            {
+                for (int j = -upperCenter; j <= upperCenter; j++)
+                {
+                    Matrix[center - i, center - j] = Gaussian.Gaussian2D(i, j, sigma);
+                }
+            }
+        }
+
+        public void WriteMatrix()
+        {
+            int size = Matrix.GetLength(0);
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    Console.Write("| {0:##.####} ", Matrix[i, j]);
+                }
+
+                Console.WriteLine("|");
+            }
+        }
+    }
 }
