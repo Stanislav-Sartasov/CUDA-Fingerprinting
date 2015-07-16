@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
+namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
 {
     [TestClass]
-    public class BinTemplateCorrelationTests
+    public class BinTemplateSimilarityTests
     {
         [TestMethod]
         public void TestBinTemplateCorrelation()
@@ -49,8 +49,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             int[] dbTemplatesLengths = new int[] { 1, 2, 4 };
 
 
-            double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultiple(query, db); // templateDb version
-            //double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelationOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
+            double[] similarityRates = BinTemplateSimilarity.GetTemplateSimilarity(query, db); // templateDb version
+            //double[] similarityRates = BinCylinderSimilarity.GetTemplateSimilarityOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
             for (int i = 0; i < similarityRates.Length; i++)
             {
                 Console.Write(similarityRates[i] + (i != similarityRates.Length - 1 ? "; " : ""));

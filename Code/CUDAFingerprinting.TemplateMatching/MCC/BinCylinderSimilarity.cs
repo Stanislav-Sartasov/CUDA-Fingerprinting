@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUDAFingerprinting.Common.BinCylinderCorrelation
+namespace CUDAFingerprinting.TemplateMatching.MCC
 {
-    public class BinCylinderCorrelation
+    public class BinCylinderSimilarity
     {
-        public static double GetBinCylinderCorrelation(
+        public static double GetCylinderSimilarity(
             uint[] linearizedCylinder1, uint[] linearizedCylinder2,
             uint[] cylinder1Validities, uint[] cylinder2Validities,
             uint minMatchableElementsCount)

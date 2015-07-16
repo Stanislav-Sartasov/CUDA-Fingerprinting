@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
+namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
 {
-    static class CylinderTestsHelper
+    class CylinderTestsHelper
     {
         public static uint[] ConvertArrayUintToBinary(uint[] intArray)
         {

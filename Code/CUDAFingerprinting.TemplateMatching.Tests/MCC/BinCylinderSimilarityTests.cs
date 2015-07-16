@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
+namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
 {
     [TestClass]
-    public class BinCylinderCorrelationTests
+    public class BinCylinderSimilarityTests
     {
         public static uint[] GetValidities(int[, ,] cylinder)
         {
@@ -34,31 +32,31 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
 
             return cylinderValidity;
         }
-        
+
         [TestMethod]
-        public void TestBinCylinderCorrelation()
+        public void TestBinCylinderSimilarity()
         {
             uint[][] cylinderValidities = 
-            {
-                CylinderTestsHelper.ConvertArrayUintToBinary(GetValidities(CylinderTestsHelper.cylinderZerosValues)), 
-                CylinderTestsHelper.ConvertArrayUintToBinary(GetValidities(CylinderTestsHelper.cylinderOnesValues)), 
-                CylinderTestsHelper.ConvertArrayUintToBinary(GetValidities(CylinderTestsHelper.cylinderMixedValues))
-            };
+        {
+            CylinderTestsHelper.ConvertArrayUintToBinary(GetValidities(CylinderTestsHelper.cylinderZerosValues)), 
+            CylinderTestsHelper.ConvertArrayUintToBinary(GetValidities(CylinderTestsHelper.cylinderOnesValues)), 
+            CylinderTestsHelper.ConvertArrayUintToBinary(GetValidities(CylinderTestsHelper.cylinderMixedValues))
+        };
 
             // When
-            var correlation0 = BinCylinderCorrelation.GetBinCylinderCorrelation(
+            var correlation0 = BinCylinderSimilarity.GetCylinderSimilarity(
                 CylinderTestsHelper.linearizedCylinders[0], CylinderTestsHelper.linearizedCylinders[1],
                 cylinderValidities[0], cylinderValidities[1], 0);
 
-            var correlation1 = BinCylinderCorrelation.GetBinCylinderCorrelation(
+            var correlation1 = BinCylinderSimilarity.GetCylinderSimilarity(
                 CylinderTestsHelper.linearizedCylinders[1], CylinderTestsHelper.linearizedCylinders[2],
                 cylinderValidities[1], cylinderValidities[2], 0);
 
-            var correlation2 = BinCylinderCorrelation.GetBinCylinderCorrelation(
+            var correlation2 = BinCylinderSimilarity.GetCylinderSimilarity(
                 CylinderTestsHelper.linearizedCylinders[2], CylinderTestsHelper.linearizedCylinders[2],
                 cylinderValidities[2], cylinderValidities[2], 0);
 
-            var correlation3 = BinCylinderCorrelation.GetBinCylinderCorrelation(
+            var correlation3 = BinCylinderSimilarity.GetCylinderSimilarity(
                 CylinderTestsHelper.linearizedCylinders[1], CylinderTestsHelper.linearizedCylinders[1],
                 cylinderValidities[1], cylinderValidities[1], 0);
 
