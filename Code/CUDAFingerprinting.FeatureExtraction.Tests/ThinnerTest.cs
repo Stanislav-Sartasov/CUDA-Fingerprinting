@@ -5,10 +5,10 @@ using System.IO;
 using CUDAFingerprinting.Common;
 using System.Diagnostics;
 
-namespace CUDAFingerprinting.Common.Thinning.Tests
+namespace CUDAFingerprinting.FeatureExtraction.Tests
 {
     [TestClass]
-    public class ThinnerTests
+    public class ThinnerTest
     {
         [TestMethod]
         public void ThinTestAllPics()
@@ -50,7 +50,7 @@ namespace CUDAFingerprinting.Common.Thinning.Tests
             Process.Start(name1);
             */
             var bmpAfter = Thinner.Thin(bmpBefore, bmp.Width, bmp.Height);
-            
+
             var newPic = ImageHelper.SaveArrayToBitmap(
                 OverlapArrays(bmpAfter, bmpBefore, bmp.Height, bmp.Width)
             );
@@ -68,18 +68,5 @@ namespace CUDAFingerprinting.Common.Thinning.Tests
                     nA[y, x] = skeleton[y, x] < 250.0 ? 128.0 : background[y, x];
             return nA;
         }
-        /*
-        public static void WriteArrayPic(String s, double[,] bytes, int h, int w)
-        {
-            System.Console.WriteLine(s);
-            for (int x = 0; x < h; x++)
-            {
-                for (int y = 0; y < w; y++)
-                {
-                    System.Console.Write(bytes[h - 1 - x, y] != 0 ? '=' : '+');
-                }
-                System.Console.WriteLine();
-            }
-        }*/
     }
 }

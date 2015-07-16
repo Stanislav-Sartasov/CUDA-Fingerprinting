@@ -50,7 +50,6 @@ namespace CUDAFingerprinting.Common
         }
 
 		public Block(double[,] Orientation, int size, double[,] gradientX, double[,] gradientY, int centerRow, int centerColumn)				// вычисляет направление в пикселе [i, j], результат помещает в Orientation
-        {
 			this._size = size;
 			this._gx = new double[size, size];
 			this._gy = new double[size, size];
@@ -100,7 +99,6 @@ namespace CUDAFingerprinting.Common
 				return orientation;
             }
         }
-    }
 
 	// ------------------------------------------------------------------------------------
 
@@ -142,13 +140,7 @@ namespace CUDAFingerprinting.Common
 			double[,] Gy = ConvolutionHelper.Convolve(doubleBytes, filterY);
 			// разделение на блоки
 			this._blocks = new Block[(int)Math.Floor((float)(maxY / BlockSize)), (int)Math.Floor((float)(maxX / BlockSize))];
-            for (int row = 0; row < _blocks.GetUpperBound(0) + 1; row++)
-            {
-                for (int column = 0; column < _blocks.GetUpperBound(1) + 1; column++)
-                {
 					_blocks[row, column] = new Block(BlockSize, Gx, Gy, row * BlockSize, column * BlockSize);
-                }
-            }
         }
 
         public OrientationField(int[,] bytes):this(bytes, DefaultSize)
@@ -162,8 +154,8 @@ namespace CUDAFingerprinting.Common
 
 		public double GetOrientation(int x, int y)                  // метод, определяющий по входным координатам (х, у) поле напрваления в этой точке
 		{
-            int row = y / BlockSize;
-            int column = x / BlockSize;
+		    if (row >= _blocks.GetLength(0) || column >= _blocks.GetLength(1))
+		        return 0;
 			return this._blocks[row, column].Orientation;
 		}
         public double[,] GetOrientationMatrix(int height, int width)

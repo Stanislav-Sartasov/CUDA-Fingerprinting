@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{79E3FE0B-60DB-4D6D-9090-81D11720C57C}</ProjectGuid>
+    <ProjectGuid>{2668A7D5-AF3A-4392-A218-A25A971A9549}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.GPU.ImageBinarization.CUDATest</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.GPU.ImageBinarization.CUDATest</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.GPU.OrientationField.Test</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.GPU.OrientationField.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -35,9 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUDAFingerprinting.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Debug\CUDAFingerprinting.Common.dll</HintPath>
+    <Reference Include="CUDAFingerprinting.Common">
+      <HintPath>..\bin\Debug\CUDAFingerprinting.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -55,29 +54,27 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ImageBinarizationTest.cs" />
+    <Compile Include="OrientationFieldTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources.Designer.cs">
+    <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <None Include="Resources\1.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Debug\CUDAFingerprinting.GPU.ImageBinarization.dll">
-      <Link>CUDAFingerprinting.GPU.ImageBinarization.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\2_6.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
+    <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Debug\CUDAFingerprinting.GPU.OrientationField.dll">
+      <Link>CUDAFingerprinting.GPU.OrientationField.dll</Link>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

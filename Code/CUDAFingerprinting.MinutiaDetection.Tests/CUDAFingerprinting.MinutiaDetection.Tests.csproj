@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0D060CC8-D377-4A9B-90F3-B189525B77E1}</ProjectGuid>
+    <ProjectGuid>{7E0C9725-C579-4FEF-9F23-538CB3E090DF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.Common.Thinning.Tests</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.Common.Thinning.Tests</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.MinutiaDetection.Tests</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.MinutiaDetection.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -51,13 +51,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="MinutiaDetectionTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ThinnerTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -66,65 +66,20 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\man.bmp" />
+    <None Include="Resources\17150140AFTER.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CUDAFingerprinting.Common.Thinning\CUDAFingerprinting.Common.Thinning.csproj">
-      <Project>{5baac4f1-87b1-4ece-8daa-0aeb307045ec}</Project>
-      <Name>CUDAFingerprinting.Common.Thinning</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\line.bmp" />
+    <ProjectReference Include="..\CUDAFingerprinting.MinutiaDetection\CUDAFingerprinting.MinutiaDetection.csproj">
+      <Project>{29bd2034-69dc-4ac2-a98c-d9626fba2f4b}</Project>
+      <Name>CUDAFingerprinting.MinutiaDetection</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\small.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\verySmall.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\verySmall2.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\patt.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\101_8.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\19_4.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\egor.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\yoba.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\29_4.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\H.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\idealH.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\X.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\connectedness.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\connectedness2.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\1_1.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

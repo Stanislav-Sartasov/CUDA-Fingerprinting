@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CUDAFingerprinting.Common.Thinning
+namespace CUDAFingerprinting.FeatureExtraction
 {
     public static class Thinner
     {
@@ -15,8 +15,8 @@ namespace CUDAFingerprinting.Common.Thinning
             CENTER,
             AT_LEAST_ONE_EMPTY
         }
-       
-        private static PixelType[,,] patterns = new PixelType[,,] 
+
+        private static PixelType[, ,] patterns = new PixelType[,,] 
         {
             {//a
                 {PixelType.FILLED, PixelType.FILLED, PixelType.AT_LEAST_ONE_EMPTY}, 
@@ -92,16 +92,16 @@ namespace CUDAFingerprinting.Common.Thinning
         };
 
         private static double[,] a = null;
-        
+
         private static int w = 0;
         private static int h = 0;
 
         private static double GetPixel(double[,] array, int x, int y)
         {
-            return (x < 0 || y < 0 || x >= w || y >= h) ? 
-                WHITE : 
-                array[h - 1 - y, x] > 128.0 ? 
-                    WHITE : 
+            return (x < 0 || y < 0 || x >= w || y >= h) ?
+                WHITE :
+                array[h - 1 - y, x] > 128.0 ?
+                    WHITE :
                     BLACK;
         }
 
@@ -110,23 +110,23 @@ namespace CUDAFingerprinting.Common.Thinning
             if (x < 0 || y < 0 || x >= w || y >= h) return;
             array[h - 1 - y, x] = value;
         }
-        
+
         private static bool AreEqual(double value, PixelType patternPixel)
         {
             switch (patternPixel)
             {
                 case PixelType.FILLED:
-                { 
-                    if (value == BLACK)
+                    {
+                        if (value == BLACK)
                             return true;
                         break;
-                }
+                    }
                 case PixelType.EMPTY:
-                {
-                    if (value == WHITE)
-                        return true;
-                    break;
-                }
+                    {
+                        if (value == WHITE)
+                            return true;
+                        break;
+                    }
                 case PixelType.AT_LEAST_ONE_EMPTY://y
                     return true;
                 case PixelType.CENTER://c

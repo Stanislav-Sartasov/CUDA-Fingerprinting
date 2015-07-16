@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CUDAFingerprinting.Common.Thinning")]
+[assembly: AssemblyTitle("CUDAFingerprinting.MinutiaDetection")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CUDAFingerprinting.Common.Thinning")]
+[assembly: AssemblyProduct("CUDAFingerprinting.MinutiaDetection")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6f1b292b-43e7-4dd4-bbc5-b6e92987bfd4")]
+[assembly: Guid("e7e9d317-7991-42f8-bc71-350c58c47ac0")]
 
 // Version information for an assembly consists of the following four values:
 //
