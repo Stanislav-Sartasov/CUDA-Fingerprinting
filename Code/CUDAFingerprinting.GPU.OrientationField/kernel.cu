@@ -4,6 +4,7 @@
 #include <math.h>
 #include "cuda_runtime.h"
 #include <device_functions.h>
+#include <math_constants.h>
 #include "device_launch_parameters.h"
 #include "Convolution.cuh"
 #include "constsmacros.h"
@@ -23,6 +24,11 @@ extern "C"
 __global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
 	int centerRow = defaultRow();
 	int centerColumn = defaultColumn();
+
+	//float gx = gradientX.At(centerRow, centerColumn);
+	//float gy = gradientY.At(centerRow, centerColumn);
+	//float sq = sqrt(gx*gx + gy*gy);
+	//orientation.SetAt(centerRow, centerColumn, sq);
 
 	const int size = 16;
 	const int center = size / 2;
@@ -56,20 +62,17 @@ __global__ void cudaSetOrientationInPixels(CUDAArray<float> orientation, CUDAArr
 			denominator += sqrdiff[i][j];
 		}
 	}
-	__syncthreads();
 
 	// определяем значение угла ориентации
-	if (denominator == 0){
-		orientation.SetAt(centerRow, centerColumn, M_PI_2);
-	}
-	else{
-		orientation.SetAt(centerRow, centerColumn, M_PI_2 + atan2(2 * numerator, denominator) / 2.0f);
-		if (orientation.At(centerRow, centerColumn) > M_PI_2)
+	float angle = CUDART_PIO2_F;
+	if (denominator != 0){
+		angle = CUDART_PIO2_F + atan2(numerator*2.0f, denominator) / 2.0f;
+		if (angle > CUDART_PIO2_F)
 		{
-			float index = orientation.At(centerRow, centerColumn) - M_PI;
-			orientation.SetAt(centerRow, centerColumn, index);
+			angle -= CUDART_PI_F;
 		}
 	}
+	orientation.SetAt(centerRow, centerColumn, angle);
 }
 
 __global__ void cudaSetOrientationInBlocks(CUDAArray<float> orientation, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
@@ -119,15 +122,15 @@ __global__ void cudaSetOrientationInBlocks(CUDAArray<float> orientation, CUDAArr
 	denominator = sqrdiff[0][0];
 
 	// определяем значение угла ориентации
-	if (denominator == 0){
-		orientation.SetAt(row, column, M_PI_2);
-	}
-	else{
-		orientation.SetAt(row, column, M_PI_2 + atan2(2 * numerator, denominator) / 2.0f);
-		if (orientation.At(row, column) > M_PI_2){
-			orientation.SetAt(row, column, orientation.At(row, column) - M_PI);
+	float angle = CUDART_PIO2_F;
+	if (denominator != 0){
+		angle = CUDART_PIO2_F + atan2(numerator*2.0f, denominator) / 2.0f;
+		if (angle > CUDART_PIO2_F)
+		{
+			angle -= CUDART_PI_F;
 		}
 	}
+	orientation.SetAt(row, column, angle);
 }
 
 // ----------- CPU ----------- //
@@ -138,7 +141,7 @@ void SetOrientationInBlocks(CUDAArray<float> orientation, CUDAArray<float> sourc
 		dim3(ceilMod(source.Width, defaultBlockSize),
 		ceilMod(source.Height, defaultBlockSize));
 	cudaSetOrientationInBlocks << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
-	cudaError_t error = cudaDeviceSynchronize();
+	cudaError_t error = cudaGetLastError();
 }
 
 void SetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> source, CUDAArray<float> gradientX, CUDAArray<float> gradientY){
@@ -146,9 +149,9 @@ void SetOrientationInPixels(CUDAArray<float> orientation, CUDAArray<float> sourc
 	dim3 gridSize =
 		dim3(ceilMod(source.Width, defaultThreadCount),
 		ceilMod(source.Height, defaultThreadCount));
+	
 	cudaSetOrientationInPixels << <gridSize, blockSize >> >(orientation, gradientX, gradientY);
-	cudaError_t error = cudaDeviceSynchronize();
-	float* o = orientation.GetData();
+	cudaError_t error = cudaGetLastError();
 }
 
 
@@ -176,7 +179,7 @@ void OrientationFieldInBlocks(float* orientation, float* sourceBytes, int width,
 	orientation = Orientation.GetData();
 }
 
-void OrientatiobFieldInPixels(float* orientation, float* sourceBytes, int width, int height){
+void OrientationFieldInPixels(float* orientation, float* sourceBytes, int width, int height){
 
 	CUDAArray<float> source(sourceBytes, width, height);
 	CUDAArray<float> Orientation(source.Width, source.Height);
@@ -194,24 +197,25 @@ void OrientatiobFieldInPixels(float* orientation, float* sourceBytes, int width,
 	Convolve(Gx, source, filterX);
 	Convolve(Gy, source, filterY);
 
+	float* gx = Gx.GetData();
+	
 	SetOrientationInPixels(Orientation, source, Gx, Gy);
-
-	orientation = Orientation.GetData();
 }
 
 //int main(){
 //	
-//	char filepath[] = "C:\\temp\\1.bmp";
+//	char filepath[] = "C:\\temp\\3.bmp";
+//	cudaSetDevice(0);
 //	int width, height;
 //	int* intBmpArray = loadBmp(filepath, &width, &height);
 //	float* floatBmpArray = (float*)malloc(sizeof(float) * width * height);
 //	for (int i = 0; i < width * height; i++){
 //		floatBmpArray[i] = (float)intBmpArray[i];
 //	}
-//	float* orientation;
-//	orientation = OrientationFieldInBlocks(floatBmpArray, width, height);
+//	float* orientation = (float*)malloc(sizeof(float)*width*height);
+//	//OrientationFieldInBlocks(floatBmpArray, orientation, width, height);
 //
-//	//orientation = OrientatiobFieldInPixels(floatBmpArray, width, height);
+//	OrientationFieldInPixels(orientation, floatBmpArray, width, height);
 //
 //	return 0;
 //}
