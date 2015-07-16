@@ -68,58 +68,53 @@ float getBinCylinderCorrelation(
 	return correlation;
 }
 
-unsigned int binToInt(char* s)
-{
-	return (unsigned int)strtoul(s, NULL, 2);
-}
-
-int main()
-{
-	unsigned int cylinderCapacity = 1;
-
-	unsigned int *cudaCylinder1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-	unsigned int *cudaCylinder2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-
-	unsigned int *cudaValidities1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-	unsigned int *cudaValidities2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-
-	// Test 1
-	//memset(cudaCylinder1, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaCylinder2, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaValidities1, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaValidities2, 255, cylinderCapacity * sizeof(unsigned int));
-	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
-
-
-	// Test 2
-	//srand((unsigned int)time(NULL));
-	//for (unsigned int i = 0; i < cylinderCapacity; i++) {
-	//	cudaCylinder1[i] = rand();
-	//	cudaCylinder2[i] = rand();
-	//	cudaValidities1[i] = rand();
-	//	cudaValidities2[i] = rand();
-	//}
-	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
-
-	// Test 3 (only for cylinderCapacity == 1)
-
-	cudaCylinder1[0] = binToInt("11111111111111111100000000000000");
-	cudaValidities1[0] = binToInt("11111111111111111100000000000000");
-
-	cudaCylinder2[0] = binToInt("11010001010100001100000000000000");
-	cudaValidities2[0] = binToInt("11011101111100011100000000000000");
-
-	float correlation =
-		getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
-
-	printf("Correlation: %f\n", correlation);
-
-	// [end] Test 3
-
-	free(cudaCylinder1);
-	free(cudaCylinder2);
-	free(cudaValidities1);
-	free(cudaValidities2);
-
-	return 0;
-}
+//int main()
+//{
+//	unsigned int cylinderCapacity = 1;
+//
+//	unsigned int *cudaCylinder1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//	unsigned int *cudaCylinder2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//
+//	unsigned int *cudaValidities1 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//	unsigned int *cudaValidities2 = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//
+//	// Test 1
+//	//memset(cudaCylinder1, 255, cylinderCapacity * sizeof(unsigned int));
+//	//memset(cudaCylinder2, 255, cylinderCapacity * sizeof(unsigned int));
+//	//memset(cudaValidities1, 255, cylinderCapacity * sizeof(unsigned int));
+//	//memset(cudaValidities2, 255, cylinderCapacity * sizeof(unsigned int));
+//	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+//
+//
+//	// Test 2
+//	//srand((unsigned int)time(NULL));
+//	//for (unsigned int i = 0; i < cylinderCapacity; i++) {
+//	//	cudaCylinder1[i] = rand();
+//	//	cudaCylinder2[i] = rand();
+//	//	cudaValidities1[i] = rand();
+//	//	cudaValidities2[i] = rand();
+//	//}
+//	//getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+//
+//	// Test 3 (only for cylinderCapacity == 1)
+//
+//	cudaCylinder1[0] = binToInt("11111111111111111100000000000000");
+//	cudaValidities1[0] = binToInt("11111111111111111100000000000000");
+//
+//	cudaCylinder2[0] = binToInt("11010001010100001100000000000000");
+//	cudaValidities2[0] = binToInt("11011101111100011100000000000000");
+//
+//	float correlation =
+//		getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);
+//
+//	printf("Correlation: %f\n", correlation);
+//
+//	// [end] Test 3
+//
+//	free(cudaCylinder1);
+//	free(cudaCylinder2);
+//	free(cudaValidities1);
+//	free(cudaValidities2);
+//
+//	return 0;
+//}

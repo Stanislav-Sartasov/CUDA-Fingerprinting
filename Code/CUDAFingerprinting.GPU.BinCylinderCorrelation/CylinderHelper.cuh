@@ -13,8 +13,12 @@ public:
 	float norm;
 	unsigned int templateIndex;
 
-	Cylinder(unsigned int *givenValues, unsigned int valuesCount, float givenAngle, float givenNorm) :
-		angle(givenAngle), norm(givenNorm), values((unsigned int *)malloc(valuesCount * sizeof(unsigned int))) {}
+	Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
+		valuesCount(givenValuesCount), angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex) 
+	{
+		values = (unsigned int *)malloc(givenValuesCount * sizeof(unsigned int));
+		memcpy(values, givenValues, givenValuesCount * sizeof(unsigned int));
+	}
 };
 
 class CylinderGPU
@@ -25,8 +29,20 @@ public:
 	float norm;
 	unsigned int templateIndex;
 
-	CylinderGPU(unsigned int *givenValues, unsigned int valuesCount, float givenAngle, float givenNorm) :
-		angle(givenAngle), norm(givenNorm), values(new CUDAArray<unsigned int>(givenValues, valuesCount, 1)) {}
+	CylinderGPU(unsigned int givenValuesCount) 
+	{
+		CUDAArray<unsigned int> *preValues = new CUDAArray<unsigned int>(givenValuesCount, 1);
+		cudaMalloc(&values, sizeof(CUDAArray<unsigned int>));
+		cudaMemcpy(values, preValues, sizeof(CUDAArray<unsigned int>), cudaMemcpyHostToDevice);
+	}
+
+	CylinderGPU(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
+		angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex) 
+	{
+		CUDAArray<unsigned int> *preValues = new CUDAArray<unsigned int>(givenValues, givenValuesCount, 1);
+		cudaMalloc(&values, sizeof(CUDAArray<unsigned int>));
+		cudaMemcpy(values, preValues, sizeof(CUDAArray<unsigned int>), cudaMemcpyHostToDevice);
+	}
 };
 
 #endif CUDAFINGERPRINTING_CYLINDERHELPER

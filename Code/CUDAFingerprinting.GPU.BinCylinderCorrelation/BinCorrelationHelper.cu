@@ -20,9 +20,26 @@ void printArray1D(unsigned int* arr, unsigned int length)
 
 void printCUDAArray1D(CUDAArray<unsigned int> arr)
 {
-	printf("Print CUDAArray\n");
+	printf("Print CUDAArray 1D\n");
 	printArray1D(arr.GetData(), arr.Width * arr.Height);
-	printf("[end] Print CUDAArray\n");
+	printf("[end] Print CUDAArray 1D\n");
+}
+
+void printArray2D(unsigned int* arr, unsigned int width, unsigned int height)
+{
+	for (unsigned int i = 0; i < height; i++) {
+		for (unsigned int j = 0; j < width; j++) {
+			printf("%u ", arr[i * width + j]);
+		}
+		printf("\n");
+	}
+}
+
+void printCUDAArray2D(CUDAArray<unsigned int> arr)
+{
+	printf("Print CUDAArray 2D\n");
+	printArray2D(arr.GetData(), arr.Width, arr.Height);
+	printf("[end] Print CUDAArray 2D\n");
 }
 
 __device__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, CUDAArray<unsigned int> *result)
@@ -56,8 +73,8 @@ CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<u
 
 __device__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, CUDAArray<unsigned int> *result)
 {
-	int row = defaultRow();
-	int column = defaultColumn();
+	int row = 0;
+	int column = defaultColumn() % fst->Width;
 
 	if (fst->Width > column && fst->Height > row)	{
 		unsigned int newValue = fst->At(row, column) ^ snd->At(row, column);
@@ -88,7 +105,7 @@ CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<u
 __device__ void cudaArrayWordNormDevice(CUDAArray<unsigned int> *arr, unsigned int* sum)
 {
 	int row = defaultRow();
-	int column = defaultColumn();
+	int column = defaultColumn() % arr->Width;
 
 	if (arr->Width > column && arr->Height > row)	{
 		unsigned int x = arr->At(row, column);
@@ -128,3 +145,13 @@ unsigned int getOneBitsCount(CUDAArray<unsigned int> arr)
 	return *sum;
 }
 
+unsigned int getOneBitsCountRaw(unsigned int* arr, unsigned int length)
+{
+	CUDAArray<unsigned int> cudaArr(arr, length, 1);
+	return getOneBitsCount(cudaArr);
+}
+
+unsigned int binToInt(char* s)
+{
+	return (unsigned int)strtoul(s, NULL, 2);
+}

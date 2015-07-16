@@ -3,7 +3,7 @@
 
 #include "CylinderHelper.cuh"
 
-void getBinTemplateSimilarity(
+void getBinTemplateSimilarities(
 	Cylinder *query, unsigned int queryLength,
 	Cylinder *cylindersDb, unsigned int cylinderDbCount,
 	unsigned int *templateDbLengths, unsigned int templateDbCount,

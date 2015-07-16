@@ -47,8 +47,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             uint[] templateIndices = new uint[] { 0, 1, 1, 2, 2, 2, 2 };
             CylinderDatabase cylinderDb = new CylinderDatabase(contiguousArr, templateIndices);
             int[] dbTemplatesLengths = new int[] { 1, 2, 4 };
-
-
+            
             double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultiple(query, db); // templateDb version
             //double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelationOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
             for (int i = 0; i < similarityRates.Length; i++)
