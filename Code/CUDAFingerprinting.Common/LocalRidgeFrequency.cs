@@ -61,19 +61,13 @@ namespace CUDAFingerprinting.Common
 
         public static double[,] CalculateFrequency(double[,] img, double[,] orientationMatrix, int w = 16, int l = 32)
         {
-            double[,] frequencyMatrix = new double[img.GetLength(0), img.GetLength(1)];
+            double[,] frequencyMatrix = new double[img.GetLength(0) / w, img.GetLength(1) / w];
+            //iterating by block centres:
             for (int i = w/2 - 1; i <= (img.GetLength(0)/w - 1)*w + (w/2 - 1); i += w)
             {
                 for (int j = w / 2 - 1; j <= (img.GetLength(1) / w - 1) * w + (w / 2 - 1); j += w)
                 {
-                    double frequency = CalculateFrequencyBlock(img, orientationMatrix[i, j], i, j, w, l);
-                    for (int u = i - (w/2 - 1); u < i + (w / 2 + 1); u++)
-                    {
-                        for (int v = j - (w/2 - 1); v < j + (w/2 + 1); v++)
-                        {
-                            frequencyMatrix[u, v] = frequency;
-                        }
-                    }
+                    frequencyMatrix[(i - (w / 2 - 1)) / w, (j - (w / 2 - 1)) / w] = CalculateFrequencyBlock(img, orientationMatrix[i, j], i, j, w, l);
                 }
             }
             return frequencyMatrix;
@@ -89,27 +83,77 @@ namespace CUDAFingerprinting.Common
             if (x <= 0) return 0;
             return 1;
         }
-        public static double[,] InterpolateFrequency(double[,] frequencyMatrix, int height, int width, int filterSize = 7, int w = 16)
+        //public static double[,] InterpolateFrequencyOld(double[,] frequencyMatrix, int height, int width, int filterSize = 7, int w = 16)
+        //{
+        //    double[,] result = new double[frequencyMatrix.GetLength(0), frequencyMatrix.GetLength(1)];
+        //    for (int i = w / 2 - 1; i <= (height / w - 1) * w + (w / 2 - 1); i += w)
+        //    {
+        //        for (int j = w / 2 - 1; j <= (width / w - 1) * w + (w / 2 - 1); j += w)
+        //        {
+        //            if (frequencyMatrix[(i - (w / 2 - 1)) / w, (j - (w / 2 - 1)) / w] != -1.0)
+        //            {
+        //                result[(i - (w/2 - 1))/w, (j - (w/2 - 1))/w] =
+        //                    frequencyMatrix[(i - (w/2 - 1))/w, (j - (w/2 - 1))/w];
+        //                //for (int u = i - (w/2 - 1); u < i + (w/2 + 1); u++)
+        //                //{
+        //                //    for (int v = j - (w/2 - 1); v < j + (w/2 + 1); v++)
+        //                //    {
+        //                //        result[u, v] = frequencyMatrix[i, j];
+        //                //    }
+        //                //}
+        //            }
+        //            else
+        //            {
+        //                var gaussian = new Filter(filterSize, 1);
+        //                int center = filterSize / 2; //filter is always a square.
+        //                int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
+        //                double numerator = 0;
+        //                double denominator = 0;
+        //                for (int u = -upperCenter; u <= center; u++)
+        //                {
+        //                    for (int v = -upperCenter; v <= center; v++)
+        //                    {
+        //                        int indexX = (i + u * w) / w;
+        //                        int indexY = (j + v * w) / w;
+        //                        if (indexX < 0) indexX = 0;
+        //                        if (indexX >= frequencyMatrix.GetLength(0)) indexX = frequencyMatrix.GetLength(0) - 1;
+        //                        if (indexY < 0) indexY = 0;
+        //                        if (indexY >= frequencyMatrix.GetLength(1)) indexY = frequencyMatrix.GetLength(1) - 1;
+        //                        numerator +=  gaussian.Matrix[center - u, center - v] * Mu(frequencyMatrix[indexX, indexY]);//Not sure this formula is correct
+        //                        denominator += gaussian.Matrix[center - u, center - v] * Delta(frequencyMatrix[indexX, indexY] + 1);//Not sure this formula is correct
+        //                    }
+        //                }
+        //                frequencyMatrix[(i - (w / 2 - 1)) / w, (j - (w / 2 - 1)) / w] = numerator/denominator;
+        //                result[(i - (w/2 - 1))/w, (j - (w/2 - 1))/w] =
+        //                    frequencyMatrix[(i - (w/2 - 1))/w, (j - (w/2 - 1))/w];
+        //                //for (int u = i - (w / 2 - 1); u < i + (w / 2 + 1); u++)
+        //                //{
+        //                //    for (int v = j - (w / 2 - 1); v < j + (w / 2 + 1); v++)
+        //                //    {
+        //                //        result[u, v] = frequencyMatrix[i, j];
+        //                //    }
+        //                //}
+        //            }
+        //        }
+        //    }
+        //    return result;
+        //}
+
+        public static bool InterpolateFrequency(this double[,] frequencyMatrix, int filterSize = 7, int sigma = 1, int w = 16)
         {
-            double[,] result = new double[frequencyMatrix.GetLength(0), frequencyMatrix.GetLength(1)];
-            for (int i = w / 2 - 1; i <= (height / w - 1) * w + (w / 2 - 1); i += w)
+            bool needMoreInterpolationFlag = false;
+
+            int height = frequencyMatrix.GetLength(0);
+            int width = frequencyMatrix.GetLength(1);
+
+            for (int i = 0; i < height; i ++)
             {
-                for (int j = w / 2 - 1; j <= (width / w - 1) * w + (w / 2 - 1); j += w)
+                for (int j = 0; j < width; j ++)
                 {
-                    if (frequencyMatrix[i, j] != -1)
+                    if (frequencyMatrix[i, j] == -1.0)
                     {
-                        for (int u = i - (w/2 - 1); u < i + (w/2 + 1); u++)
-                        {
-                            for (int v = j - (w/2 - 1); v < j + (w/2 + 1); v++)
-                            {
-                                result[u, v] = frequencyMatrix[i, j];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var gaussian = new Filter(filterSize, 1);
-                        int center = filterSize / 2; //filter is always a square.
+                        var gaussian = new Filter(filterSize, sigma);
+                        int center = filterSize/2; //filter is always a square.
                         int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
                         double numerator = 0;
                         double denominator = 0;
@@ -117,23 +161,49 @@ namespace CUDAFingerprinting.Common
                         {
                             for (int v = -upperCenter; v <= center; v++)
                             {
-                                int indexX = i + u * w;
-                                int indexY = j + v * w;
+                                //In paper by Hong, Wan, Jain the indexes look different, but they're equivalent to those below.
+                                int indexX = i + u;
+                                int indexY = j + v;
                                 if (indexX < 0) indexX = 0;
                                 if (indexX >= height) indexX = height - 1;
                                 if (indexY < 0) indexY = 0;
                                 if (indexY >= width) indexY = width - 1;
-                                numerator +=  gaussian.Matrix[center - u, center - v] * Mu(frequencyMatrix[indexX, indexY]);//Not sure this formula is correct
-                                denominator += gaussian.Matrix[center - u, center - v] * Delta(frequencyMatrix[indexX, indexY] + 1);//Not sure this formula is correct
+                                numerator += gaussian.Matrix[center - u, center - v]*Mu(frequencyMatrix[indexX, indexY]);
+                                denominator += gaussian.Matrix[center - u, center - v]*Delta(frequencyMatrix[indexX, indexY] + 1);
                             }
                         }
-                        frequencyMatrix[i,j] = numerator/denominator;
-                        for (int u = i - (w / 2 - 1); u < i + (w / 2 + 1); u++)
+                        frequencyMatrix[i, j] = numerator/denominator;
+                        if ((frequencyMatrix[i, j] != frequencyMatrix[i, j]) || (frequencyMatrix[i, j] > 1.0/3.0) ||
+                            (frequencyMatrix[i, j] < 0.04))
                         {
-                            for (int v = j - (w / 2 - 1); v < j + (w / 2 + 1); v++)
-                            {
-                                result[u, v] = frequencyMatrix[i, j];
-                            }
+                            frequencyMatrix[i, j] = -1;
+                            needMoreInterpolationFlag = true;
+                        }
+                    }
+                }
+            }
+            return needMoreInterpolationFlag;
+        }
+
+        public static void InterpolateToPerfecton(this double[,] frequencyMatrix, int filterSize = 7, int w = 16)
+        {
+            bool flag = InterpolateFrequency(frequencyMatrix, filterSize, w);
+            while (flag) 
+                flag = InterpolateFrequency(frequencyMatrix, filterSize, w);
+        }
+        public static double[,] GetFrequencyMatrixImageSize(double[,] frequencyMatrix, int imgHeight, int imgWidth, int w = 16)
+        {
+            double[,] result = new double[imgHeight, imgWidth];
+            for (int i = 0; i < frequencyMatrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < frequencyMatrix.GetLength(1); j++)
+                {
+                    double curFrequency = frequencyMatrix[i, j];
+                    for (int u = 0; u < w; u++)
+                    {
+                        for (int v = 0; v < w; v++)
+                        {
+                            result[i*w + u, j*w + v] = curFrequency;
                         }
                     }
                 }
