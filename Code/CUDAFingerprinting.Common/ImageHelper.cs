@@ -24,8 +24,8 @@ namespace CUDAFingerprinting.Common
 
             foreach (var pt in minutiae)
             {
-                gfx.DrawEllipse(Pens.Red, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.FillEllipse(Brushes.Red, pt.X - 2, pt.Y - 2, 5, 5);
+                //minutia box
+                gfx.DrawRectangle(Pens.Red, pt.X - 1, pt.Y - 1, 2, 2);
             }
 
             gfx.Save();
@@ -43,20 +43,31 @@ namespace CUDAFingerprinting.Common
         public static void MarkMinutiaeWithDirections(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
-            for (int x = 0; x < bmp2.Width; x++)
+            for (int x = 0; x < source.Width; x++)
             {
-                for (int y = 0; y < bmp2.Height; y++)
+                for (int y = 0; y < source.Height; y++)
                 {
                     bmp2.SetPixel(x, y, source.GetPixel(x, y));
                 }
             }
             var gfx = Graphics.FromImage(bmp2);
 
+            int fl = 1;
             foreach (var pt in minutiae)
             {
-                gfx.DrawEllipse(Pens.Red, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.FillEllipse(Brushes.Red, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.DrawLine(Pens.Blue, (float)pt.X, (float)pt.Y, (float)(pt.X + Math.Cos(pt.Angle)*6), (float)(pt.Y - Math.Sin(pt.Angle)*6));
+                //minutia direction
+                gfx.DrawLine(Pens.Blue, 
+                    pt.X, 
+                    pt.Y, 
+                    Convert.ToInt32(pt.X + Math.Cos(pt.Angle) * 5),
+                    Convert.ToInt32(pt.Y - Math.Sin(pt.Angle) * 5)
+                );
+            }
+            //for marking above direction lines
+            foreach (var pt in minutiae)
+            {
+                //minutia point
+                gfx.FillRectangle(Brushes.Red, pt.X, pt.Y, 1, 1);
             }
 
             gfx.Save();
@@ -170,6 +181,11 @@ namespace CUDAFingerprinting.Common
         }
 
         public static void SaveArray(int[,] data, string path, bool applyNormalization = false)
+        {
+            SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
+        }
+
+        public static void SaveArray(float[,] data, string path, bool applyNormalization = false)
         {
             SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
         }

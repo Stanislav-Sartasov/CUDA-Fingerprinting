@@ -50,7 +50,16 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="MCC\BinCylinderSimilarityTests.cs" />
+    <Compile Include="MCC\BinTemplateSimilarityTests.cs" />
+    <Compile Include="MCC\CylinderTestsHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.TemplateMatching\CUDAFingerprinting.TemplateMatching.csproj">
+      <Project>{9dcdbfa8-d0fb-4f13-b903-c6a82f024297}</Project>
+      <Name>CUDAFingerprinting.TemplateMatching</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

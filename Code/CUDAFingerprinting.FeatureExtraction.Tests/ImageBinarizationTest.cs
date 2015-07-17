@@ -11,7 +11,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
         [TestMethod]
         public void BinarializationTest()
         {
-            double[,] arrayD = ImageHelper.LoadImage(Resources._2_6);
+            double[,] arrayD = ImageHelper.LoadImage(Resources._1test);
             var binarizatedImageDouble = ImageBinarization.Binarize2D(arrayD, 128);
             for (int i = 0; i < arrayD.GetLength(0); i++)
             {
