@@ -63,12 +63,11 @@ __global__ void computeLUTSqrt(CUDAArray<float> LUTSqrt)
 
 __global__ void computeLUTNumPairs(CUDAArray<unsigned int> LUTNumPairs)
 {
-	for (int i = 0; i < LUTNumPairs.Width; i++)
-	{
-		unsigned int curNumPairs = NUM_PAIRS_MIN + round((NUM_PAIRS_MAX - NUM_PAIRS_MIN)
-			/ (1 + expf(-NUM_PAIRS_TAU * MIN(queryLengthGlobal, i) - NUM_PAIRS_MU)));
-		LUTNumPairs.SetAt(i, 0, curNumPairs);
-	}
+	int threadIndex = defaultColumn();
+	float exp = expf(11.6f);
+	unsigned int curNumPairs = NUM_PAIRS_MIN + round((NUM_PAIRS_MAX - NUM_PAIRS_MIN)
+		/ (1 + expf(-1 * NUM_PAIRS_TAU * (MIN(queryLengthGlobal, threadIndex) - NUM_PAIRS_MU) )));
+	LUTNumPairs.SetAt(0, threadIndex, curNumPairs);
 }
 
 __global__ void computeLUTAngles(CUDAArray<int> LUTAngles)
@@ -142,8 +141,7 @@ __global__ void generateBucketMatrix(CUDAArray<float> LUTSqrt, CUDAArray<int> LU
 				bucketIndex--;
 			}
 
-			atomicAdd(&(bucketMatrix.cudaPtr[curCylinderDb.templateIndex * bucketMatrix.Stride / sizeof(unsigned int) + bucketIndex]), 1);
-			//bucketMatrix.SetAt(curCylinderDb.templateIndex, bucketIndex, bucketMatrix.At(curCylinderDb.templateIndex, bucketIndex) + 1);
+			atomicAdd(&(bucketMatrix.cudaPtr[curCylinderDb.templateIndex * bucketMatrix.Stride / sizeof(unsigned int) + bucketIndex]), 1);	
 		}
 	}
 }
@@ -153,32 +151,37 @@ __global__ void computeLSS(
 {
 	// Dynamic allocation will probably be better
 	__shared__ unsigned int bucketSubmatrixPerBlock[QUANTIZED_SIMILARITIES_COUNT][THREADS_PER_BLOCK_LSS];
-
+	
 	// Index of the first DB template of the current block
 	unsigned int firstBlockTemplateIndex = THREADS_PER_BLOCK_LSS * blockIdx.x;
 
 	// Copy appropriate part of bucketMatrix to bucketSubmatrixPerBlock
-	for (int j = 0; j < THREADS_PER_BLOCK_LSS; j++)
+	int submatrixHeight =
+		QUANTIZED_SIMILARITIES_COUNT % THREADS_PER_BLOCK_LSS == 0 ? THREADS_PER_BLOCK_LSS :
+		QUANTIZED_SIMILARITIES_COUNT % THREADS_PER_BLOCK_LSS;
+	for (int j = 0; j < submatrixHeight; j++)
 	{
 		bucketSubmatrixPerBlock[j][threadIdx.x] = bucketMatrix.At(firstBlockTemplateIndex + j, threadIdx.x);
 	}
 
 	__syncthreads();
 
-	unsigned int curTemplateIndex = firstBlockTemplateIndex + threadIdx.x; // == defaultColumn() (hopefully)
-
-	unsigned int numPairs = LUTNumPairs.At(MIN(LUTTemplateDbLengths.At(curTemplateIndex, 1), queryLengthGlobal), 1);
-	int sum = 0, t = numPairs, i = 0;
-	while (i < QUANTIZED_SIMILARITIES_COUNT && t > 0)
+	unsigned int threadIndex = defaultColumn();
+	if (bucketMatrix.Height > threadIndex)
 	{
-		unsigned int curBucketValue = bucketSubmatrixPerBlock[threadIdx.x][i];
-		sum += MIN(curBucketValue, t);
-		t -= MIN(curBucketValue, t);
-		i++;
+		unsigned int numPairs = 11; // LUTNumPairs.At(0, MIN(LUTTemplateDbLengths.At(0, threadIndex), queryLengthGlobal));
+		int sum = 0, t = numPairs, i = 0;
+		while (i < QUANTIZED_SIMILARITIES_COUNT && t > 0)
+		{
+			unsigned int curBucketValue = bucketSubmatrixPerBlock[threadIdx.x][i];
+			sum += MIN(curBucketValue, t) * i;
+			t -= MIN(curBucketValue, t);
+			i++;
+		}
+		sum += t * QUANTIZED_SIMILARITIES_COUNT;
+	
+		similarityRates.SetAt(0, threadIndex, 1.0 - (float)sum / (numPairs * QUANTIZED_SIMILARITIES_COUNT));
 	}
-	sum += t * QUANTIZED_SIMILARITIES_COUNT;
-
-	similarityRates.SetAt(curTemplateIndex, 1, 1 - sum / (numPairs * QUANTIZED_SIMILARITIES_COUNT));
 }
 
 void convertToCylindersGPU(Cylinder *cylinders, unsigned int cylindersCount, CUDAArray<CylinderGPU> *cylindersGPU)
@@ -192,11 +195,6 @@ void convertToCylindersGPU(Cylinder *cylinders, unsigned int cylindersCount, CUD
 	}
 
 	*cylindersGPU = CUDAArray<CylinderGPU>(cylindersGPUarr, cylindersCount, 1);
-}
-
-__global__ void checkGPUVars(CylinderGPU *cylinder, unsigned int* result)
-{
-
 }
 
 void printAngles(int* arr, int width, int height)
@@ -215,26 +213,6 @@ void printCUDAAngles(CUDAArray<int> arr)
 	printAngles(arr.GetData(), arr.Width, arr.Height);
 	printf("[end] Print CUDAArray 2D\n");
 }
-
-
-void printSqrt(float* arr, int width, int height)
-{
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			printf("%f ", arr[i * width + j]);
-		}
-		printf("\n");
-	}
-}
-
-void printCUDASqrt(CUDAArray<float> arr)
-{
-	printf("Print CUDAArray 2D\n");
-	printSqrt(arr.GetData(), arr.Width, arr.Height);
-	printf("[end] Print CUDAArray 2D\n");
-}
-
-
 
 float * getBinTemplateSimilarities(
 	Cylinder *query, unsigned int queryLength,
@@ -266,8 +244,8 @@ float * getBinTemplateSimilarities(
 	CUDAArray<float> LUTSqrt = CUDAArray<float>(cylinderCellsCount * sizeof(unsigned int) * 8 + 1, 1); // 0 through number of bits in cylinder
 	computeLUTSqrt << <1, cylinderCellsCount * sizeof(unsigned int)* 8 + 1 >> >(LUTSqrt);
 
-	CUDAArray<unsigned int> LUTNumPairs = CUDAArray<unsigned int>(cylinderCellsCount, 1);
-	computeLUTNumPairs << <1, cylinderCellsCount >> >(LUTNumPairs);
+	CUDAArray<unsigned int> LUTNumPairs = CUDAArray<unsigned int>(MAX_CYLINDERS_PER_TEMPLATE, 1);
+	computeLUTNumPairs << <1, MAX_CYLINDERS_PER_TEMPLATE >> >(LUTNumPairs);
 
 	int *preLUTAngles = (int *)malloc((queryLength + 1) * QUANTIZED_ANGLES_COUNT * sizeof(int));
 	//memset(&preLUTAngles, 0, (queryLength + 1) * QUANTIZED_ANGLES_COUNT * sizeof(int)); // Why does it overwrite everything around? AFAIR works with unsigned
@@ -275,23 +253,14 @@ float * getBinTemplateSimilarities(
 		preLUTAngles[i] = 0;
 	}
 	CUDAArray<int> LUTAngles = CUDAArray<int>(preLUTAngles, queryLength + 1, QUANTIZED_ANGLES_COUNT);
-	//printCUDAAngles(LUTAngles);
 	computeLUTAngles << <1, QUANTIZED_ANGLES_COUNT >> >(LUTAngles);
-	//printCUDAAngles(LUTAngles);
 	
 	CylinderGPU *xorArrayCylindersGPU = (CylinderGPU *)malloc(cylinderDbCount * queryLength * sizeof(CylinderGPU));
 	for (unsigned int i = 0; i < cylinderDbCount * queryLength; i++) {
 		xorArrayCylindersGPU[i] = CylinderGPU(cylinderCellsCount);
 	}
 	CUDAArray<CylinderGPU> xorArray = CUDAArray<CylinderGPU>(xorArrayCylindersGPU, queryLength, cylinderDbCount);
-	cudaCheckError();
-	cudaError_t error2 = cudaDeviceSynchronize();
-	if (error2 != 0) exit(1);
-	cudaCheckError();
-	computeXorArray << <1, 32 >> >(xorArray);
-	cudaDeviceSynchronize();
-	cudaCheckError();
-	printf("Got Xor\n");
+	computeXorArray << <ceilMod(cylinderDbCount * queryLength * cylinderCellsCount, defaultThreadCount), defaultThreadCount >> >(xorArray);
 
 	unsigned int *d_LUTArr;
 	cudaMalloc((void **)&d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int));
@@ -306,11 +275,11 @@ float * getBinTemplateSimilarities(
 	CUDAArray<unsigned int> preBucketMatrix = CUDAArray<unsigned int>(zeroMatrix, QUANTIZED_SIMILARITIES_COUNT, templateDbCount);
 	cudaMemcpyToSymbol(bucketMatrix, &preBucketMatrix, sizeof(CUDAArray<unsigned int>));
 	cudaCheckError();
-	generateBucketMatrix << <1, 192 >> >(
+	generateBucketMatrix << <ceilMod(cylinderDbCount, THREADS_PER_BLOCK_MATRIX_GEN), THREADS_PER_BLOCK_MATRIX_GEN >> >(
 		LUTSqrt, LUTAngles, LUTPopCountXor);
 	cudaMemcpyFromSymbol(&preBucketMatrix, bucketMatrix, sizeof(CUDAArray<unsigned int>));
-	printCUDAArray2D(preBucketMatrix);
 	cudaCheckError();
+	printCUDAArray2D(preBucketMatrix);
 
 	CUDAArray<float> similaritiesVector = CUDAArray<float>(templateDbCount, 1);
 	computeLSS << <ceilMod(templateDbCount, THREADS_PER_BLOCK_LSS), THREADS_PER_BLOCK_LSS >> >
@@ -376,12 +345,12 @@ int main()
 		db, sizeof(db) / sizeof(Cylinder),
 		dbTemplateLengths, dbTemplateCount);
 	
-	//printf("Printing similarities:\n");
-	//for (unsigned int i = 0; i < dbTemplateCount; i++)
-	//{
-	//	printf("%f%s", similarities[i], (i == dbTemplateCount - 1 ? "" : ", "));
-	//}
-	//printf("\n");
+	printf("Printing similarities:\n");
+	for (unsigned int i = 0; i < dbTemplateCount; i++)
+	{
+		printf("%f%s", similarities[i], (i == dbTemplateCount - 1 ? "" : ", "));
+	}
+	printf("\n");
 
 	// [end] Test 3
 
