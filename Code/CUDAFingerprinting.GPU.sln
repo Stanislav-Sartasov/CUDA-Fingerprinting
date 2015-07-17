@@ -30,6 +30,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Thinning", "CUDAFingerprinting.GPU.Thinning\CUDAFingerprinting.GPU.Thinning.vcxproj", "{8B3A73B9-6F93-445F-B4DD-FDB44E50AD50}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.MinutiaDetection", "CUDAFingerprinting.GPU.MinutiaDetection\CUDAFingerprinting.GPU.MinutiaDetection.vcxproj", "{CAE0FD91-A22C-442B-8380-8043C159A91A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8} = {FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.MinutiaDetection.Tests", "CUDAFingerprinting.GPU.MinutiaDetection.Tests\CUDAFingerprinting.GPU.MinutiaDetection.Tests.csproj", "{386561D9-F53D-4E05-9242-74081F96B556}"
 	ProjectSection(ProjectDependencies) = postProject

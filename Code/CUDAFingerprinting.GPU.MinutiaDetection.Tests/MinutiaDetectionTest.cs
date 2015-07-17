@@ -20,7 +20,8 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
             var bytes = ImageHelper.LoadImageAsInt(image);
             PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
 
-            float[] minutiasArray = new float[bytes.GetLength(0) * bytes.GetLength(1)];
+            float[] minutiasArray = new float[bytes.GetLength(0) * bytes.GetLength(1) * 3];
+            
             int minutiasCount = GetMinutias(
                 minutiasArray,
                 array2Dto1D(bytes), 
@@ -28,7 +29,7 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
                 bytes.GetLength(1), 
                 bytes.GetLength(0)
             );
-
+            
             List<Minutia> minutias = MinutiasArrayToList(minutiasArray, minutiasCount);
 
             //field.SaveAboveToFile(image, Path.GetTempPath() + "//minutiaDetectionOrientationField.bmp", true);
