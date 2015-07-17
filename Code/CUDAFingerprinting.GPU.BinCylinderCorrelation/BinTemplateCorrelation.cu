@@ -64,9 +64,8 @@ __global__ void computeLUTSqrt(CUDAArray<float> LUTSqrt)
 __global__ void computeLUTNumPairs(CUDAArray<unsigned int> LUTNumPairs)
 {
 	int threadIndex = defaultColumn();
-	float exp = expf(11.6f);
 	unsigned int curNumPairs = NUM_PAIRS_MIN + round((NUM_PAIRS_MAX - NUM_PAIRS_MIN)
-		/ (1 + expf(-1 * NUM_PAIRS_TAU * (MIN(queryLengthGlobal, threadIndex) - NUM_PAIRS_MU) )));
+		/ (1 + expf(-1 * NUM_PAIRS_TAU * ((int)MIN(queryLengthGlobal, threadIndex) - NUM_PAIRS_MU)))); // Amazingly important cast
 	LUTNumPairs.SetAt(0, threadIndex, curNumPairs);
 }
 
@@ -84,7 +83,7 @@ __global__ void computeLUTAngles(CUDAArray<int> LUTAngles)
 			LUTIndex++;
 		}
 	}
-	LUTAngles.SetAt(threadIdx.x, LUTIndex, -1);
+	LUTAngles.SetAt(threadIdx.x, LUTIndex, END_OF_LIST);
 }
 
 __global__ void computeXorArray(CUDAArray<CylinderGPU> xorArray)
@@ -169,7 +168,7 @@ __global__ void computeLSS(
 	unsigned int threadIndex = defaultColumn();
 	if (bucketMatrix.Height > threadIndex)
 	{
-		unsigned int numPairs = 11; // LUTNumPairs.At(0, MIN(LUTTemplateDbLengths.At(0, threadIndex), queryLengthGlobal));
+		unsigned int numPairs = LUTNumPairs.At(0, MIN(LUTTemplateDbLengths.At(0, threadIndex), queryLengthGlobal));
 		int sum = 0, t = numPairs, i = 0;
 		while (i < QUANTIZED_SIMILARITIES_COUNT && t > 0)
 		{
@@ -220,6 +219,7 @@ float * getBinTemplateSimilarities(
 	unsigned int *templateDbLengths, unsigned int templateDbCount)
 {
 	cudaSetDevice(0);
+
 	CUDAArray<CylinderGPU> preQueryGPU = CUDAArray<CylinderGPU>(queryLength, 1);
 	convertToCylindersGPU(query, queryLength, &preQueryGPU);
 
@@ -242,7 +242,7 @@ float * getBinTemplateSimilarities(
 
 	// 0 through cylinderCellsCount (population count values)
 	CUDAArray<float> LUTSqrt = CUDAArray<float>(cylinderCellsCount * sizeof(unsigned int) * 8 + 1, 1); // 0 through number of bits in cylinder
-	computeLUTSqrt << <1, cylinderCellsCount * sizeof(unsigned int)* 8 + 1 >> >(LUTSqrt);
+	computeLUTSqrt << <1, cylinderCellsCount * sizeof(unsigned int)* 8 + 1 >> >(LUTSqrt); 
 
 	CUDAArray<unsigned int> LUTNumPairs = CUDAArray<unsigned int>(MAX_CYLINDERS_PER_TEMPLATE, 1);
 	computeLUTNumPairs << <1, MAX_CYLINDERS_PER_TEMPLATE >> >(LUTNumPairs);
