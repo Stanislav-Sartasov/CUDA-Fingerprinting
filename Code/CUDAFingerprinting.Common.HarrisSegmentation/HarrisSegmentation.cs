@@ -23,17 +23,6 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation
             height = picture.Height;
         }
 
-        public double GetTrace (double[,] M)
-        {
-            double Tr = M[0, 0] + M[1, 1];
-            return Tr;
-        }
-
-        public double GetDeterminant(double[,] M)
-        {
-            double Det = M[0, 0] * M[1, 1] - M[1, 0] * M[0, 1];
-            return Det;
-        }
         public double[,] GaussFilter()
         {
             double[,] filterX = new double[,] { { -3, 0, 3 }, { -10, 0, 10 }, { -3, 0, 3 } };
@@ -56,11 +45,11 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation
                 }
             }
 
-            double sigma = 2.0;
+            double sigma = 0.5;
             int size = KernelHelper.GetKernelSizeForGaussianSigma(sigma);
             double[,] w = KernelHelper.MakeKernel((x, y) => Gaussian.Gaussian2D(x, y, sigma), size); //Gaussian filter
 
-            double[,] A = ConvolutionHelper.Convolve(X2, w);
+            double[,] A = ConvolutionHelper.Convolve(X2, w); 
             double[,] B = ConvolutionHelper.Convolve(Y2, w);
             double[,] C = ConvolutionHelper.Convolve(XY, w);
 
@@ -76,9 +65,9 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation
                     M[1, 0] = C[i, j];
                     M[1, 1] = B[i, j];
 
-                    double Tr = GetTrace(M);
-                    double Det = GetDeterminant(M);
-
+                    double Tr = M[0, 0] + M[1, 1];
+                    double Det = M[0, 0] * M[1, 1] - M[1, 0] * M[0, 1];
+                    
                     R[i, j] = Det / Tr;
                 }
             }
@@ -95,9 +84,9 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation
             return matrix;
         }
 
-        public byte[,] Segmentate(double[,] matrix)
+        public int[,] Segmentate(double[,] matrix)
         {
-            byte[,] byteMatrix = new byte[width, height];
+            int[,] byteMatrix = new int[width, height];
 
             for (int x = 0; x < width - 3; x = x + 3)
             {
@@ -109,7 +98,7 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation
                     {
                         for (int j = 0; j < 3; ++j)
                         {
-                            if( matrix[x + i, y + j] > strenght )
+                            if (matrix[x + i, y + j] > strenght)
                             {
                                 flag = true;
                             }
@@ -136,7 +125,7 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation
             return byteMatrix;
         }
 
-        public Bitmap MakeBitmap (byte[,] byteMatrix)
+        public Bitmap MakeBitmap (int[,] byteMatrix)
         {
             Bitmap bmp = new Bitmap(width, height);
 

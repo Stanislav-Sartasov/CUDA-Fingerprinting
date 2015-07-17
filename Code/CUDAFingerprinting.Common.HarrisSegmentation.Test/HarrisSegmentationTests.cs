@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 using CUDAFingerprinting.Common;
+using System.IO;
 
 namespace CUDAFingerprinting.Common.HarrisSegmentation.Test
 {
@@ -15,7 +16,7 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation.Test
             HarrisSegmentation M = new HarrisSegmentation(image);
 
             double[,] matrix = M.GaussFilter();
-            byte[,] byteMatrix = M.Segmentate(matrix);
+            int[,] byteMatrix = M.Segmentate(matrix);
 
             string filename = "Result.jpg";
 

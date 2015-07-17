@@ -51,7 +51,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                     Assert.AreEqual(arrayI[i, j], binarizatedImageInt[i, j]);
                 }
             }
-            ImageHelper.SaveArrayToBitmap(binarizatedImageInt).Save(Path.GetTempPath() + Guid.NewGuid() + ".bmp");
+            ImageHelper.SaveArrayToBitmap(binarizatedImageInt).Save("d://Result.bmp");
         }
     }
 }
