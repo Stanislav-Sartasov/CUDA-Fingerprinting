@@ -44,8 +44,8 @@ void printCUDAArray2D(CUDAArray<unsigned int> arr)
 
 __device__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, CUDAArray<unsigned int> *result)
 {
-	int row = defaultRow();
-	int column = defaultColumn();
+	int row = (defaultRow()) % fst->Height;
+	int column = (defaultColumn()) % fst->Width;
 
 	if (fst->Width > column && fst->Height > row) {
 		unsigned int newValue = fst->At(row, column) & snd->At(row, column);
@@ -55,7 +55,9 @@ __device__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> *fst, CUDAArra
 
 __global__ void cudaArrayBitwiseAndGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
 {
-	cudaArrayBitwiseAndDevice(&fst, &snd, &result);
+	if (fst.Width > (defaultColumn()) && fst.Height > (defaultRow())) {
+		cudaArrayBitwiseAndDevice(&fst, &snd, &result);
+	}
 }
 
 CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd)
@@ -73,18 +75,18 @@ CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<u
 
 __device__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, CUDAArray<unsigned int> *result)
 {
-	int row = 0;
-	int column = defaultColumn() % fst->Width;
+	int row = (defaultRow()) % fst->Height;
+	int column = (defaultColumn()) % fst->Width;
 
-	if (fst->Width > column && fst->Height > row)	{
-		unsigned int newValue = fst->At(row, column) ^ snd->At(row, column);
-		result->SetAt(row, column, newValue);
-	}
+	unsigned int newValue = fst->At(row, column) ^ snd->At(row, column);
+	result->SetAt(row, column, newValue);
 }
 
 __global__ void cudaArrayBitwiseXorGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
 {
-	cudaArrayBitwiseXorDevice(&fst, &snd, &result);
+	if (fst.Width > (defaultColumn()) && fst.Height > (defaultRow())) {
+		cudaArrayBitwiseXorDevice(&fst, &snd, &result);
+	}
 }
 
 
@@ -104,26 +106,26 @@ CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<u
 
 __device__ void cudaArrayWordNormDevice(CUDAArray<unsigned int> *arr, unsigned int* sum)
 {
-	int row = defaultRow();
-	int column = defaultColumn() % arr->Width;
+	int row = (defaultRow()) % arr->Height;
+	int column = (defaultColumn()) % arr->Width;
 
-	if (arr->Width > column && arr->Height > row)	{
-		unsigned int x = arr->At(row, column);
+	unsigned int x = arr->At(row, column);
 
-		x = x - ((x >> 1) & 0x55555555);
-		x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
-		x = (x + (x >> 4)) & 0x0F0F0F0F;
-		x = x + (x >> 8);
-		x = x + (x >> 16);
-		x = x & 0x0000003F;
+	x = x - ((x >> 1) & 0x55555555);
+	x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
+	x = (x + (x >> 4)) & 0x0F0F0F0F;
+	x = x + (x >> 8);
+	x = x + (x >> 16);
+	x = x & 0x0000003F;
 
-		atomicAdd(sum, x);
-	}
+	atomicAdd(sum, x);
 }
 
 __global__ void cudaArrayWordNormGlobal(CUDAArray<unsigned int> arr, unsigned int* sum)
 {
-	cudaArrayWordNormDevice(&arr, sum);
+	if (arr.Width > (defaultColumn()) && arr.Height > (defaultRow())) {
+		cudaArrayWordNormDevice(&arr, sum);
+	}
 }
 
 unsigned int getOneBitsCount(CUDAArray<unsigned int> arr)

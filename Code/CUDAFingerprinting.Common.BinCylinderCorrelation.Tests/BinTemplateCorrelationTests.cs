@@ -48,8 +48,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             CylinderDatabase cylinderDb = new CylinderDatabase(contiguousArr, templateIndices);
             int[] dbTemplatesLengths = new int[] { 1, 2, 4 };
             
-            double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultiple(query, db); // templateDb version
-            //double[] similarityRates = BinCylinderCorrelation.GetTemplateCorrelationOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
+            //double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultiple(query, db); // templateDb version
+            double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultipleOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
             for (int i = 0; i < similarityRates.Length; i++)
             {
                 Console.Write(similarityRates[i] + (i != similarityRates.Length - 1 ? "; " : ""));
