@@ -49,6 +49,24 @@ namespace CUDAFingerprinting.Common
             }
         }
 
+        public void Normalize()
+        {
+            double sum = 0;
+            for (int i = 0; i < Matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < Matrix.GetLength(0); j++)
+                {
+                    sum += Matrix[i, j];
+                }
+            }
+            for (int i = 0; i < Matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < Matrix.GetLength(0); j++)
+                {
+                    Matrix[i, j] /= sum;
+                }
+            }
+        }
         public void WriteMatrix()
         {
             int size = Matrix.GetLength(0);

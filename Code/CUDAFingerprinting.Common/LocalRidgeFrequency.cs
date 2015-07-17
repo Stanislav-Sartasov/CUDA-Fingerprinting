@@ -191,6 +191,15 @@ namespace CUDAFingerprinting.Common
             while (flag) 
                 flag = InterpolateFrequency(frequencyMatrix, filterSize, w);
         }
+
+        public static double[,] Filter(double[,] frequencyMatrix, int filterSize = 7, double sigma = 1, int w = 16)
+        {
+            var result = new double[frequencyMatrix.GetLength(0), frequencyMatrix.GetLength(1)];
+            var lowPassFilter = new Filter(filterSize, sigma);
+            lowPassFilter.Normalize();
+            result = ConvolutionHelper.Convolve(frequencyMatrix, lowPassFilter.Matrix);
+            return result;
+        }
         public static double[,] GetFrequencyMatrixImageSize(double[,] frequencyMatrix, int imgHeight, int imgWidth, int w = 16)
         {
             double[,] result = new double[imgHeight, imgWidth];

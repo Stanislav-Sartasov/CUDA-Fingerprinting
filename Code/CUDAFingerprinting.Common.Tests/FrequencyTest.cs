@@ -21,9 +21,10 @@ namespace CUDAFingerprinting.Common.Tests
             var ar2 = array.Select2D(x => (double) x).DoNormalization(100, 100);
             var fr = LocalRidgeFrequency.CalculateFrequency(ar2, orMatr);
             fr.InterpolateToPerfecton();
+            var filtered = LocalRidgeFrequency.Filter(fr);
             //for (int i = 0; i<1; i++)
             //    freq = LocalRidgeFrequency.InterpolateFrequency(freq, array.GetLength(0), array.GetLength(1));
-            var freq = LocalRidgeFrequency.GetFrequencyMatrixImageSize(fr, array.GetLength(0), array.GetLength(1));
+            var freq = LocalRidgeFrequency.GetFrequencyMatrixImageSize(filtered, array.GetLength(0), array.GetLength(1));
             int count = 0;
             for (int i=0; i < freq.GetLength(0); i++)
                 for (int j = 0; j < freq.GetLength(1); j++)
