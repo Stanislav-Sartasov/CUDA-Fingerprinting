@@ -279,23 +279,21 @@ float * getBinTemplateSimilarities(
 		LUTSqrt, LUTAngles, LUTPopCountXor);
 	cudaMemcpyFromSymbol(&preBucketMatrix, bucketMatrix, sizeof(CUDAArray<unsigned int>));
 	cudaCheckError();
-	printCUDAArray2D(preBucketMatrix);
 
 	CUDAArray<float> similaritiesVector = CUDAArray<float>(templateDbCount, 1);
 	computeLSS << <ceilMod(templateDbCount, THREADS_PER_BLOCK_LSS), THREADS_PER_BLOCK_LSS >> >
 		(LUTTemplateDbLengths, LUTNumPairs, similaritiesVector);
 
-	//LUTSqrt.Dispose();
-	//LUTAngles.Dispose();
-	//LUTNumPairs.Dispose();
-	//bucketMatrix.Dispose();
+	LUTSqrt.Dispose();
+	LUTAngles.Dispose();
+	LUTNumPairs.Dispose();
+	bucketMatrix.Dispose();
 
 	float* result = similaritiesVector.GetData();
 
-	//similaritiesVector.Dispose();
+	similaritiesVector.Dispose();
 
 	return result;
-	//return nullptr;
 }
 
 int main()

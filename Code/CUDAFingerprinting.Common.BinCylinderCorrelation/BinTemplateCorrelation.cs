@@ -107,7 +107,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
             {
                 int numPairs = ComputeNumPairs(dbTemplateLengths[k], query.Cylinders.Length);
 
-                    int sum = 0, t = numPairs, i = 0;
+                int sum = 0, t = numPairs, i = 0;
                 while (i < bucketsCount && t > 0)
                 {
                     sum += (int)Math.Min(bucketMatrix[k, i], t) * i;
