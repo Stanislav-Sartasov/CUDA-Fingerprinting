@@ -19,12 +19,15 @@ namespace CUDAFingerprinting.Common.Tests
             var orfield = new OrientationField(array);
             var orMatr = orfield.GetOrientationMatrix(array.GetLength(0), array.GetLength(1));
             var ar2 = array.Select2D(x => (double) x).DoNormalization(100, 100);
-            var freq = LocalRidgeFrequency.CalculateFrequency(ar2, orMatr);
+            var fr = LocalRidgeFrequency.CalculateFrequency(ar2, orMatr);
+            var freq = LocalRidgeFrequency.InterpolateFrequency(fr, array.GetLength(0), array.GetLength(1));
+            //for (int i = 0; i<1; i++)
+            //    freq = LocalRidgeFrequency.InterpolateFrequency(freq, array.GetLength(0), array.GetLength(1));
             int count = 0;
             for (int i=0; i < freq.GetLength(0); i++)
                 for (int j = 0; j < freq.GetLength(1); j++)
                 {
-                    if ((freq[i, j] == -1.0) || (freq[i, j] > 0.3333333) || ((freq[i, j] < 0.04) && (freq[i, j] != 0)))
+                    if ((freq[i, j] == -1.0) || (freq[i, j] > 1.0 / 3.0) || ((freq[i, j] < 0.04) && (freq[i, j] != 0)) || (freq[i, j] != freq[i, j]))
                         count ++;
                 }
             int a = freq.GetLength(0)*freq.GetLength(1);

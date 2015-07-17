@@ -47,7 +47,6 @@ namespace CUDAFingerprinting.Common.GaborFilter
                             if (indexY >= imgWidth) indexY = imgWidth - 1;
                             result[i, j] += gabor.Filters[angle].Matrix[center - u, center - v]*img[indexX, indexY];
                         }
-                        double check = result[i, j];
                     }
                     result[i, j] = result[i, j] > 255 ? 255 : (result[i, j] < 0 ? 0 : result[i, j]);
                 }
