@@ -46,11 +46,11 @@ __device__ bool IsAvailablePixel(int x, int y)
 	return !(x < 0 || y < 0 || x >= w || y >= h);
 }
 
-__device__ double GetPixel(int* data, int x, int y)
+__device__ int GetPixel(int* data, int x, int y)
 {
 	return  !IsAvailablePixel(x, y) ?
-	WHITE :
-		  data[(h - 1 - y) * w + x] > GREY ?
+		WHITE :
+		data[(h - 1 - y) * w + x] > GREY ?
 			WHITE :
 			BLACK;
 }
@@ -58,7 +58,7 @@ __device__ double GetPixel(int* data, int x, int y)
 __device__ int MinutiaCode(int* data, int x, int y)
 {
 	if (GetPixel(data, x, y) != BLACK)
-		return false;
+		return -1;
 	//check 8-neigbourhood
 	bool p[8] = {
 		GetPixel(data, x, y - 1) > 0,
@@ -78,7 +78,7 @@ __device__ int MinutiaCode(int* data, int x, int y)
 	}
 	NeigboursCount /= 2;
 	return NeigboursCount;
-	}
+}
 
 __device__ bool InCircle(int xC, int yC, int R, int x, int y)
 {
@@ -171,7 +171,7 @@ __device__ double GetCorrectAngle(int* data, double* orientation, int x, int y, 
 	return angle;
 }
 
-#define BLOCK_DIM 16
+#define BLOCK_DIM 30
 
 __global__ void ProcessPixel(float* dest, int* data, double* orientation)
 {
@@ -211,6 +211,7 @@ __global__ void ProcessPixel(float* dest, int* data, double* orientation)
 	}
 }
 
+//shift minutias data to beginning of array
 int ShrinkResult(float* dest, float* destBuffer, int width, int height)
 {
 	int minutiasNumber = 0;
@@ -242,9 +243,6 @@ int GetMinutias(float* dest, int* data, double* orientation, int width, int heig
 	cudaMemcpyToSymbol(h, &height, sizeof(height));
 	cudaCheckError();
 
-	int blocksRowSize = ceilMod(width, BLOCK_DIM);
-	int blocksColumnSize = ceilMod(height, BLOCK_DIM);
-
 	float* destBuffer = (float*)malloc(sizeof(float) * height * width * 3);
 
 	//allocate memory on device & initialize
@@ -264,8 +262,10 @@ int GetMinutias(float* dest, int* data, double* orientation, int width, int heig
 	cudaMemcpy(devOrientation, orientation, sizeof(double) * height * width, cudaMemcpyHostToDevice);
 	cudaCheckError();
 
+	int blocksRowSize = ceilMod(width, BLOCK_DIM);
+	int blocksColumnSize = ceilMod(height, BLOCK_DIM);
 	dim3 gridSize = dim3(blocksRowSize, blocksColumnSize);
-	dim3 blockSize = dim3(BLOCK_DIM, BLOCK_DIM);
+	dim3 blockSize = dim3(BLOCK_DIM, BLOCK_DIM, 1);
 
 	ProcessPixel <<<gridSize, blockSize>>>(devDest, devData, devOrientation);
 
@@ -300,16 +300,11 @@ int main()
 		orientation,
 		width,
 		height
-		);
-	//double** skeleton = Thin(intToDoubleArray(img, width, height), width, height);
-	//double** res = OverlapArrays(skeleton, intToDoubleArray(img, width, height), width, height);
-	//saveBmp("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\resultCUDA.bmp", doubleToIntArray(res, width, height), width, height);
-
-	//free(skeleton);
-	//free(res);
-	//system("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\resultCUDA.bmp");
+	);
 
 	free(img);
+	free(orientation);
+	free(minutiasArray);
 	return 0;
 }
 #endif

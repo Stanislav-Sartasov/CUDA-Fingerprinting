@@ -35,6 +35,8 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
             //field.SaveAboveToFile(image, Path.GetTempPath() + "//minutiaDetectionOrientationField.bmp", true);
 
             System.Console.WriteLine(Path.GetTempPath());//result path
+            System.Console.WriteLine(minutias.Count);
+            System.Console.WriteLine(minutiasCount);
 
             ImageHelper.MarkMinutiae(
                 image,
