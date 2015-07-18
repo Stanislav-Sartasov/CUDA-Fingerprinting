@@ -171,7 +171,7 @@ __device__ double GetCorrectAngle(int* data, double* orientation, int x, int y, 
 	return angle;
 }
 
-#define BLOCK_DIM 30
+#define BLOCK_DIM 16
 
 __global__ void ProcessPixel(float* dest, int* data, double* orientation)
 {
