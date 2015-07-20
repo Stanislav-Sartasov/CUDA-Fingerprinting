@@ -68,6 +68,7 @@
     <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +85,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\002.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1_2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\007.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

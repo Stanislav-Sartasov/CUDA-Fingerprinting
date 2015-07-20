@@ -39,13 +39,13 @@ namespace CUDAFingerprinting.Common
             
             for (int i = 1; i < signature.Length - 1; i++)
             {
-                if ((signature[i - 1] > signature[i]) && (signature[i + 1] > signature[i]))
+                if ((signature[i - 1] - signature[i] > 0) && (signature[i + 1] - signature[i] > 0))
                 {
                     if (prevMin != -1)
                     {
                         lengthsSum += i - prevMin;
                         summandNum++;
-                        prevMin = -1;
+                        prevMin = i;
                     }
                     else
                     {
@@ -67,6 +67,13 @@ namespace CUDAFingerprinting.Common
             {
                 for (int j = w / 2 - 1; j <= (img.GetLength(1) / w - 1) * w + (w / 2 - 1); j += w)
                 {
+                    int a = (i - (w/2 - 1))/w;
+                    int b = (j - (w/2 - 1))/w;
+                    int c;
+                    if ((a == 10) && (b == 3))
+                    {
+                        c = 1;
+                    }
                     frequencyMatrix[(i - (w / 2 - 1)) / w, (j - (w / 2 - 1)) / w] = CalculateFrequencyBlock(img, orientationMatrix[i, j], i, j, w, l);
                 }
             }

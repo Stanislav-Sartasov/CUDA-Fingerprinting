@@ -10,7 +10,7 @@ namespace ImageEnhancmentTest
         [TestMethod]
         public void ImageEnhancmentTest1()
         {
-            var bmp = Resources.SampleFinger;
+            var bmp = Resources.SampleFinger3;
             double[,] imgDoubles = ImageHelper.LoadImage(bmp);
             imgDoubles.DoNormalization(100, 100);
             int[,] imgInts = imgDoubles.Select2D((x => (int)x));
@@ -18,7 +18,7 @@ namespace ImageEnhancmentTest
             double[,] orient = orf.GetOrientationMatrix(imgInts.GetLength(0), imgInts.GetLength(1));
             var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 32, 8);
             var bmp2 = ImageHelper.SaveArrayToBitmap(res);
-            bmp2.Save("test.bmp", ImageHelper.GetImageFormatFromExtension("test.bmp"));
+            bmp2.Save("007.bmp", ImageHelper.GetImageFormatFromExtension("007.bmp"));
         }
     }
 }

@@ -63,9 +63,59 @@ namespace ImageEnhancmentTest {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Finger {
+            get {
+                object obj = ResourceManager.GetObject("Finger", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap otpechatok {
+            get {
+                object obj = ResourceManager.GetObject("otpechatok", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap SampleFinger {
             get {
                 object obj = ResourceManager.GetObject("SampleFinger", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SampleFinger1 {
+            get {
+                object obj = ResourceManager.GetObject("SampleFinger1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SampleFinger2 {
+            get {
+                object obj = ResourceManager.GetObject("SampleFinger2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SampleFinger3 {
+            get {
+                object obj = ResourceManager.GetObject("SampleFinger3", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
