@@ -19,19 +19,13 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
             height = dAr.GetLength(1);
         }
 
-        public double Module(double[] v)
-        {
-            double sum = v[0] * v[0] + v[1] * v[1];
-            return Math.Sqrt(sum);
-        }
-
         public Complex[,] Regularize(Complex[,] cMap)
         {
             Complex[,] cNewMap = new Complex[width, height];
 
-            for (int x = 1; x < width - 1; x++)
+            for (int x = 3; x < width - 3; x++)
             {
-                for (int y = 1; y < height - 1; y++)
+                for (int y = 3; y < height - 3; y++)
                 {
                     cNewMap[x, y] = new Complex (0, 0);
 
@@ -43,23 +37,12 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
                         }
                     }
 
-                    cNewMap[x, y] /= 9;
+                    cNewMap[x, y] /= 441;
                 }
             }
 
             return cNewMap;
         }
-
-        /*public double Attenuate (int distc)
-        {
-            double sigma = 0.5;
-            var commonDenom = 2.0d * sigma * sigma;
-            var denominator = Math.Sqrt(2.0 * Math.PI) * sigma;
-
-            var att = Math.Exp(distc * distc / commonDenom) / denominator;
-            
-            return att;
-        }*/
 
         public double[,] Strengthen(Complex[,] cMap)
         {
@@ -69,26 +52,28 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
             double[,] str = new double[width, height];
             double denom = 0;
 
-            for (int x = 1; x < width - 1; x++)
+            for (int x = 24; x < width - 24; x++)
             {
-                for (int y = 1; y < height - 1; y++)
+                for (int y = 24;  y < height - 24; y++)
                 {
                     cNum = new Complex(0, 0);
                     denom = 0;
 
-                    for (int i = -1; i < 2; i++)
+                    for (int i = -24; i < 23; i++)
                     {
-                        for (int j = -1; j < 2; j++)
+                        for (int j = -24; j < 23; j++)
                         {
                             cNum += cMap[x + i, y + j];
 
                             cDenom = cMap[x + i, y + j];
 
-                            denom += Complex.Abs(cDenom);
+                            denom += cMap[x + i, y + j].Magnitude;
                         }
                     }
 
-                    str[x, y] = 1 - Complex.Abs(cNum) / denom;
+
+                    str[x, y] = 1 - cNum.Magnitude / denom;
+                      
                 }
             }
 
@@ -100,67 +85,34 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
             Complex[,] cMap = new Complex[width, height];
             Complex[,] V_r = new Complex[width, height];
             double[,] str = new double[width, height];
-            //double[, ,] V_e = new double[width, height, 2];
-
-            //double gamma = 1;
-            //double sum = 0;
-            //int distc = 0;
-
-            /*System.IO.StreamWriter file = new System.IO.StreamWriter(@"D:\Sin.txt");
-            System.IO.StreamWriter file2 = new System.IO.StreamWriter(@"D:\Cos.txt");*/
 
             for (int x = 1; x < width - 1; ++x )
             {
                 for (int y = 1; y < height - 1; ++y)
                 {
                     cMap[x, y] = new Complex(Math.Sin(2*vectMap[x, y]), Math.Cos(2*vectMap[x, y]));
-
-                    /*file.Write(Math.Round(newVectMap[x, y, 0], 2));
-                    file.Write(" ");
-
-                    file2.Write(Math.Round(newVectMap[x, y, 1], 2));
-                    file2.Write(" ");*/
                 }
-                /*file.WriteLine();
-                file2.WriteLine();*/
             }
 
             V_r = Regularize(cMap);
+
+            var newField = V_r.Select2D(x => x.Phase / 2);
+
             str = Strengthen(V_r);
-
-            /*for (int x = 1; x < width - 1; ++x)
-            {
-                for (int y = 1; y < height - 1; ++y)
-                {
-                    sum = 0;
-
-                    for (int i = -1; i < 2; i++)
-                    {
-                        for (int j = -1; j < 1; j++)
-                        {
-                            sum += str[x + i, y + j];
-                        }
-                    }
-
-                    distc = (int)(Math.Abs(width / 2 - x / 32) * Math.Abs(width / 2 - x / 32) + Math.Abs(height / 2 - y / 32) * Math.Abs(height / 2 - y / 32));
-
-                    //V_e[x, y, 0] = V_r[x, y, 0] * (1 + gamma * Attenuate(distc) * sum / 9);
-                    //V_e[x, y, 1] = V_r[x, y, 1] * (1 + gamma * Attenuate(distc) * sum / 9);
-                }
-            }*/
 
             return str;
         }
 
         public Bitmap MakeBitmap(double[,] byteMatrix)
         {
-            Bitmap bmp = new Bitmap(width, height);
+            Bitmap bmp = new Bitmap(height, width);
 
-            for (int x = 0; x < width; ++x)
+            for (int x = 0; x < height; ++x)
             {
-                for (int y = 0; y < height; ++y)
+                for (int y = 0; y < width; ++y)
                 {
-                    bmp.SetPixel(x, y, Color.FromArgb((int)byteMatrix[x, y], (int)byteMatrix[x, y], (int)byteMatrix[x, y]));
+                    var value = (int)(255*byteMatrix[x, y]);
+                    bmp.SetPixel(x, y, Color.FromArgb(255, value, value, value));
                 }
             }
 
