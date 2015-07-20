@@ -40,8 +40,8 @@ namespace CUDAFingerprinting.Common
             for (int i = 1; i < signature.Length - 1; i++)
             {
                 //In comparison below there has to be non-zero value so that we would be able to ignore minor irrelevant pits.
-                // 0.1 was calculated using heuristic approach. 
-                if ((signature[i - 1] - signature[i] > 0.1) && (signature[i + 1] - signature[i] > 0.1))
+                // 0.5 was calculated using heuristic approach. 
+                if ((signature[i - 1] - signature[i] > 0.5) && (signature[i + 1] - signature[i] > 0.5))
                 {
                     if (prevMin != -1)
                     {

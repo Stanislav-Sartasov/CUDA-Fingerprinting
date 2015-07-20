@@ -9,14 +9,14 @@ namespace CUDAFingerprinting.Common.Tests
         [TestMethod]
         public void TestFrequency()
         {
-            var bmp = Resources.SampleFinger5;
+            var bmp = Resources.SampleFinger2;
             var array = ImageHelper.LoadImageAsInt(bmp);
 
             var orfield = new OrientationField(array);
             var orMatr = orfield.GetOrientationMatrix(array.GetLength(0), array.GetLength(1));
             var ar2 = array.Select2D(x => (double)x).DoNormalization(100, 100); 
-            //var bmp2 = ImageHelper.SaveArrayToBitmap(ar2, true);
-            //bmp2.Save("003.bmp", ImageHelper.GetImageFormatFromExtension("003.bmp"));
+            var bmp2 = ImageHelper.SaveArrayToBitmap(ar2, true);
+            bmp2.Save("003.bmp", ImageHelper.GetImageFormatFromExtension("003.bmp"));
 
             var fr = LocalRidgeFrequency.CalculateFrequency(ar2, orMatr);
 
