@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CUDAFingerprinting.Common;
+using System.Drawing;
 
 namespace CUDAFingerprinting.Common.SingularityRegionDetection
 {
@@ -23,20 +24,51 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
             return Math.Sqrt(sum);
         }
 
-        public double[,,] Regularize(double[,,] vectMap)
+        /*public double[,,] Regularize(double[,,] vectMap)
         {
             double[, ,] newVectMap = new double[width, height, 2];
             double[] V_r = new double [2];
 
-            for (int x = 1; x < width; x++)
+            for (int x = 1; x < width - 1; x++)
             {
-                for (int y = 1; y < height; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     V_r[0] = 0;
                     V_r[1] = 0;
                     for (int i = -1; i < 2; i++)
                     {
                         for (int j = -1; j < 2; j++)
+                        {
+                            V_r[0] += vectMap[x + i, y + j, 0];
+                            V_r[1] += vectMap[x + i, y + j, 1];
+                        }
+                    }
+
+                    V_r[0] /= 9;
+                    V_r[1] /= 9;
+
+                    newVectMap[x, y, 0] = V_r[0];
+                    newVectMap[x, y, 1] = V_r[1];
+                }
+            }
+
+            return newVectMap;
+        }*/
+
+        public double[, ,] Regularize(double[, ,] vectMap)
+        {
+            double[, ,] newVectMap = new double[width, height, 2];
+            double[] V_r = new double[2];
+
+            for (int x = 0; x < width - 3; x = x + 3)
+            {
+                for (int y = 1; y < height - 3; y = y + 3)
+                {
+                    V_r[0] = 0;
+                    V_r[1] = 0;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
                         {
                             V_r[0] += vectMap[x + i, y + j, 0];
                             V_r[1] += vectMap[x + i, y + j, 1];
@@ -67,23 +99,23 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
 
         public double[,] Strengthen(double[,,] vectMap)
         {
-            double[,,] newVectMap = new double[width, height, 2];
+            double[, ,] newVectMap = new double[width, height, 2];
             double[] numVect = new double[2];
             double[] denomVect = new double[2];
             double[,] str = new double[width, height];
             double denom;
 
-            for (int x = 1; x < width - 1; x++)
+            for (int x = 0; x < width - 3; x = x + 3)
             {
-                for (int y = 1; y < height - 1; y++)
+                for (int y = 1; y < height - 3; y = y + 3)
                 {
                     numVect[0] = 0;
                     numVect[1] = 0;
                     denom = 0;
 
-                    for (int i = -1; i < 2; i++)
+                    for (int i = 0; i < 3; i++)
                     {
-                        for (int j = -1; j < 1; j++)
+                        for (int j = 0; j < 3; j++)
                         {
                             numVect[0] += vectMap[x + i, y + j, 0];
                             numVect[1] += vectMap[x + i, y + j, 1];
@@ -102,16 +134,19 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
             return str;
         }
 
-        public double[,,] Detect(double[,] vectMap)
+        public double[,] Detect(double[,] vectMap)
         {
             double[, ,] newVectMap = new double[width, height, 2];
             double[, ,] V_r = new double[width, height, 2];
             double[,] str = new double[width, height];
-            double[, ,] V_e = new double[width, height, 2];
+            //double[, ,] V_e = new double[width, height, 2];
 
-            double gamma = 1;
+            //double gamma = 1;
             double sum = 0;
             int distc = 0;
+
+            System.IO.StreamWriter file = new System.IO.StreamWriter(@"D:\Sin.txt");
+            System.IO.StreamWriter file2 = new System.IO.StreamWriter(@"D:\Cos.txt");
 
             for (int x = 1; x < width - 1; ++x )
             {
@@ -119,7 +154,15 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
                 {
                     newVectMap[x, y, 0] = Math.Sin(vectMap[x, y]);
                     newVectMap[x, y, 1] = Math.Cos(vectMap[x, y]);
+
+                    file.Write(Math.Round(newVectMap[x, y, 0], 2));
+                    file.Write(" ");
+
+                    file2.Write(Math.Round(newVectMap[x, y, 1], 2));
+                    file2.Write(" ");
                 }
+                file.WriteLine();
+                file2.WriteLine();
             }
 
             V_r = Regularize(newVectMap);
@@ -141,12 +184,32 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
 
                     distc = (int)(Math.Abs(width / 2 - x / 32) * Math.Abs(width / 2 - x / 32) + Math.Abs(height / 2 - y / 32) * Math.Abs(height / 2 - y / 32));
 
-                    V_e[x, y, 0] = V_r[x, y, 0] * (1 + gamma * Attenuate(distc) * sum / 9);
-                    V_e[x, y, 1] = V_r[x, y, 1] * (1 + gamma * Attenuate(distc) * sum / 9);
+                    //V_e[x, y, 0] = V_r[x, y, 0] * (1 + gamma * Attenuate(distc) * sum / 9);
+                    //V_e[x, y, 1] = V_r[x, y, 1] * (1 + gamma * Attenuate(distc) * sum / 9);
                 }
             }
 
-            return V_e;
+            return str;
+        }
+
+        public Bitmap MakeBitmap(double[,] byteMatrix)
+        {
+            Bitmap bmp = new Bitmap(width, height);
+
+            for (int x = 0; x < width; ++x)
+            {
+                for (int y = 0; y < height; ++y)
+                {
+                    bmp.SetPixel(x, y, Color.FromArgb((int)byteMatrix[x, y], (int)byteMatrix[x, y], (int)byteMatrix[x, y]));
+                }
+            }
+
+            return bmp;
+        }
+
+        public void SaveSegmentation(Bitmap bmp, string filename)
+        {
+            bmp.Save(filename);
         }
     }
 }

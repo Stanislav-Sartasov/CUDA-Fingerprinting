@@ -69,5 +69,15 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection.Test.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SampleFinger {
+            get {
+                object obj = ResourceManager.GetObject("SampleFinger", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
