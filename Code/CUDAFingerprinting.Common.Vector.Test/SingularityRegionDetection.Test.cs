@@ -26,7 +26,8 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection.Test
             for (int i = 0; i < width; i++)
                 for (int j = 0; j < height; j++)
                 {
-                    dAr[i, j] = pxl.GetOrientation(i, j) -(Math.PI) / 2;
+                    dAr[i, j] = (pxl.GetOrientation(i, j) < 0 && pxl.GetOrientation(i, j) >= -Math.PI / 2) ? 
+                        pxl.GetOrientation(i, j) + (Math.PI) : pxl.GetOrientation(i, j);
                 }
 
             SingularityRegionDetection D = new SingularityRegionDetection(dAr);
