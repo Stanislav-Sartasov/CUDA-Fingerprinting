@@ -67,7 +67,7 @@ float getBinCylinderCorrelation(
 
 	return correlation;
 }
-
+//
 //int main()
 //{
 //	unsigned int cylinderCapacity = 1;
@@ -98,11 +98,11 @@ float getBinCylinderCorrelation(
 //
 //	// Test 3 (only for cylinderCapacity == 1)
 //
-//	cudaCylinder1[0] = binToInt("11111111111111111100000000000000");
-//	cudaValidities1[0] = binToInt("11111111111111111100000000000000");
+//	createCylinderValues("11111111111111111100000000000000", 32, cudaCylinder1);
+//	createCylinderValues("11111111111111111100000000000000", 32, cudaValidities1);
 //
-//	cudaCylinder2[0] = binToInt("11010001010100001100000000000000");
-//	cudaValidities2[0] = binToInt("11011101111100011100000000000000");
+//	createCylinderValues("11010001010100001100000000000000", 32, cudaCylinder2);
+//	createCylinderValues("11011101111100011100000000000000", 32, cudaValidities2);
 //
 //	float correlation =
 //		getBinCylinderCorrelation(cylinderCapacity, cudaCylinder1, cudaCylinder2, cudaValidities1, cudaValidities2);

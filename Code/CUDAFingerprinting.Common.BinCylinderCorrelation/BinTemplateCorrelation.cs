@@ -99,7 +99,6 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                     }
 
                     bucketMatrix[db.TemplateIndices[k], bucketIndex]++;
-
                 }
             }
 

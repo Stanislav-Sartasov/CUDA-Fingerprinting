@@ -24,6 +24,6 @@ __device__ void cudaArrayWordNormDevice(CUDAArray<unsigned int> *arr, unsigned i
 unsigned int getOneBitsCount(CUDAArray<unsigned int> arr);
 unsigned int getOneBitsCountRaw(unsigned int* arr, unsigned int length);
 
-unsigned int binToInt(char* s);
+void createCylinderValues(char* src, unsigned int srcLength, unsigned int *res);
 
 #endif CUDAFINGERPRINTING_BINCORRELATIONHELPER

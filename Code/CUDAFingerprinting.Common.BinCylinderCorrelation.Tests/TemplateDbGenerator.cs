@@ -80,6 +80,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         {
             using (var file = new StreamWriter(path))
             {
+                file.WriteLine(templateDbCount);
+
                 for (int i = 0; i < templateDbCount; i++)
                 {
                     file.Write(templateDbLengths[i] + (i != templateDbCount - 1 ? " " : ""));
@@ -88,11 +90,11 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
 
                 // 2 versions of templateIndices places (only 1 should be used at a time!)
                 // C#-compatible version
-                for (int i = 0; i < cylinderDbCount; i++)
-                {
-                    file.Write(templateIndices[i] + (i != cylinderDbCount - 1 ? " " : ""));
-                }
-                file.WriteLine();
+                //for (int i = 0; i < cylinderDbCount; i++)
+                //{
+                //    file.Write(templateIndices[i] + (i != cylinderDbCount - 1 ? " " : ""));
+                //}
+                //file.WriteLine();
                 // [end] C#-compatible version
 
                 file.WriteLine();
@@ -106,7 +108,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
                     file.WriteLine();
                     file.WriteLine(db[i].Angle);
                     file.WriteLine(db[i].Norm);
-                    //file.WriteLine(templateIndices[i]); // C-compatible version
+                    file.WriteLine(templateIndices[i]); // C-compatible version
                     file.WriteLine();
                 }
             }
@@ -116,11 +118,13 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         public void TestTemplateDbGenerator()
         {
             string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            GenerateTemplateDb(2000, 25, 255);
-            WriteDbToFile(homeFolder + "\\mcc_db.txt");
+            GenerateTemplateDb(100, 25, 255);
+            //WriteDbToFile(homeFolder + "\\mcc_cs_db.txt");
+            WriteDbToFile(homeFolder + "\\mcc_c_db.txt");
 
-            GenerateTemplateDb(100000, 1, 255); // 1 cylinder for query
-            WriteDbToFile(homeFolder + "\\mcc_query.txt");
+            GenerateTemplateDb(10, 1, 255); // 1 cylinder for query
+            //WriteDbToFile(homeFolder + "\\mcc_cs_query.txt");
+            WriteDbToFile(homeFolder + "\\mcc_c_query.txt");
         }
     }
 }

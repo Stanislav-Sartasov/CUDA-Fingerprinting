@@ -20,12 +20,13 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         };
 
         public static Template query;
+
         public static Template[] db; // DB for simple version
 
         public static Cylinder[] contiguousCylinders; // DB for optimized version
         public static uint[] templateIndices;
-        public static int[] templateDbLengths;
         public static CylinderDatabase cylinderDb;
+        public static int[] templateDbLengths;
 
         [TestMethod]
         public void TestBinTemplateCorrelation()
@@ -154,8 +155,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         public void TestBinTemplateCorrelationMassive()
         {
             string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            ParseDb(homeFolder + "\\mcc_db.txt");
-            ParseQuery(homeFolder + "\\mcc_query.txt");
+            ParseDb(homeFolder + "\\mcc_cs_db.txt");
+            ParseQuery(homeFolder + "\\mcc_cs_query.txt");
 
             CylinderDatabase cylinderDb = new CylinderDatabase(contiguousCylinders, templateIndices);
 

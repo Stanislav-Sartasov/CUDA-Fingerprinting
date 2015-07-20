@@ -10,15 +10,14 @@
 #include "CylinderHelper.cuh"
 #include <math_constants.h>
 #include <math.h>
-#include "BinCorrelationHelper.cuh"
 #include "BinTemplateCorrelation.cuh"
 
 #define cudaCheckError() {\
 	cudaError_t e = cudaGetLastError(); \
-if (e != cudaSuccess) {\
-	printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
-	exit(0); \
-}\
+	if (e != cudaSuccess) {\
+		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
+		exit(0); \
+	}\
 }
 
 // Getting element of CUDAArray of unsigned integers without .At() (used with bucketMatrix)
@@ -28,23 +27,7 @@ if (e != cudaSuccess) {\
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define MAX_CYLINDERS_PER_TEMPLATE 256
-#define CYLINDER_CELLS_COUNT 1 // Hopefully this define is not necessary (constant memory again)
-
-#define QUANTIZED_ANGLES_COUNT 256
-#define QUANTIZED_SIMILARITIES_COUNT 64 // Basically buckets count
-
 #define END_OF_LIST -1
-
-#define ANGLE_THRESHOLD 0.52359877f // == PI / 6
-
-#define THREADS_PER_BLOCK_MATRIX_GEN 192
-#define THREADS_PER_BLOCK_LSS 64
-
-#define NUM_PAIRS_MIN 11
-#define NUM_PAIRS_MAX 13
-#define NUM_PAIRS_MU 30
-#define NUM_PAIRS_TAU 0.4
 
 __constant__ CUDAArray<CylinderGPU> queryGPU;
 __device__ CUDAArray<CylinderGPU> cylinderDbGPU;
@@ -311,66 +294,52 @@ float * getBinTemplateSimilarities(
 
 	return result;
 }
-
-int main()
-{
-	unsigned int cylinderCapacity = 1;
-
-	unsigned int *cylinder0Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-	unsigned int *cylinder1Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-	unsigned int *cylinder2Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
-
-	// Test 1
-	//memset(cudaCylinder1, 255, cylinderCapacity * sizeof(unsigned int));
-	//memset(cudaCylinder2, 255, cylinderCapacity * sizeof(unsigned int));
-
-
-	// Test 2
-	//srand((unsigned int)time(NULL));
-	//for (unsigned int i = 0; i < cylinderCapacity; i++) {
-	//	cudaCylinder1[i] = rand();
-	//	cudaCylinder2[i] = rand();
-	//}
-
-	// Test 3 (only for cylinderCapacity == 1)
-
-	cylinder0Values[0] = binToInt("00000000000000000000000000000000");
-	cylinder1Values[0] = binToInt("11111111111111111100000000000000");
-	cylinder2Values[0] = binToInt("11010001010100001100000000000000");
-
-	Cylinder cylinder0 =
-		Cylinder(cylinder0Values, cylinderCapacity, CUDART_PI_F / 6, sqrt((float)getOneBitsCountRaw(cylinder0Values, cylinderCapacity)), 0);
-	Cylinder cylinder1_0 =
-		Cylinder(cylinder1Values, cylinderCapacity, CUDART_PI_F / 4, sqrt((float)getOneBitsCountRaw(cylinder1Values, cylinderCapacity)), 0);
-	Cylinder cylinder1_1 =
-		Cylinder(cylinder1Values, cylinderCapacity, CUDART_PI_F / 4, sqrt((float)getOneBitsCountRaw(cylinder1Values, cylinderCapacity)), 1);
-	Cylinder cylinder2_1 =
-		Cylinder(cylinder2Values, cylinderCapacity, CUDART_PI_F / 3, sqrt((float)getOneBitsCountRaw(cylinder2Values, cylinderCapacity)), 1);
-	Cylinder cylinder2_2 =
-		Cylinder(cylinder2Values, cylinderCapacity, CUDART_PI_F / 3, sqrt((float)getOneBitsCountRaw(cylinder2Values, cylinderCapacity)), 2);
-
-	Cylinder db[] = { cylinder1_0, cylinder1_1, cylinder2_1, cylinder2_2, cylinder2_2, cylinder2_2, cylinder2_2 };
-	Cylinder query[] = { cylinder2_2 }; // Template index hopefully doesn't matter here
-	unsigned int dbTemplateLengths[] = { 1, 2, 4 };
-	unsigned int dbTemplateCount = sizeof(dbTemplateLengths) / sizeof(unsigned int);
-
-	float *similarities = getBinTemplateSimilarities(
-		query, sizeof(query) / sizeof(Cylinder),
-		db, sizeof(db) / sizeof(Cylinder),
-		dbTemplateLengths, dbTemplateCount);
-
-	printf("Similarities:\n");
-	for (unsigned int i = 0; i < dbTemplateCount; i++)
-	{
-		printf("%f%s", similarities[i], (i == dbTemplateCount - 1 ? "" : ", "));
-	}
-	printf("\n");
-
-	// [end] Test 3
-
-	free(cylinder0Values);
-	free(cylinder1Values);
-	free(cylinder2Values);
-
-	return 0;
-}
+//
+//int main()
+//{
+//	unsigned int cylinderCapacity = 1;
+//
+//	unsigned int *cylinder0Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//	unsigned int *cylinder1Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//	unsigned int *cylinder2Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
+//
+//	cylinder0Values[0] = intToBin("00000000000000000000000000000000");
+//	cylinder1Values[0] = intToBin("11111111111111111100000000000000");
+//	cylinder2Values[0] = intToBin("11010001010100001100000000000000");
+//
+//	Cylinder cylinder0 =
+//		Cylinder(cylinder0Values, cylinderCapacity, CUDART_PI_F / 6, sqrt((float)getOneBitsCountRaw(cylinder0Values, cylinderCapacity)), 0);
+//	Cylinder cylinder1_0 =
+//		Cylinder(cylinder1Values, cylinderCapacity, CUDART_PI_F / 4, sqrt((float)getOneBitsCountRaw(cylinder1Values, cylinderCapacity)), 0);
+//	Cylinder cylinder1_1 =
+//		Cylinder(cylinder1Values, cylinderCapacity, CUDART_PI_F / 4, sqrt((float)getOneBitsCountRaw(cylinder1Values, cylinderCapacity)), 1);
+//	Cylinder cylinder2_1 =
+//		Cylinder(cylinder2Values, cylinderCapacity, CUDART_PI_F / 3, sqrt((float)getOneBitsCountRaw(cylinder2Values, cylinderCapacity)), 1);
+//	Cylinder cylinder2_2 =
+//		Cylinder(cylinder2Values, cylinderCapacity, CUDART_PI_F / 3, sqrt((float)getOneBitsCountRaw(cylinder2Values, cylinderCapacity)), 2);
+//
+//	Cylinder db[] = { cylinder1_0, cylinder1_1, cylinder2_1, cylinder2_2, cylinder2_2, cylinder2_2, cylinder2_2 };
+//	Cylinder query[] = { cylinder2_2 }; // Template index hopefully doesn't matter here
+//	unsigned int dbTemplateLengths[] = { 1, 2, 4 };
+//	unsigned int dbTemplateCount = sizeof(dbTemplateLengths) / sizeof(unsigned int);
+//
+//	float *similarities = getBinTemplateSimilarities(
+//		query, sizeof(query) / sizeof(Cylinder),
+//		db, sizeof(db) / sizeof(Cylinder),
+//		dbTemplateLengths, dbTemplateCount);
+//
+//	printf("Similarities:\n");
+//	for (unsigned int i = 0; i < dbTemplateCount; i++)
+//	{
+//		printf("%f%s", similarities[i], (i == dbTemplateCount - 1 ? "" : ", "));
+//	}
+//	printf("\n");
+//
+//	// [end] Test 3
+//
+//	free(cylinder0Values);
+//	free(cylinder1Values);
+//	free(cylinder2Values);
+//
+//	return 0;
+//}

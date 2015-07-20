@@ -148,7 +148,28 @@ unsigned int getOneBitsCountRaw(unsigned int* arr, unsigned int length)
 	return getOneBitsCount(cudaArr);
 }
 
-unsigned int binToInt(char* s)
+void createCylinderValues(char *src, unsigned int srcLength, unsigned int *res)
 {
-	return (unsigned int)strtoul(s, NULL, 2);
+	// srcLength, in symbols/bytes
+	// resLength is ints
+	unsigned int resLength = ceilMod(srcLength, sizeof(unsigned int)* 8); // 8 obviously for 8 bits per byte
+
+	for (unsigned int i = 0; i < resLength; i++)
+	{
+		if (srcLength >= (i + 1) * sizeof(unsigned int)* 8)
+		{
+			char curSrc[sizeof(unsigned int)* 8];
+			memcpy(curSrc, &src[i * sizeof(unsigned int)* 8], sizeof(unsigned int)* 8);
+			res[i] = strtoul(curSrc, NULL, 2);
+		}
+		else
+		{
+			int curSrcLength = srcLength - i * sizeof(unsigned int)* 8 + 1; // + 1 for '\0'
+			char *curSrc = (char *)malloc(curSrcLength);
+			memcpy(curSrc, &src[i * sizeof(unsigned int)* 8], curSrcLength - 1);
+			curSrc[curSrcLength - 1] = '\0';
+			int preRes = strtoul(curSrc, NULL, 2);
+			res[i] = preRes << (sizeof(unsigned int)* 8 - curSrcLength + 1); // curSrcLength - 1 cause '\0' is not counted
+		}
+	}
 }
