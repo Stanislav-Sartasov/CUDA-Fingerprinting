@@ -9,7 +9,7 @@ namespace CUDAFingerprinting.Common.Tests
         [TestMethod]
         public void TestFrequency()
         {
-            var bmp = Resources.SampleFinger2;
+            var bmp = Resources.SampleFinger5;
             var array = ImageHelper.LoadImageAsInt(bmp);
 
             var orfield = new OrientationField(array);
@@ -34,12 +34,19 @@ namespace CUDAFingerprinting.Common.Tests
             var filtered = LocalRidgeFrequency.FilterFrequencies(fr);
 
             double sum = 0;
-            for (int i = 0; i < fr.GetLength(0); i++)
-                for (int j = 0; j < fr.GetLength(1); j++)
+            for (int i = 0; i < filtered.GetLength(0); i++)
+                for (int j = 0; j < filtered.GetLength(1); j++)
                 {
-                    sum += fr[i, j];
+                    sum += filtered[i, j];
                 }
             double mean = sum / pixNum;
+
+            double max = -1;
+            for (int i = 0; i < filtered.GetLength(0); i++)
+                for (int j = 0; j < filtered.GetLength(1); j++)
+                {
+                    if (filtered[i, j] > max) max = filtered[i, j];
+                }
 
             int count = 0;
             for (int i=0; i < filtered.GetLength(0); i++)

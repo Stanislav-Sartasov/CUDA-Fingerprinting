@@ -5,7 +5,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
 {
     public class ImageEnhancement
     {
-        public static double[,] Enhance(double[,] img, double[,] orientMatrix, double frequency, int filterSize,
+        public static double[,] Enhance(double[,] img, double[,] orientMatrix, double[,] frequencyMatrix, int filterSize,
             int angleNum)
         {
             int imgHeight = img.GetLength(0);
@@ -17,7 +17,9 @@ namespace CUDAFingerprinting.Common.GaborFilter
             for (int i = 0; i < angleNum; i++)
                 angles[i] = constAngle * i - Math.PI / 2;
 
-            var gabor = new GaborFilter(angleNum, filterSize, frequency);
+            double[] frequencies = {1.0/25.0, 1.0/16.0, 1.0/9.0, 1.0/3.0};
+
+            var gabor = new GaborFilter(angleNum, filterSize);
             int center = filterSize / 2; //filter is always a square.
             int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
@@ -25,13 +27,22 @@ namespace CUDAFingerprinting.Common.GaborFilter
             {
                 for (int j = 0; j < imgWidth; j++)
                 {
-                    double diff = Double.MaxValue;
+                    double angleDiff = Double.MaxValue;
                     int angle = 0;
                     for (int angInd = 0; angInd < angleNum; angInd++)
-                        if (Math.Abs(angles[angInd] - orientMatrix[i, j]) < diff)
+                        if (Math.Abs(angles[angInd] - orientMatrix[i, j]) < angleDiff)
                         {
                             angle = angInd;
-                            diff = Math.Abs(angles[angInd] - orientMatrix[i, j]);
+                            angleDiff = Math.Abs(angles[angInd] - orientMatrix[i, j]);
+                        }
+
+                    double diff = Double.MaxValue;
+                    int freq = 0;
+                    for (int freqInd = 0; freqInd < angleNum; freqInd++)
+                        if (Math.Abs(frequencies[freqInd] - frequencyMatrix[i, j]) < diff)
+                        {
+                            freq = freqInd;
+                            diff = Math.Abs(frequencies[freqInd] - frequencyMatrix[i, j]);
                         }
                     for (int u = -upperCenter; u <= center; u++)
                     {
@@ -45,7 +56,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
                             if (indexX >= imgHeight) indexX = imgHeight - 1;
                             if (indexY < 0) indexY = 0;
                             if (indexY >= imgWidth) indexY = imgWidth - 1;
-                            result[i, j] += gabor.Filters[angle].Matrix[center - u, center - v]*img[indexX, indexY];
+                            result[i, j] += gabor.Filters[angle, freq].Matrix[center - u, center - v]*img[indexX, indexY];
                         }
                     }
                     result[i, j] = result[i, j] > 255 ? 255 : (result[i, j] < 0 ? 0 : result[i, j]);

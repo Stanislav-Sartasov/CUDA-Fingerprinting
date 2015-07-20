@@ -16,9 +16,9 @@ namespace ImageEnhancmentTest
             int[,] imgInts = imgDoubles.Select2D((x => (int)x));
             OrientationField orf = new OrientationField(imgInts, 16);
             double[,] orient = orf.GetOrientationMatrix(imgInts.GetLength(0), imgInts.GetLength(1));
-            var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 32, 8);
-            var bmp2 = ImageHelper.SaveArrayToBitmap(res);
-            bmp2.Save("007.bmp", ImageHelper.GetImageFormatFromExtension("007.bmp"));
+            //var res = ImageEnhancement.Enhance(imgDoubles, orient, (double)1 / 9, 32, 8);
+            //var bmp2 = ImageHelper.SaveArrayToBitmap(res);
+            //bmp2.Save("007.bmp", ImageHelper.GetImageFormatFromExtension("007.bmp"));
         }
     }
 }
