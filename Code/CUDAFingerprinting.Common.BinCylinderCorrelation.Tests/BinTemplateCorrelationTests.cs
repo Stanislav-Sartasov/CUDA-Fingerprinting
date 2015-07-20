@@ -1,24 +1,41 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.IO;
 
 namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
 {
     [TestClass]
     public class BinTemplateCorrelationTests
     {
+        public static Cylinder cylinderZeros = CylinderTestsHelper.cylinderZeros;
+        public static Cylinder cylinderOnes = CylinderTestsHelper.cylinderOnes;
+        public static Cylinder cylinderMixed = CylinderTestsHelper.cylinderMixed;
+
+        public static Cylinder[] cylinders = new Cylinder[]
+        {
+            CylinderTestsHelper.cylinderZeros,
+            CylinderTestsHelper.cylinderOnes,
+            CylinderTestsHelper.cylinderMixed
+        };
+
+        public static Template query;
+        public static Template[] db; // DB for simple version
+
+        public static Cylinder[] contiguousCylinders; // DB for optimized version
+        public static uint[] templateIndices;
+        public static int[] templateDbLengths;
+        public static CylinderDatabase cylinderDb;
+
         [TestMethod]
         public void TestBinTemplateCorrelation()
         {
-            Cylinder cylinderZeros = CylinderTestsHelper.cylinderZeros;
-            Cylinder cylinderOnes = CylinderTestsHelper.cylinderOnes;
-            Cylinder cylinderMixed = CylinderTestsHelper.cylinderMixed;
-
-            Template query = new Template(new Cylinder[]
+            query = new Template(new Cylinder[] 
             {
                 cylinderMixed
             });
 
-            Template[] db = new Template[]
+            db = new Template[]
             {
                 new Template(new Cylinder[]
                 {
@@ -40,16 +57,109 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
                 })
             };
 
-            Cylinder[] contiguousArr = new Cylinder[]
+            contiguousCylinders = new Cylinder[]
             {
                 cylinderOnes, cylinderOnes, cylinderMixed, cylinderMixed, cylinderMixed, cylinderMixed, cylinderMixed
             };
-            uint[] templateIndices = new uint[] { 0, 1, 1, 2, 2, 2, 2 };
-            CylinderDatabase cylinderDb = new CylinderDatabase(contiguousArr, templateIndices);
-            int[] dbTemplatesLengths = new int[] { 1, 2, 4 };
-            
+            templateIndices = new uint[] { 0, 1, 1, 2, 2, 2, 2 };
+            cylinderDb = new CylinderDatabase(contiguousCylinders, templateIndices);
+            templateDbLengths = new int[] { 1, 2, 4 };
+
             //double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultiple(query, db); // templateDb version
-            double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultipleOptimized(query, cylinderDb, dbTemplatesLengths); // cylinderDb version
+            double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultipleOptimized(query, cylinderDb, templateDbLengths); // cylinderDb version
+            for (int i = 0; i < similarityRates.Length; i++)
+            {
+                Console.Write(similarityRates[i] + (i != similarityRates.Length - 1 ? "; " : ""));
+            }
+            Console.WriteLine();
+        }
+
+        public static void ParseDb(string path)
+        {
+            using (var file = new StreamReader(path))
+            {
+                string[] templateDbLengthsString = file.ReadLine().Split(new Char[] { ' ' });
+                templateDbLengths = new int[templateDbLengthsString.Length];
+                for (int i = 0; i < templateDbLengthsString.Length; i++)
+                {
+
+                    templateDbLengths[i] = Int32.Parse(templateDbLengthsString[i]);
+                }
+
+                string[] templateIndicesString = file.ReadLine().Split(new Char[] { ' ' });
+                templateIndices = new uint[templateIndicesString.Length];
+                for (int i = 0; i < templateIndicesString.Length; i++)
+                {
+                    templateIndices[i] = UInt32.Parse(templateIndicesString[i]);
+                }
+
+                file.ReadLine();
+
+                contiguousCylinders = new Cylinder[templateIndices.Length];
+                for (int i = 0; i < templateIndices.Length; i++)
+                {
+                    Cylinder curCylinder = new Cylinder();
+
+                    string curCylinderString = file.ReadLine();
+                    uint[] curCylinderUInt = new uint[curCylinderString.Length];
+                    for (int j = 0; j < curCylinderUInt.Length; j++)
+                    {
+                        curCylinderUInt[j] = UInt32.Parse(curCylinderString[j].ToString());
+                    }
+                    curCylinder.Values = CylinderTestsHelper.ConvertArrayUintToBinary(curCylinderUInt);
+
+                    curCylinder.Angle = Double.Parse(file.ReadLine());
+                    curCylinder.Norm = Double.Parse(file.ReadLine());
+
+                    contiguousCylinders[i] = curCylinder;
+
+                    file.ReadLine();
+                }
+            }
+        }
+
+        public static void ParseQuery(string path)
+        {
+            using (var file = new StreamReader(path))
+            {
+                Cylinder[] queryCylinders = new Cylinder[Int32.Parse(file.ReadLine())];
+                file.ReadLine();
+                file.ReadLine();
+
+                for (int i = 0; i < queryCylinders.Length; i++)
+                {
+                    Cylinder curCylinder = new Cylinder();
+
+                    string curCylinderString = file.ReadLine();
+                    uint[] curCylinderUInt = new uint[curCylinderString.Length];
+                    for (int j = 0; j < curCylinderUInt.Length; j++)
+                    {
+                        curCylinderUInt[j] = UInt32.Parse(curCylinderString[j].ToString());
+                    }
+                    curCylinder.Values = CylinderTestsHelper.ConvertArrayUintToBinary(curCylinderUInt);
+
+                    curCylinder.Angle = Double.Parse(file.ReadLine());
+                    curCylinder.Norm = Double.Parse(file.ReadLine());
+
+                    queryCylinders[i] = curCylinder;
+
+                    file.ReadLine();
+                }
+
+                query = new Template(queryCylinders);
+            }
+        }
+        
+        [TestMethod]
+        public void TestBinTemplateCorrelationMassive()
+        {
+            string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            ParseDb(homeFolder + "\\mcc_db.txt");
+            ParseQuery(homeFolder + "\\mcc_query.txt");
+
+            CylinderDatabase cylinderDb = new CylinderDatabase(contiguousCylinders, templateIndices);
+
+            double[] similarityRates = BinTemplateCorrelation.GetTemplateCorrelationMultipleOptimized(query, cylinderDb, templateDbLengths); // cylinderDb version
             for (int i = 0; i < similarityRates.Length; i++)
             {
                 Console.Write(similarityRates[i] + (i != similarityRates.Length - 1 ? "; " : ""));

@@ -8,9 +8,11 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
 {
     public class Cylinder
     {
-        public uint[] Values { get; private set; }
-        public double Angle { get; private set; }
-        public double Norm { get; private set; }
+        public uint[] Values { get; set; }
+        public double Angle { get; set; }
+        public double Norm { get; set; }
+
+        public Cylinder() { }
 
         public Cylinder(uint[] givenValues, double givenAngle, double givenNorm)
         {
