@@ -37,7 +37,7 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
                         }
                     }
 
-                    cNewMap[x, y] /= 441;
+                    cNewMap[x, y] /= 9;
                 }
             }
 
