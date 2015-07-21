@@ -61,6 +61,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SingularityRegionDetection.Test.cs" />
     <Compile Include="VisualizationTest.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\002.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\8_2.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
