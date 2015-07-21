@@ -29,7 +29,7 @@ void printArray2D(unsigned int* arr, unsigned int width, unsigned int height)
 {
 	for (unsigned int i = 0; i < height; i++) {
 		for (unsigned int j = 0; j < width; j++) {
-			printf("%u ", arr[i * width + j]);
+			printf("%2u ", arr[i * width + j]);
 		}
 		printf("\n");
 	}
@@ -79,7 +79,8 @@ __device__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> *fst, CUDAArra
 	int column = (defaultColumn()) % fst->Width;
 
 	unsigned int newValue = fst->At(row, column) ^ snd->At(row, column);
-	result->SetAt(row, column, newValue);
+	result->cudaPtr[row * result->Stride / sizeof(unsigned int)+column] = newValue;
+	//result->SetAt(row, column, newValue);
 }
 
 __global__ void cudaArrayBitwiseXorGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)

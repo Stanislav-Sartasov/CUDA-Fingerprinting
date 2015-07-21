@@ -43,12 +43,13 @@ void parseDb(char *path)
 	fgets(line, MAX_FILE_LINE_LENGTH, file);
 
 	db = (Cylinder *)malloc(dbLength * sizeof(Cylinder));
-
-	Cylinder *curCylinder = new Cylinder();
+	
 	for (unsigned int i = 0; i < dbLength; i++)
 	{
+		Cylinder *curCylinder = new Cylinder(CYLINDER_CELLS_COUNT);
+
 		fgets(line, MAX_FILE_LINE_LENGTH, file);
-		createCylinderValues(line, CYLINDER_CELLS_COUNT, curCylinder->values);
+		createCylinderValues(line, CYLINDER_CELLS_COUNT * sizeof(unsigned int)* 8, curCylinder->values);
 
 		fgets(line, MAX_FILE_LINE_LENGTH, file);
 		curCylinder->angle = strtof(line, NULL);
@@ -62,8 +63,9 @@ void parseDb(char *path)
 		db[i] = *curCylinder;
 
 		fgets(line, MAX_FILE_LINE_LENGTH, file);
+
+		delete(curCylinder);
 	}
-	delete(curCylinder);
 
 	fclose(file);
 }
@@ -79,10 +81,7 @@ void parseQ(char *path)
 
 	char *line = new char[MAX_FILE_LINE_LENGTH];
 
-	fgets(line, MAX_FILE_LINE_LENGTH, file);
-
-	templateDbCountTest = strtoul(line, NULL, 10);
-	templateDbLengthsTest = (unsigned int *)malloc(templateDbCountTest * sizeof(unsigned int));
+	fgets(line, MAX_FILE_LINE_LENGTH, file); // Always 1 for query (number of templates)
 
 	fgets(line, MAX_FILE_LINE_LENGTH, file);
 	qLength = strtoul(line, NULL, 10);
@@ -90,12 +89,13 @@ void parseQ(char *path)
 	fgets(line, MAX_FILE_LINE_LENGTH, file);
 
 	q = (Cylinder *)malloc(qLength * sizeof(Cylinder));
-
-	Cylinder *curCylinder = new Cylinder();
-	for (unsigned int i = 0; i < dbLength; i++)
+	
+	for (unsigned int i = 0; i < qLength; i++)
 	{
+		Cylinder *curCylinder = new Cylinder(CYLINDER_CELLS_COUNT);
+
 		fgets(line, MAX_FILE_LINE_LENGTH, file);
-		createCylinderValues(line, CYLINDER_CELLS_COUNT, curCylinder->values);
+		createCylinderValues(line, CYLINDER_CELLS_COUNT * sizeof(unsigned int) * 8, curCylinder->values);
 
 		fgets(line, MAX_FILE_LINE_LENGTH, file);
 		curCylinder->angle = strtof(line, NULL);
@@ -108,8 +108,9 @@ void parseQ(char *path)
 		q[i] = *curCylinder;
 
 		fgets(line, MAX_FILE_LINE_LENGTH, file);
+
+		delete(curCylinder);
 	}
-	delete(curCylinder);
 
 	fclose(file);
 }
@@ -117,7 +118,7 @@ void parseQ(char *path)
 int main()
 {
 	char pathDb[MAX_FILE_NAME_LENGTH] = "C:\\Users\\resaglow\\mcc_c_db.txt";
-	char pathQ[MAX_FILE_NAME_LENGTH] = "C:\\Users\\resaglow\\mcc_c_q.txt";
+	char pathQ[MAX_FILE_NAME_LENGTH] = "C:\\Users\\resaglow\\mcc_c_query.txt";
 
 	parseDb(pathDb);
 	parseQ(pathQ);
@@ -130,7 +131,7 @@ int main()
 	printf("Similarities:\n");
 	for (unsigned int i = 0; i < templateDbCountTest; i++)
 	{
-		printf("%f%s", similarities[i], (i == templateDbCountTest - 1 ? "" : ", "));
+		printf("%f%s", similarities[i], (i != templateDbCountTest - 1 ? "; " : ""));
 	}
 	printf("\n");
 

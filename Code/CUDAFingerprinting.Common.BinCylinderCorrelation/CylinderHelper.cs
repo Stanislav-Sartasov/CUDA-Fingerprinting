@@ -79,10 +79,11 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
         public static double GetAngleDiff(double angle1, double angle2)
         {
             double diff = angle1 - angle2;
-            return
+            double res =
                 diff < -Math.PI ? diff + 2 * Math.PI :
                 diff >= Math.PI ? diff - 2 * Math.PI :
                 diff;
+            return res;
         }
     }
 }

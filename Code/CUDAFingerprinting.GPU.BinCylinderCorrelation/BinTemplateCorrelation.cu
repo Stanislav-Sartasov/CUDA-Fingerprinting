@@ -15,8 +15,8 @@
 #define cudaCheckError() {\
 	cudaError_t e = cudaGetLastError(); \
 	if (e != cudaSuccess) {\
-		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
-		exit(0); \
+		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
+		exit(0);\
 	}\
 }
 
@@ -37,10 +37,11 @@ __constant__ unsigned int queryLengthGlobal;
 __device__ float getAngleDiff(float angle1, float angle2)
 {
 	float diff = angle1 - angle2;
-	return
+	float res = 
 		diff < -CUDART_PI_F ? diff + 2 * CUDART_PI_F :
 		diff >= CUDART_PI_F ? diff - 2 * CUDART_PI_F :
 		diff;
+	return res;
 }
 
 
@@ -64,10 +65,10 @@ __global__ void computeLUTAngles(CUDAArray<int> LUTAngles)
 	unsigned int LUTIndex = 0;
 	for (i = 0; i < queryGPU.Width; i++)
 	{
-		if (getAngleDiff(queryGPU.At(i, 0).angle, curAngle) < ANGLE_THRESHOLD)
+		float diff = getAngleDiff(queryGPU.At(0, i).angle, curAngle);
+		if (diff < ANGLE_THRESHOLD)
 		{
-			LUTAngles.SetAt(curAngle, LUTIndex, i);
-			int num = LUTAngles.At(curAngle, LUTIndex);
+			LUTAngles.SetAt(threadIdx.x, LUTIndex, i);
 			LUTIndex++;
 		}
 	}
@@ -81,7 +82,7 @@ __global__ void computeXorArray(CUDAArray<CUDAArray<unsigned int>> xorArray)
 	if (xorArray.Width * xorArray.Height * CYLINDER_CELLS_COUNT > threadIndex)
 	{
 		unsigned int xorArrayRow = threadIndex / (queryLengthGlobal * CYLINDER_CELLS_COUNT);
-		unsigned int xorArrayColumn = (threadIndex / queryLengthGlobal) % CYLINDER_CELLS_COUNT;
+		unsigned int xorArrayColumn = (threadIndex / CYLINDER_CELLS_COUNT) % queryLengthGlobal;
 
 		cudaArrayBitwiseXorDevice(
 			cylinderDbGPU.At(0, xorArrayRow).values,
@@ -97,8 +98,7 @@ __global__ void cumputeLUTPopCountXor(unsigned int *LUTArr, CUDAArray<CUDAArray<
 	if (xorArray.Width * xorArray.Height * CYLINDER_CELLS_COUNT > threadIndex)
 	{
 		unsigned int xorArrayRow = threadIndex / (queryLengthGlobal * CYLINDER_CELLS_COUNT);
-		unsigned int xorArrayColumn = (threadIndex / queryLengthGlobal) % CYLINDER_CELLS_COUNT;
-
+		unsigned int xorArrayColumn = (threadIndex / CYLINDER_CELLS_COUNT) % queryLengthGlobal;
 
 		cudaArrayWordNormDevice(
 			&CYLINDER_ARRAY_AT(xorArray, xorArrayRow, xorArrayColumn),
@@ -204,6 +204,11 @@ void printCUDAAngles(CUDAArray<int> arr)
 	printf("[end] Print CUDAArray 2D\n");
 }
 
+__global__ void checkCudaVars(CUDAArray<unsigned int> arr)
+{
+
+}
+
 float * getBinTemplateSimilarities(
 	Cylinder *query, unsigned int queryLength,
 	Cylinder *cylinderDb, unsigned int cylinderDbCount,
@@ -245,38 +250,50 @@ float * getBinTemplateSimilarities(
 	CUDAArray<unsigned int> *xorArrayCylindersGPU =
 		(CUDAArray<unsigned int> *)malloc(cylinderDbCount * queryLength * sizeof(CUDAArray<unsigned int>));
 	for (unsigned int i = 0; i < cylinderDbCount * queryLength; i++) {
-		xorArrayCylindersGPU[i] = CUDAArray<unsigned int>(1, cylinderCellsCount);
+		xorArrayCylindersGPU[i] = CUDAArray<unsigned int>(cylinderCellsCount, 1);
 	}
 	CUDAArray<CUDAArray<unsigned int>> xorArray = CUDAArray<CUDAArray<unsigned int>>(xorArrayCylindersGPU, queryLength, cylinderDbCount);
 	computeXorArray << <ceilMod(cylinderDbCount * queryLength * cylinderCellsCount, defaultThreadCount), defaultThreadCount >> >(xorArray);
 	cudaCheckError();
-	unsigned int *d_LUTArr;
+
+	//CUDAArray<unsigned int>* xorArrayCPU = xorArray.GetData();
+	//for (unsigned int i = 0; i < xorArray.Height; i++)
+	//{
+	//	checkCudaVars << <1, 1 >> >(xorArrayCPU[i]);
+	//	printCUDAArray1D(xorArrayCPU[i]);
+	//}
+
+	unsigned int* d_LUTArr;
 	cudaMalloc((void **)&d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int));
 	cudaCheckError();
 	cudaMemset(d_LUTArr, 0, cylinderDbCount * queryLength * sizeof(unsigned int));
 	cudaCheckError();
-	cumputeLUTPopCountXor << <cylinderDbCount, queryLength * cylinderCellsCount >> >(d_LUTArr, xorArray); // Potentially dangerous (may exceed threads-per-block limitation)
+	// Potentially dangerous (may exceed threads-per-block limitation)
+	cumputeLUTPopCountXor << <cylinderDbCount * queryLength, cylinderCellsCount >> >(d_LUTArr, xorArray);
 	cudaCheckError();
 
-	unsigned int *h_LUTArr = new unsigned int[cylinderDbCount * queryLength];
+	unsigned int* h_LUTArr = new unsigned int[cylinderDbCount * queryLength];
 	cudaMemcpy(h_LUTArr, d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 	cudaCheckError();
 
 	CUDAArray<unsigned int> LUTPopCountXor = CUDAArray<unsigned int>(h_LUTArr, queryLength, cylinderDbCount);
+	//printCUDAArray1D(LUTPopCountXor);
+	
 
-
-	unsigned int *zeroMatrix = (unsigned int *)malloc(QUANTIZED_SIMILARITIES_COUNT * templateDbCount * sizeof(unsigned int));
+	unsigned int* zeroMatrix = (unsigned int *)malloc(QUANTIZED_SIMILARITIES_COUNT * templateDbCount * sizeof(unsigned int));
 	memset(zeroMatrix, 0, QUANTIZED_SIMILARITIES_COUNT * templateDbCount * sizeof(unsigned int));
-
 	CUDAArray<unsigned int> preBucketMatrix = CUDAArray<unsigned int>(zeroMatrix, QUANTIZED_SIMILARITIES_COUNT, templateDbCount);
+	free(zeroMatrix);
 	cudaMemcpyToSymbol(bucketMatrix, &preBucketMatrix, sizeof(CUDAArray<unsigned int>));
 	cudaCheckError();
 
 	generateBucketMatrix << <ceilMod(cylinderDbCount, THREADS_PER_BLOCK_MATRIX_GEN), THREADS_PER_BLOCK_MATRIX_GEN >> >(
 		LUTSqrt, LUTAngles, LUTPopCountXor);
 
-	cudaMemcpyFromSymbol(&preBucketMatrix, bucketMatrix, sizeof(CUDAArray<unsigned int>));
+	cudaMemcpyFromSymbol(&preBucketMatrix, bucketMatrix, sizeof(CUDAArray<unsigned int>)); // for debug only
 	cudaCheckError();
+	//printCUDAArray2D(preBucketMatrix);
+
 
 	CUDAArray<float> similaritiesVector = CUDAArray<float>(templateDbCount, 1);
 	computeLSS << <ceilMod(templateDbCount, THREADS_PER_BLOCK_LSS), THREADS_PER_BLOCK_LSS >> >
@@ -288,13 +305,15 @@ float * getBinTemplateSimilarities(
 	LUTNumPairs.Dispose();
 	bucketMatrix.Dispose();
 
-	float* result = similaritiesVector.GetData();
+	float *result = similaritiesVector.GetData();
 
 	similaritiesVector.Dispose();
 
 	return result;
 }
-//
+
+
+
 //int main()
 //{
 //	unsigned int cylinderCapacity = 1;
@@ -303,9 +322,9 @@ float * getBinTemplateSimilarities(
 //	unsigned int *cylinder1Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
 //	unsigned int *cylinder2Values = (unsigned int *)malloc(cylinderCapacity * sizeof(unsigned int));
 //
-//	cylinder0Values[0] = intToBin("00000000000000000000000000000000");
-//	cylinder1Values[0] = intToBin("11111111111111111100000000000000");
-//	cylinder2Values[0] = intToBin("11010001010100001100000000000000");
+//	createCylinderValues("00000000000000000000000000000000", 32, cylinder0Values);
+//	createCylinderValues("11111111111111111100000000000000", 32, cylinder1Values);
+//	createCylinderValues("11010001010100001100000000000000", 32, cylinder2Values);
 //
 //	Cylinder cylinder0 =
 //		Cylinder(cylinder0Values, cylinderCapacity, CUDART_PI_F / 6, sqrt((float)getOneBitsCountRaw(cylinder0Values, cylinderCapacity)), 0);

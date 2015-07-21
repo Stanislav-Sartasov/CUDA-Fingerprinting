@@ -5,7 +5,7 @@
 #include "BinCorrelationHelper.cuh"
 
 #define MAX_CYLINDERS_PER_TEMPLATE 256
-#define CYLINDER_CELLS_COUNT 255 // Hopefully this define is not necessary (constant memory again)
+#define CYLINDER_CELLS_COUNT 8 // Hopefully this define is not necessary (constant memory again)
 
 #define QUANTIZED_ANGLES_COUNT 256
 #define QUANTIZED_SIMILARITIES_COUNT 64 // Basically buckets count

@@ -17,6 +17,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         public static int templateDbCount;
         public static int cylinderCellsCount;
 
+        public static Random rnd = new Random();
+
         public static void GenerateTemplateDb(
             int givenCylinderDbCount, int givenTemplateDbCount, int givenCylinderCellsCount)
         {
@@ -27,8 +29,6 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             db = new Cylinder[cylinderDbCount];
             templateIndices = new int[cylinderDbCount];
             templateDbLengths = new int[templateDbCount];
-
-            Random rnd = new Random();
 
             for (int i = 0; i < cylinderDbCount; i++)
             {
@@ -76,40 +76,50 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             }
         }
 
-        public static void WriteDbToFile(string path)
+        public static void WriteDbToFile(string pathCS, string pathC)
         {
-            using (var file = new StreamWriter(path))
+            using (var file1 = new StreamWriter(pathCS))
+            using (var file2 = new StreamWriter(pathC))
             {
-                file.WriteLine(templateDbCount);
+                file2.WriteLine(templateDbCount);
 
                 for (int i = 0; i < templateDbCount; i++)
                 {
-                    file.Write(templateDbLengths[i] + (i != templateDbCount - 1 ? " " : ""));
+                    file1.Write(templateDbLengths[i] + (i != templateDbCount - 1 ? " " : ""));
+                    file2.Write(templateDbLengths[i] + (i != templateDbCount - 1 ? " " : ""));
                 }
-                file.WriteLine();
+                file1.WriteLine();
+                file2.WriteLine();
 
                 // 2 versions of templateIndices places (only 1 should be used at a time!)
                 // C#-compatible version
-                //for (int i = 0; i < cylinderDbCount; i++)
-                //{
-                //    file.Write(templateIndices[i] + (i != cylinderDbCount - 1 ? " " : ""));
-                //}
-                //file.WriteLine();
+                for (int i = 0; i < cylinderDbCount; i++)
+                {
+                    file1.Write(templateIndices[i] + (i != cylinderDbCount - 1 ? " " : ""));
+                }
+                file1.WriteLine();
                 // [end] C#-compatible version
 
-                file.WriteLine();
+                file1.WriteLine();
+                file2.WriteLine();
 
                 for (int i = 0; i < cylinderDbCount; i++)
                 {
                     for (int j = 0; j < cylinderCellsCount; j++)
                     {
-                        file.Write(db[i].Values[j]);
+                        file1.Write(db[i].Values[j]);
+                        file2.Write(db[i].Values[j]);
                     }
-                    file.WriteLine();
-                    file.WriteLine(db[i].Angle);
-                    file.WriteLine(db[i].Norm);
-                    file.WriteLine(templateIndices[i]); // C-compatible version
-                    file.WriteLine();
+                    file1.WriteLine();
+                    file1.WriteLine(db[i].Angle);
+                    file1.WriteLine(db[i].Norm);
+                    file1.WriteLine();
+
+                    file2.WriteLine();
+                    file2.WriteLine(db[i].Angle);
+                    file2.WriteLine(db[i].Norm);
+                    file2.WriteLine(templateIndices[i]); // C-compatible version
+                    file2.WriteLine();
                 }
             }
         }
@@ -117,14 +127,16 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
         [TestMethod]
         public void TestTemplateDbGenerator()
         {
-            string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            GenerateTemplateDb(100, 25, 255);
-            //WriteDbToFile(homeFolder + "\\mcc_cs_db.txt");
-            WriteDbToFile(homeFolder + "\\mcc_c_db.txt");
+            Random rnd = new Random();
 
-            GenerateTemplateDb(10, 1, 255); // 1 cylinder for query
+            string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            GenerateTemplateDb(10000, 250, 255);
+            //WriteDbToFile(homeFolder + "\\mcc_cs_db.txt");
+            WriteDbToFile(homeFolder + "\\mcc_cs_db.txt", homeFolder + "\\mcc_c_db.txt");
+
+            GenerateTemplateDb(100, 1, 255); // 1 cylinder for query
             //WriteDbToFile(homeFolder + "\\mcc_cs_query.txt");
-            WriteDbToFile(homeFolder + "\\mcc_c_query.txt");
+            WriteDbToFile(homeFolder + "\\mcc_cs_query.txt", homeFolder + "\\mcc_c_query.txt");
         }
     }
 }

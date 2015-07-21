@@ -22,7 +22,7 @@
     <CudaCompile Include="BinCorrelationHelper.cu" />
     <CudaCompile Include="BinCylinderCorrelation.cu" />
     <CudaCompile Include="BinTemplateCorrelation.cu" />
-    <CudaCompile Include="BinTemplateCorrelationMassiveTest.cu" />
+    <CudaCompile Include="BinTemplateMassiveTest.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BinCorrelationHelper.cuh" />

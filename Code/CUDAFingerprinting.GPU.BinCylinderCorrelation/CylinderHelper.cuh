@@ -13,7 +13,11 @@ public:
 	float norm;
 	unsigned int templateIndex;
 
-	Cylinder() {}
+	Cylinder(unsigned int givenValuesCount) 
+	{
+		values = (unsigned int *)malloc(givenValuesCount * sizeof(unsigned int));
+		valuesCount = givenValuesCount;
+	}
 
 	Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
 		valuesCount(givenValuesCount), angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex) 
