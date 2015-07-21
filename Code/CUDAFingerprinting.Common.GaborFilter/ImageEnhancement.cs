@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 
 namespace CUDAFingerprinting.Common.GaborFilter
 {
@@ -17,9 +16,9 @@ namespace CUDAFingerprinting.Common.GaborFilter
             for (int i = 0; i < angleNum; i++)
                 angles[i] = constAngle * i - Math.PI / 2;
 
-            double[] frequencies = {1.0/25.0, 1.0/16.0, 1.0/9.0, 1.0/3.0};
-
             var gabor = new GaborFilter(angleNum, filterSize);
+
+            double[] frequencies = GaborFilter.FrequencyMatrix;
             int center = filterSize / 2; //filter is always a square.
             int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
@@ -38,18 +37,17 @@ namespace CUDAFingerprinting.Common.GaborFilter
 
                     double diff = Double.MaxValue;
                     int freq = 0;
-                    for (int freqInd = 0; freqInd < angleNum; freqInd++)
+                    for (int freqInd = 0; freqInd < GaborFilter.FrequencyCount; freqInd++)
                         if (Math.Abs(frequencies[freqInd] - frequencyMatrix[i, j]) < diff)
                         {
                             freq = freqInd;
                             diff = Math.Abs(frequencies[freqInd] - frequencyMatrix[i, j]);
                         }
+
                     for (int u = -upperCenter; u <= center; u++)
                     {
                         for (int v = -upperCenter; v <= center; v++)
                         {
-                          
-
                             int indexX = i + u;
                             int indexY = j + v;
                             if (indexX < 0) indexX = 0;

@@ -52,7 +52,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ConvolutionTests.cs" />
-    <Compile Include="FrequencyTest.cs" />
     <Compile Include="ImageHelperTests.cs" />
     <Compile Include="NormalizeTests.cs" />
     <Compile Include="PixelwiseOrientationFieldTest.cs" />

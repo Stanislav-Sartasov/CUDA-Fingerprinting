@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-
 
 namespace CUDAFingerprinting.Common
 {
@@ -39,9 +34,9 @@ namespace CUDAFingerprinting.Common
             
             for (int i = 1; i < signature.Length - 1; i++)
             {
-                //In comparison below there has to be non-zero value so that we would be able to ignore minor irrelevant pits.
-                // 0.5 was calculated using heuristic approach. 
-                if ((signature[i - 1] - signature[i] > 0.5) && (signature[i + 1] - signature[i] > 0.5))
+                //In comparison below there has to be non-zero value so that we would be able to ignore minor irrelevant pits of black.
+                // 0.3 was calculated using heuristic approach. 
+                if ((signature[i - 1] - signature[i] > 0.3) && (signature[i + 1] - signature[i] > 0.3))
                 {
                     if (prevMin != -1)
                     {
@@ -61,7 +56,7 @@ namespace CUDAFingerprinting.Common
             return frequency;
         }
 
-        public static double[,] CalculateFrequency(double[,] img, double[,] orientationMatrix, int w = 16, int l = 32)
+        private static double[,] CalculateFrequency(double[,] img, double[,] orientationMatrix, int w, int l)
         {
             double[,] frequencyMatrix = new double[img.GetLength(0), img.GetLength(1)];
             for (int i = 0; i < img.GetLength(0); i ++)
@@ -85,7 +80,7 @@ namespace CUDAFingerprinting.Common
             return 1;
         }
 
-        public static bool InterpolateFrequency(this double[,] frequencyMatrix, int filterSize = 7, double sigma = 1, int w = 16)
+        private static bool InterpolateFrequency(this double[,] frequencyMatrix, int filterSize, double sigma, int w)
         {
             bool needMoreInterpolationFlag = false;
 
@@ -130,59 +125,30 @@ namespace CUDAFingerprinting.Common
             return needMoreInterpolationFlag;
         }
 
-        public static void InterpolateToPerfecton(this double[,] frequencyMatrix, int filterSize = 7, double sigma = 1, int w = 16)
+        private static void InterpolateToPerfecton(this double[,] frequencyMatrix, int filterSize, double sigma, int w)
         {
             bool flag = InterpolateFrequency(frequencyMatrix, filterSize, sigma, w);
             while (flag) 
                 flag = InterpolateFrequency(frequencyMatrix, filterSize, sigma, w);
         }
 
-        public static double[,] FilterFrequencies(double[,] frequencyMatrix, int filterSize = 7, double sigma = 1, int w = 16)
+        private static double[,] FilterFrequencies(double[,] frequencyMatrix, int filterSize, double sigma, int w)
         {
             var result = new double[frequencyMatrix.GetLength(0), frequencyMatrix.GetLength(1)];
             var lowPassFilter = new Filter(filterSize, sigma);
             lowPassFilter.Normalize();
             
-            result = StrangeConvolve(frequencyMatrix, lowPassFilter.Matrix, w);
+            result = ConvolutionHelper.Convolve(frequencyMatrix, lowPassFilter.Matrix, w);
             return result;
         }
 
-        //Yeah, I know I shouldn't do stuff like this, but I'll fix it. Later.
-        public static double[,] StrangeConvolve(double[,] data, double[,] kernel, int w)
+        public static double[,] GetFrequencies(double[,] img, double[,] orientMatrix, int interpolationFilterSize = 7, double interpolationFilterSigma = 1,
+            int lowPassFilterSize = 19, double lowPassFilterSigma = 3, int w = 16, int l = 32)
         {
-            int X = data.GetLength(0);
-            int Y = data.GetLength(1);
-
-            int I = kernel.GetLength(0);
-            int J = kernel.GetLength(1);
-
-            var result = new double[X, Y];
-
-            var centerI = I / 2;
-            var centerJ = J / 2;
-            int upperLimitI = (I & 1) == 0 ? centerI - 1 : centerI;
-            int upperLimitJ = (J & 1) == 0 ? centerJ - 1 : centerJ;
-
-            for (int x = 0; x < X; x++)
-            {
-                for (int y = 0; y < Y; y++)
-                {
-                    for (int i = -upperLimitI; i <= centerI; i++)
-                    {
-                        for (int j = -upperLimitJ; j <= centerJ; j++)
-                        {
-                            var indexX = x + i * w;
-                            if (indexX < 0) indexX = 0;
-                            if (indexX >= X) indexX = X - 1;
-                            var indexY = y + j * w;
-                            if (indexY < 0) indexY = 0;
-                            if (indexY >= Y) indexY = Y - 1;
-                            result[x, y] += kernel[centerI - i, centerJ - j] * data[indexX, indexY];
-                        }
-                    }
-                }
-            }
-            return result;
+            var frequencyMatr = CalculateFrequency(img, orientMatrix, w, l);
+            frequencyMatr.InterpolateToPerfecton(interpolationFilterSize, interpolationFilterSigma, w);
+            var filtered = FilterFrequencies(frequencyMatr, lowPassFilterSize, lowPassFilterSigma, w);
+            return filtered;
         }
     }
 }
