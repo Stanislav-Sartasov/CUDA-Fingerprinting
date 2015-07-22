@@ -11,6 +11,7 @@
 #include "CUDAArray.cuh"
 #include <math.h>
 #include "Filter.cuh"
+#include "ImageLoading.cuh"
 
 __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float* frequencyArr, float bAngle)
 {
@@ -26,7 +27,7 @@ __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float*
 	float yDash = -dX *aCos + dY * aSin;
 	float cellExp = exp(-0.5 * (xDash * xDash / 16 + yDash * yDash / 16));
 	float cellCos = cos(2 * CUDART_PI_F * xDash * frequencyArr[blockIdx.y]);
-	filters.SetAt(threadIdx.x, blockDim.x * blockIdx.x + threadIdx.y, cellExp * cellCos);
+	filters.SetAt(threadIdx.x + blockIdx.y * size, blockDim.x * blockIdx.x + threadIdx.y, cellExp * cellCos);
 }
 
 //CUDAArray<float> MakeGabor16Filters(int angleNum, float frequency)
@@ -60,7 +61,6 @@ CUDAArray<float> MakeGaborFilters(int size, int angleNum, float* frequencyArr, i
 	cudaMalloc((void**)&dev_frArr, frNum * sizeof(float));
 	cudaMemcpy(dev_frArr, frequencyArr, frNum * sizeof(float), cudaMemcpyHostToDevice);
 	cudaCreateGaborFilter << < dim3(angleNum, frNum), dim3(size, size) >> > (filters, size, dev_frArr, bAngle);
-
 	return filters;
 }
 

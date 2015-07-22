@@ -73,10 +73,6 @@
     <None Include="Resources\002.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.Filters.dll">
-      <Link>CUDAFingerprinting.GPU.Filters.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.ImageEnhancement.dll">
       <Link>CUDAFingerprinting.GPU.ImageEnhancement.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

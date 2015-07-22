@@ -7,7 +7,7 @@ namespace CUDAFingerprinting.GPU.Tests
     [TestClass]
     public class ImageEnhancementTest
     {
-        [DllImport("CUDAFingerprinting.GPU.Filters.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Enhance32")]
+        [DllImport("CUDAFingerprinting.GPU.ImageEnhancement.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Enhance")]
         public static extern void Enhance(float[,] source, int imgWidth, int imgHeight, float[] res, float[,] orientationMatrix,
         float[,] frequencyMatrix, int filterSize, int angleNum);
 
@@ -24,8 +24,9 @@ namespace CUDAFingerprinting.GPU.Tests
         public static extern void OrientationFieldInPixels(float[] res, float[,] floatArray, int width, int height);
 
         [DllImport("CUDAFingerprinting.GPU.ImageEnhancement.dll", CallingConvention = CallingConvention.Cdecl,
-            EntryPoint = "CalculateFrequency")]
-        public static extern void CalculateFrequency(float[] res, float[,] image, int height, int width, float[,] orientMatrix, int w);
+            EntryPoint = "GetFrequency")]
+        public static extern void GetFrequency(float[] res, float[,] image, int height, int width, float[,] orientMatrix, int interpolationFilterSize = 7,
+        int interpolationSigma = 1, int lowPassFilterSize = 19, int lowPassFilterSigma = 3, int w = 16);
         [TestMethod]
         public void EnhanceTest()
         {
@@ -37,7 +38,7 @@ namespace CUDAFingerprinting.GPU.Tests
             float[,] orient = orientLin.Make2D(bmp.Height, bmp.Width);
 
             float[] freqLin = new float[bmp.Width * bmp.Height];
-            CalculateFrequency(freqLin, array, array.GetLength(0), array.GetLength(1), orient, 16);
+            GetFrequency(freqLin, array, array.GetLength(0), array.GetLength(1), orient, 7, 1, 25, 4);
             float[,] freq = freqLin.Make2D(bmp.Height, bmp.Width);
 
             int count = 0;

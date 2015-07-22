@@ -10,7 +10,7 @@ namespace ImageEnhancmentTest
         [TestMethod]
         public void ImageEnhancmentTest()
         {
-            var bmp = Resources.SampleFinger2;
+            var bmp = Resources.SampleFinger4;
             double[,] imgDoubles = ImageHelper.LoadImage(bmp);
 
             imgDoubles.DoNormalization(100, 100);
@@ -23,7 +23,7 @@ namespace ImageEnhancmentTest
 
             var res = ImageEnhancement.Enhance(imgDoubles, orient, freqMatrx, 32, 8);
             var bmp2 = ImageHelper.SaveArrayToBitmap(res);
-            bmp2.Save("002.bmp", ImageHelper.GetImageFormatFromExtension("009.bmp"));
+            bmp2.Save("001.bmp", ImageHelper.GetImageFormatFromExtension("009.bmp"));
         }
     }
 }

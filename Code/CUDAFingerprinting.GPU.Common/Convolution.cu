@@ -18,7 +18,7 @@ __global__ void cudaArrayAdd(CUDAArray<float> source, CUDAArray<float> addition)
 	}
 }
 
-__global__ void cudaConvolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter)
+__global__ void cudaConvolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter, int multiplier = 1)
 {
 	int row = blockIdx.y*blockDim.y + threadIdx.y;
 	int column = blockIdx.x*blockDim.x + threadIdx.x;
@@ -50,8 +50,8 @@ __global__ void cudaConvolve(CUDAArray<float> target, CUDAArray<float> source, C
 			for (int dcolumn = -center; dcolumn <= upperLimit; dcolumn++)
 			{
 				float filterValue1 = filterCache[filter.Width*(drow + center) + dcolumn + center];
-				int valueRow = row + drow;
-				int valueColumn = column + dcolumn;
+				int valueRow = row + drow * multiplier;
+				int valueColumn = column + dcolumn * multiplier;
 				
 				if (valueRow<0 || valueRow >= source.Height || valueColumn<0 || valueColumn >= source.Width)
 					continue;
@@ -98,14 +98,14 @@ void SubtractArray(CUDAArray<float> source, CUDAArray<float> subtract)
 	cudaArraySubtract<<<gridSize, blockSize>>>(source, subtract);
 }
 
-void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter)
+void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter, int multiplier)
 {
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
 	dim3 gridSize =
 		dim3(ceilMod(source.Width, defaultThreadCount),
 		ceilMod(source.Height, defaultThreadCount));
 
-	cudaConvolve<<<gridSize, blockSize>>>(target, source, filter);
+	cudaConvolve<<<gridSize, blockSize>>>(target, source, filter, multiplier);
 
 	cudaError_t error = cudaDeviceSynchronize();
 }

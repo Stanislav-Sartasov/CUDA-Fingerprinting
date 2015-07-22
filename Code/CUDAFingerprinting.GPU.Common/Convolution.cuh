@@ -7,7 +7,7 @@ void AddArray(CUDAArray<float> source, CUDAArray<float> addition);
 
 void SubtractArray(CUDAArray<float> source, CUDAArray<float> subtract);
 
-void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter);
+void Convolve(CUDAArray<float> target, CUDAArray<float> source, CUDAArray<float> filter, int multiplier = 1);
 
 void ComplexConvolve(CUDAArray<float> targetReal, CUDAArray<float> targetImaginary,
 	CUDAArray<float> sourceReal, CUDAArray<float> sourceImaginary,

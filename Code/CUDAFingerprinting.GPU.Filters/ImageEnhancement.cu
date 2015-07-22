@@ -12,12 +12,11 @@
 #include "math_constants.h"
 #include "ImageEnhancement.cuh"
 __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDAArray<float> orientMatrix, CUDAArray<float> frequencyMatrix,
-	CUDAArray<float> filters, int angleNum, float* angles)
+	CUDAArray<float> filters, int filterSize, int angleNum, float* angles)
 {
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int filterSize  = filters.Height;
 	int center      = filterSize / 2;
 	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
@@ -101,7 +100,7 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 
 	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
 	dim3 gridSize  = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
-	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, angleNum, dev_angles);
+	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, filterSize, angleNum, dev_angles);
 	result.GetData(res);
 }
 //
