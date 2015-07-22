@@ -25,11 +25,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Filters", "CUDAFingerprinting.GPU.Filters\CUDAFingerprinting.GPU.Filters.vcxproj", "{86750751-B7A7-4A54-B2A9-313A9C1E2199}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8} = {FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}
+		{4E1751EB-A79E-44C1-B6EB-9AE2BADD91FB} = {4E1751EB-A79E-44C1-B6EB-9AE2BADD91FB}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common", "CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj", "{6FD094CC-0F63-47BD-A377-F054AE615517}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.OrientationField.CTest", "CUDAFingerprinting.GPU.OrientationField.CTest\CUDAFingerprinting.GPU.OrientationField.CTest.csproj", "{6B3B4F9C-7EB3-452B-98C5-5C7A0DEF83C1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.OrientationField", "CUDAFingerprinting.GPU.OrientationField\CUDAFingerprinting.GPU.OrientationField.vcxproj", "{4E1751EB-A79E-44C1-B6EB-9AE2BADD91FB}"
 EndProject

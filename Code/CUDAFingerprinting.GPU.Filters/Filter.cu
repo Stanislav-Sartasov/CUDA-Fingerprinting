@@ -12,7 +12,7 @@
 #include <math.h>
 #include "Filter.cuh"
 
-__global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float frequency, float bAngle)
+__global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float* frequencyArr, float bAngle)
 {
 	float aCos = cos(bAngle * blockIdx.x);
 	float aSin = sin(bAngle * blockIdx.x);
@@ -25,42 +25,69 @@ __global__ void cudaCreateGaborFilter(CUDAArray<float> filters, int size, float 
 	float xDash = dX * aSin + dY * aCos;
 	float yDash = -dX *aCos + dY * aSin;
 	float cellExp = exp(-0.5 * (xDash * xDash / 16 + yDash * yDash / 16));
-	float cellCos = cos(2 * CUDART_PI_F * xDash * frequency);
-
+	float cellCos = cos(2 * CUDART_PI_F * xDash * frequencyArr[blockIdx.y]);
 	filters.SetAt(threadIdx.x, blockDim.x * blockIdx.x + threadIdx.y, cellExp * cellCos);
 }
 
-CUDAArray<float> MakeGabor16Filters(int angleNum, float frequency)
-{
-	CUDAArray<float> filters = CUDAArray<float>(16 * angleNum, 16);
-	
-	float bAngle = (float) CUDART_PI_F / angleNum;
+//CUDAArray<float> MakeGabor16Filters(int angleNum, float frequency)
+//{
+//	CUDAArray<float> filters = CUDAArray<float>(16 * angleNum, 16);
+//	
+//	float bAngle = (float) CUDART_PI_F / angleNum;
+//
+//	cudaCreateGaborFilter << < dim3(angleNum), dim3(16, 16) >> > (filters, 16, frequency, bAngle);
+//
+//	return filters;
+//}
+//
+//CUDAArray<float> MakeGabor32Filters(int angleNum, float frequency)
+//{
+//	CUDAArray<float> filters = CUDAArray<float>(32 * angleNum, 32);
+//
+//	float bAngle = (float)CUDART_PI_F / angleNum;
+//
+//	cudaCreateGaborFilter << < dim3(angleNum), dim3(32, 32) >> > (filters, 32, frequency, bAngle);
+//
+//	return filters;
+//}
 
-	cudaCreateGaborFilter << < dim3(angleNum), dim3(16, 16) >> > (filters, 16, frequency, bAngle);
+CUDAArray<float> MakeGaborFilters(int size, int angleNum, float* frequencyArr, int frNum)  //For creating filters of all sizes. This function isn't used.
+{
+	CUDAArray<float> filters = CUDAArray<float>(size * angleNum, size * frNum);
+
+	float bAngle = (float)CUDART_PI_F / angleNum;
+	float* dev_frArr;
+	cudaMalloc((void**)&dev_frArr, frNum * sizeof(float));
+	cudaMemcpy(dev_frArr, frequencyArr, frNum * sizeof(float), cudaMemcpyHostToDevice);
+	cudaCreateGaborFilter << < dim3(angleNum, frNum), dim3(size, size) >> > (filters, size, dev_frArr, bAngle);
 
 	return filters;
 }
 
-CUDAArray<float> MakeGabor32Filters(int angleNum, float frequency)
+float Gaussian2D(float x, float y, float sigma)
 {
-	CUDAArray<float> filters = CUDAArray<float>(32 * angleNum, 32);
-
-	float bAngle = (float)CUDART_PI_F / angleNum;
-
-	cudaCreateGaborFilter << < dim3(angleNum), dim3(32, 32) >> > (filters, 32, frequency, bAngle);
-
-	return filters;
+	float commonDenom = 2.0 * sigma * sigma;
+	float denominator = CUDART_PI_F * commonDenom;
+	float result = exp(-(x * x + y * y) / commonDenom) / denominator;
+	return result;
 }
 
-CUDAArray<float> MakeGaborFilters(int size, int angleNum, float frequency)  //For creating filters of all sizes. This function isn't used.
+float* MakeGaussianFilter(int size, float sigma)
 {
-	CUDAArray<float> filters = CUDAArray<float>(size * angleNum, size);
+	float* filter = (float*)malloc(size * size * sizeof(float));
 
-	float bAngle = (float)CUDART_PI_F / angleNum;
+	int center = size / 2;
+	int upperCenter = (size & 1) == 0 ? center - 1 : center;
 
-	cudaCreateGaborFilter << < dim3(angleNum), dim3(size, size) >> > (filters, size, frequency, bAngle);
+	for (int i = -upperCenter; i <= upperCenter; i++)
+	{
+		for (int j = -upperCenter; j <= upperCenter; j++)
+		{
+			filter[(center - i) * size + (center - j)] = Gaussian2D(i, j, sigma);
+		}
+	}
 
-	return filters;
+	return filter;
 }
 
 //int main()

@@ -71,11 +71,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\002.bmp" />
-    <None Include="Resources\4_8.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.Filters.dll">
       <Link>CUDAFingerprinting.GPU.Filters.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.ImageEnhancement.dll">
+      <Link>CUDAFingerprinting.GPU.ImageEnhancement.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\bin\Debug\CUDAFingerprinting.GPU.Normalization.dll">
@@ -85,6 +88,7 @@
     <Content Include="CUDAFingerprinting.GPU.OrientationField.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\4_8.bmp" />
     <None Include="Resources\Finger.jpg" />
   </ItemGroup>
   <ItemGroup>
