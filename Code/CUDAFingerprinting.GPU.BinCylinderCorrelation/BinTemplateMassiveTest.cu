@@ -3,7 +3,7 @@
 #include "BinTemplateCorrelation.cuh"
 
 #define MAX_FILE_NAME_LENGTH 1000
-#define MAX_FILE_LINE_LENGTH 1000
+#define MAX_FILE_LINE_LENGTH 10000
 
 Cylinder *q;
 unsigned int qLength;
@@ -13,8 +13,12 @@ unsigned int dbLength;
 unsigned int *templateDbLengthsTest;
 unsigned int templateDbCountTest;
 
+unsigned long long index;
+
 void parseDb(char *path)
 {
+	index = 0;
+
 	FILE *file = fopen(path, "r");
 	if (!file)
 	{
@@ -36,6 +40,7 @@ void parseDb(char *path)
 	for (unsigned int i = 0; i < templateDbCountTest; i++)
 	{
 		templateDbLengthsTest[i] = strtoul(curTemplateDbLength, NULL, 10);
+		index++;
 		dbLength += templateDbLengthsTest[i];
 		curTemplateDbLength = strtok(NULL, " ");
 	}

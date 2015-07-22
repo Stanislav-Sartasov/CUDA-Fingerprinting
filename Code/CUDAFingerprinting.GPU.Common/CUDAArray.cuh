@@ -59,7 +59,7 @@ public:
 
 	void GetData(T* arr)
 	{
-		cudaError_t error = cudaMemcpy2D(arr, Width*sizeof(T), cudaPtr, /*Stride*/ sizeof(T)* deviceStride, Width*sizeof(T), Height, cudaMemcpyDeviceToHost);
+		cudaError_t error = cudaMemcpy2D(arr, Width*sizeof(T), cudaPtr, sizeof(T)* deviceStride, Width*sizeof(T), Height, cudaMemcpyDeviceToHost);
 		error = cudaDeviceSynchronize();
 	}
 

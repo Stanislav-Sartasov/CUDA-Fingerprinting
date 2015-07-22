@@ -105,7 +105,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                 {
 
                     uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
-                    
+
                     //for (int i = 0; i < givenXOR.Length; i++)
                     //{
                     //    Console.Write(givenXOR[i] + ", ");
@@ -131,7 +131,8 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
                             bucketIndex--;
                         }
 
-                        bucketMatrix[db.TemplateIndices[k], bucketIndex]++;
+                        uint row = db.TemplateIndices[k];
+                        bucketMatrix[row, bucketIndex]++;
                     }
                 }
             }
