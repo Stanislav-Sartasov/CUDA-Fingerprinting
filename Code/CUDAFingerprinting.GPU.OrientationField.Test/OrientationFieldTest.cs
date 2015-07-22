@@ -18,8 +18,8 @@ namespace CUDAFingerprinting.GPU.OrientationField.Test
 		public void OrientationAngleTest()
 		{
 
-			var image = Properties.Resources._1;
-			var bytes = ImageHelper.LoadImageAsInt(Properties.Resources._1);
+			var image = Resources._1;
+			var bytes = ImageHelper.LoadImageAsInt(Resources._1);
 			int height = bytes.GetUpperBound(0) + 1;
 			int width = bytes.GetUpperBound(1) + 1;
 			float[] sourceBytes = new float[height* width];

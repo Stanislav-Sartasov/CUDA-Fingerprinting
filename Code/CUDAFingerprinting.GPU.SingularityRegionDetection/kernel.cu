@@ -333,7 +333,7 @@ int main()
 
 	free(pic);
 	free (fPic);
-	free (matrix);
+//	free (matrix);
 	free (orient);
 
 	return 0;
