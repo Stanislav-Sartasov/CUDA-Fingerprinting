@@ -6,12 +6,8 @@
 #include <stdlib.h>
 #include <cmath>
 #include <complex>
-//#include "C:\ProgramData\NVIDIA Corporation\CUDA Samples\v7.0\common\inc\helper_functions.h"
-//#include "C:\ProgramData\NVIDIA Corporation\CUDA Samples\v7.0\common\inc\helper_cuda.h"
+#include <ctime>
 
-
-#define BATCH 1
-#define RANK 2
 #define NX 256
 #define NY 243
 #pragma comment(lib, "cufft.lib")
@@ -273,6 +269,7 @@ short signum(float x)
 
 int main()
 {
+	unsigned int start_time = clock();
 	int height = 240, width = 256;
 	int* img = loadBmp("8_3.bmp", &width, &height);
 	int* img2 = (int*)malloc(NX*NY*sizeof(int));
@@ -280,7 +277,6 @@ int main()
 
 	cufftReal* realDataHost = (cufftReal*)malloc(NX*NY*sizeof(cufftReal));
 	cufftComplex* odataHost = (cufftComplex*)malloc(NX*(NY / 2 + 1)*sizeof(cufftComplex));
-	//cufftComplex* img3 = new cufftComplex[NX * NY];
 	for (int i = 0; i < NX; i++)
 	{
 		for (int j = 0; j < NY; j++)
@@ -296,15 +292,10 @@ int main()
 			}
 		}
 	}
-	saveBmp("o.bmp", img2, NX, NY);
+	saveBmp("usedImage.bmp", img2, NX, NY);
 
 	cudaSetDevice(0);
-	//cufftComplex* odata = (cufftComplex*)cudaMalloc((void**)&odata, sizeof(cufftComplex) * NX * (NY / 2 + 1));
-	//cudaMemcpy2D(odata, pitchSize, odataHost, );
-	//cufftReal* realData = (cufftReal*)cudaMalloc((void**)&realData, sizeof(cufftComplex) * NX * NY);
-	//cufftMakePlan1d(plan, NX*NY, CUFFT_R2C, 1, &size); //temp
-	//cudaMemcpy2D(realData, sizeof(cufftComplex), realDataHost, sizeof(cufftReal), NX, NY, cudaMemcpyHostToDevice);
-	
+
 	size_t pitch;
 	size_t size = NX*NY*sizeof(cufftReal);
 	cufftComplex* odata;
@@ -327,8 +318,7 @@ int main()
 	cufftExecR2C(plan, realData, odata);
 
 	error = cudaGetLastError();
-	
-	//cudaDeviceSynchronize();
+
 	cudaMemcpy2D(odataHost, sizeof(cufftComplex)*NX, odata, pitch, NX*sizeof(cufftComplex), NY / 2 + 1, cudaMemcpyDeviceToHost);
 
 	error = cudaGetLastError(); 
@@ -336,18 +326,19 @@ int main()
 	float max = -10000.0f;
 	float min = 4000000000.0f;
 
-	// подели ещё на (NY/2+1)
 	for (int i = 0; i < NX*(NY/2+1); i++)
 	{
 		img4[i] = 255 - sqrt(odataHost[i + signum(NX*(NY / 2 + 1) / 2 - i) * NX*(NY / 2 + 1) / 2].x* odataHost[i + signum(NX*(NY / 2 + 1) / 2 - i) * NX*(NY / 2 + 1) / 2].x 
-			+ odataHost[i + signum(NX*(NY / 2 + 1) / 2 - i) * NX*(NY / 2 + 1) / 2].y * odataHost[i + signum(NX*(NY / 2 + 1) / 2 - i) * NX*(NY / 2 + 1) / 2].y) / NX ;
+			+ odataHost[i + signum(NX*(NY / 2 + 1) / 2 - i) * NX*(NY / 2 + 1) / 2].y * odataHost[i + signum(NX*(NY / 2 + 1) / 2 - i) * NX*(NY / 2 + 1) / 2].y) / NX / (NY / 2 + 1);
 		if (img4[i]>max)max = img4[i];
 		if (img4[i] < min)min = img4[i];
 	}
 
-	saveBmp("res.bmp", img4, NX, NY/2+1);
+	saveBmp("result.bmp", img4, NX, NY/2+1);
 	cufftDestroy(plan);
 	cudaFree(odata);
 	cudaFree(realData);
+	unsigned int end_time = clock(); // конечное время
+	unsigned int search_time = end_time - start_time; // искомое время
     return 0;
 }
