@@ -14,8 +14,8 @@
 
 using namespace std;
 
-#define BigBlockSize 64
-#define BlockSize 48
+#define BigBlockSize 48
+#define BlockSize 32
 #define defaultBlockSize 16
 
 extern "C"
@@ -85,44 +85,43 @@ void Regularize (CUDAArray<float> source, CUDAArray<float> target)
 
 __device__ __inline__ float Sum (CUDAArray<float> source, int tX, int tY, int row, int column)
 {
-	__shared__ float buf[BigBlockSize][BigBlockSize];
-	__shared__ float linBuf[BlockSize];
+	__shared__ float buf[48][48];
+	__shared__ float linBuf[32];
 
-	for ( int i = 0; i < BlockSize; i++ )
+	if ( ( row - 16 >= 0 ) && ( row - 16 < source.Height ) && ( column - 16 >= 0 ) && ( column - 16 < source.Width ) )
 	{
-		linBuf[i] = 0;
-		for ( int j = 0; j < BlockSize; j++ )
-		{
-			buf[i][j] = 0;
-		}
+		buf[tX - 16][tY - 16] = source.At (row - 16, column - 16);
+		buf[tX - 16][tY] = source.At (row - 16, column);
+		buf[tX - 16][tY + 16] = source.At (row - 16, column + 16);
+		buf[tX][tY - 16] = source.At (row, column - 16);
+		buf[tX][tY] = source.At (row, column);
+		buf[tX][tY + 16] = source.At (row, column + 16);
+		buf[tX + 16][tY - 16] = source.At (row + 16, column - 16);
+		buf[tX + 16][tY] = source.At (row + 16, column);
+		buf[tX + 16][tY + 16] = source.At (row + 16, column + 16);
 	}
 
-	buf[tX][tY] = source.At (row, column);
-
 	__syncthreads();
-	if ( tX == 24 )
+	if ( tX == 15 )
 	{
 		float sum = 0;
-
-		for ( int i = -BlockSize; i < BlockSize - 1 ; i++ )
+		for ( int i = 0; i < 32; ++i )
 		{
-			sum += buf[i + BlockSize][tY];
+			sum += buf[i][tY];
 		}
 		linBuf[tY] = sum;
 	}
 
 	__syncthreads();
-	if ( tX == 24 && tY == 24 )
+	if ( tX == 15 && tY == 15 )
 	{
 		float sum = 0;
-
-		for ( int i = -BlockSize; i < BlockSize - 1 ; i++ )
+		for ( int i = 0; i < 32; ++i )
 		{
-			sum += linBuf[i + BlockSize];
+			sum += linBuf[i];
 		}
 		linBuf[0] = sum;
 	}
-
 	__syncthreads();
 
 	return linBuf[0];
@@ -147,14 +146,14 @@ __global__ void cudaStrengthen (CUDAArray<float> V_rReal, CUDAArray<float> V_rIm
 	target.SetAt (row, column, val);
 }
 
-void Strengthen (CUDAArray<float> V_rReal, CUDAArray<float> V_rImaginary, CUDAArray<float> cMapAbs, float *str)
+void Strengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> cMapAbs, float *str)
 {
-	CUDAArray<float> target = CUDAArray<float> (V_rReal.Width, V_rReal.Height);
+	CUDAArray<float> target = CUDAArray<float> (cMapReal.Width, cMapReal.Height);
 
-	dim3 blockSize = dim3(BigBlockSize, BigBlockSize);
-	dim3 gridSize = dim3(ceilMod(V_rReal.Width, BigBlockSize), ceilMod(V_rReal.Height, BigBlockSize));
+	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
+	dim3 gridSize = dim3(ceilMod(cMapReal.Width, defaultBlockSize), ceilMod(cMapReal.Height, defaultBlockSize));
 
-	cudaStrengthen <<< gridSize, blockSize >>> (V_rReal, V_rImaginary, cMapAbs, target);
+	cudaStrengthen <<< gridSize, blockSize >>> (cMapReal, cMapImaginary, cMapAbs, target);
 	cudaError_t error = cudaGetLastError ();
 	target.GetData (str);
 	target.Dispose ();
@@ -165,16 +164,12 @@ void SaveSegmentation (int width, int height, float* matrix)
 	int* newPic = (int*) malloc (sizeof (int)*width*height);
 	int capacity = width * height;
 
-	ofstream fout("Matrix.txt");
-
 	for ( int i = 0; i < capacity; ++i )
 	{
 		newPic[i] = (int)(matrix[i] * 255);
-		fout << newPic[i] << " ";
 	}
 
 	saveBmp ("newPic.bmp", newPic, width, height);
-	fout.close();
 	
 	free (newPic);
 }
