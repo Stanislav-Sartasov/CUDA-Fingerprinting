@@ -139,7 +139,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation
 
             //Console.WriteLine("END");
 
-            //PrintMatrix(bucketMatrix);
+            PrintMatrix(bucketMatrix);
 
             for (int k = 0; k < dbTemplateLengths.Length; k++)
             {

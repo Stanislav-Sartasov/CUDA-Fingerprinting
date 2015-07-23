@@ -8,7 +8,7 @@
 #define CYLINDER_CELLS_COUNT 8 // Hopefully this define is not necessary (constant memory again)
 
 #define DB_LENGTH 10000
-#define MAX_QUERY_LENGTH 1000
+#define MAX_QUERY_LENGTH 64
 
 #define QUANTIZED_ANGLES_COUNT 256
 #define QUANTIZED_SIMILARITIES_COUNT 64 // Basically buckets count
