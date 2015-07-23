@@ -23,9 +23,12 @@
 #define NUM_PAIRS_MU 30
 #define NUM_PAIRS_TAU 0.4
 
-float * getBinTemplateSimilarities(
-	Cylinder *query, unsigned int queryLength,
+void initMCC(
 	Cylinder *cylinderDb, unsigned int cylinderDbCount,
 	unsigned int *templateDbLengths, unsigned int templateDbCount);
+
+float * processMCC(
+	Cylinder *query, unsigned int queryLength,
+	unsigned int cylinderDbCount, unsigned int templateDbCount);
 
 #endif CUDAFINGERPRINTING_BINTEMPLATECORRELATION

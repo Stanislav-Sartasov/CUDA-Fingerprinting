@@ -1,5 +1,6 @@
 ﻿#include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "BinTemplateCorrelation.cuh"
 
 #define MAX_FILE_NAME_LENGTH 1000
@@ -128,11 +129,20 @@ int main()
 	parseDb(pathDb);
 	parseQ(pathQ);
 
-	float *similarities = getBinTemplateSimilarities(
-		q, qLength,
+	initMCC(
 		db, dbLength,
 		templateDbLengthsTest, templateDbCountTest);
 
+	clock_t start = clock();
+
+	float *similarities = processMCC(
+		q, qLength,
+		dbLength, templateDbCountTest);
+
+	cudaDeviceSynchronize();
+	clock_t end = clock();
+	printf("TIME: %ld\n", end - start);
+	
 	printf("Similarities:\n");
 	for (unsigned int i = 0; i < templateDbCountTest; i++)
 	{

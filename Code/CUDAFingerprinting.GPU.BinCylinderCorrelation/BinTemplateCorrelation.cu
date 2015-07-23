@@ -34,7 +34,15 @@ __constant__ CUDAArray<CylinderGPU> queryGPU;
 __device__ CUDAArray<CylinderGPU> cylinderDbGPU;
 __device__ CUDAArray<unsigned int> bucketMatrix;
 __constant__ unsigned int queryLengthGlobal;
+
+CUDAArray<float> LUTSqrt;
+CUDAArray<unsigned int> LUTNumPairs;
+CUDAArray<unsigned int> LUTTemplateDbLengths;
+
+CUDAArray<unsigned int> xorArray;
 __constant__ unsigned int xorArrayCellsCount;
+
+CUDAArray<float> similaritiesVector;
 
 __device__ float getAngleDiff(float angle1, float angle2)
 {
@@ -206,33 +214,12 @@ void printCUDAAngles(CUDAArray<int> arr)
 	printf("[end] Print CUDAArray 2D\n");
 }
 
-float * getBinTemplateSimilarities(
-	Cylinder *query, unsigned int queryLength,
+void initMCC(
 	Cylinder *cylinderDb, unsigned int cylinderDbCount,
 	unsigned int *templateDbLengths, unsigned int templateDbCount)
 {
 	//printf("Started getting similarities\n");
 	cudaSetDevice(0);
-
-	size_t freeMemory, totalMemory;
-	cudaMemGetInfo(&freeMemory, &totalMemory);
-	printf("[start similarities] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-
-	cudaMemcpyToSymbol(queryLengthGlobal, &queryLength, sizeof(unsigned int));
-	cudaCheckError();
-
-	cudaDeviceSynchronize();
-	cudaMemGetInfo(&freeMemory, &totalMemory);
-	printf("[copy query] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-
-	CUDAArray<CylinderGPU> preQueryGPU = CUDAArray<CylinderGPU>(queryLength, 1);
-	convertToCylindersGPU(query, queryLength, &preQueryGPU);
-	cudaMemcpyToSymbol(queryGPU, &preQueryGPU, sizeof(CUDAArray<CylinderGPU>));
-	cudaCheckError();
-
-	cudaDeviceSynchronize();
-	cudaMemGetInfo(&freeMemory, &totalMemory);
-	printf("[copy db] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
 
 	//printf("Started copying DB\n");
 	CUDAArray<CylinderGPU> preCylinderDbGPU = CUDAArray<CylinderGPU>(cylinderDbCount, 1);
@@ -242,33 +229,48 @@ float * getBinTemplateSimilarities(
 	cudaCheckError();
 	cudaDeviceSynchronize();
 	//printf("Ended copying DB\n");
-	
+
 	printf("Started computing LUTs\n");
-	
-	CUDAArray<unsigned int> LUTTemplateDbLengths(templateDbLengths, templateDbCount, 1);
+
+	LUTTemplateDbLengths = CUDAArray<unsigned int>(templateDbLengths, templateDbCount, 1);
 
 	// It's supposed to work only when all the cylinders have the same length, index = 0 WLOG
 	unsigned int cylinderCellsCount = cylinderDb[0].valuesCount;
 
 	// 0 through cylinderCellsCount (population count values)
-	CUDAArray<float> LUTSqrt = CUDAArray<float>(cylinderCellsCount * sizeof(unsigned int)* 8 + 1, 1);
+	LUTSqrt = CUDAArray<float>(cylinderCellsCount * sizeof(unsigned int)* 8 + 1, 1);
 	computeLUTSqrt << <1, cylinderCellsCount * sizeof(unsigned int)* 8 + 1 >> >(LUTSqrt);
-	
-	CUDAArray<unsigned int> LUTNumPairs = CUDAArray<unsigned int>(MAX_CYLINDERS_PER_TEMPLATE, 1);
+
+	LUTNumPairs = CUDAArray<unsigned int>(MAX_CYLINDERS_PER_TEMPLATE, 1);
 	computeLUTNumPairs << <1, MAX_CYLINDERS_PER_TEMPLATE >> >(LUTNumPairs);
+
+	xorArray = CUDAArray<unsigned int>(cylinderCellsCount, DB_LENGTH * MAX_QUERY_LENGTH);
+	cudaDeviceSynchronize();
+	cudaCheckError();
+
+	similaritiesVector = CUDAArray<float>(templateDbCount, 1);
+}
+
+float * processMCC(
+	Cylinder *query, unsigned int queryLength,
+	unsigned int cylinderDbCount, unsigned int templateDbCount)
+{
+	cudaMemcpyToSymbol(queryLengthGlobal, &queryLength, sizeof(unsigned int));
+	cudaCheckError();
+
+	CUDAArray<CylinderGPU> preQueryGPU = CUDAArray<CylinderGPU>(queryLength, 1);
+	convertToCylindersGPU(query, queryLength, &preQueryGPU);
+	cudaMemcpyToSymbol(queryGPU, &preQueryGPU, sizeof(CUDAArray<CylinderGPU>));
+	cudaCheckError();
 	
 	int *preLUTAngles = (int *)malloc((queryLength + 1) * QUANTIZED_ANGLES_COUNT * sizeof(int));
 	memset(preLUTAngles, 0, (queryLength + 1) * QUANTIZED_ANGLES_COUNT * sizeof(int));
 	CUDAArray<int> LUTAngles = CUDAArray<int>(preLUTAngles, queryLength + 1, QUANTIZED_ANGLES_COUNT);
 	computeLUTAngles << <1, QUANTIZED_ANGLES_COUNT >> >(LUTAngles);
-
-	CUDAArray<unsigned int> xorArray = CUDAArray<unsigned int>(cylinderCellsCount, DB_LENGTH * MAX_QUERY_LENGTH);
-	cudaDeviceSynchronize();
-	cudaCheckError();
 	
-	cudaDeviceSynchronize();
-	cudaMemGetInfo(&freeMemory, &totalMemory);
-	printf("[before XOR] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
+	//cudaDeviceSynchronize();
+	//cudaMemGetInfo(&freeMemory, &totalMemory);
+	//printf("[before XOR] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
 
 	cudaDeviceSynchronize();
 	printf("Start XOR create\n");
@@ -284,7 +286,7 @@ float * getBinTemplateSimilarities(
 	clock_t startXor = clock();
 	printf("Start XOR\n");
 
-	computeXorArray << <cylinderDbCount, queryLength * cylinderCellsCount >> >(xorArray);
+	computeXorArray << <cylinderDbCount, queryLength * CYLINDER_CELLS_COUNT >> >(xorArray);
 	cudaDeviceSynchronize();
 	cudaCheckError();
 
@@ -302,7 +304,7 @@ float * getBinTemplateSimilarities(
 	cudaMemset(d_LUTArr, 0, cylinderDbCount * queryLength * sizeof(unsigned int));
 	cudaCheckError();
 	// Potentially dangerous (may exceed threads-per-block limitation)
-	cumputeLUTPopCountXor << <cylinderDbCount, cylinderCellsCount * queryLength>> >(d_LUTArr, xorArray);
+	cumputeLUTPopCountXor << <cylinderDbCount, CYLINDER_CELLS_COUNT * queryLength>> >(d_LUTArr, xorArray);
 	cudaCheckError();
 
 	unsigned int* h_LUTArr = new unsigned int[cylinderDbCount * queryLength];
@@ -332,9 +334,7 @@ float * getBinTemplateSimilarities(
 
 	cudaMemcpyFromSymbol(&preBucketMatrix, bucketMatrix, sizeof(CUDAArray<unsigned int>)); // for debug only
 	cudaCheckError();
-	//printCUDAArray2D(preBucketMatrix);
 	
-	CUDAArray<float> similaritiesVector = CUDAArray<float>(templateDbCount, 1);
 	computeLSS << <ceilMod(templateDbCount, THREADS_PER_BLOCK_LSS), THREADS_PER_BLOCK_LSS >> >
 		(LUTTemplateDbLengths, LUTNumPairs, similaritiesVector);
 
@@ -342,21 +342,12 @@ float * getBinTemplateSimilarities(
 	clock_t end = clock();
 
 	printf("Method time: %ld\n", end - startMethod);
-	printf("Overall time: %ld\n", end - startXor);
-
-	LUTSqrt.Dispose();
-	LUTAngles.Dispose();
-	LUTNumPairs.Dispose();
-	bucketMatrix.Dispose();
+	printf("Overall algorithm time: %ld\n", end - startXor);
 
 	float *result = similaritiesVector.GetData();
 
-	similaritiesVector.Dispose();
-
 	return result;
 }
-
-
 
 //int main()
 //{
