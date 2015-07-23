@@ -42,7 +42,7 @@ void printCUDAArray2D(CUDAArray<unsigned int> arr)
 	printf("[end] Print CUDAArray 2D\n");
 }
 
-__device__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, unsigned int *result)
+__device__ __inline__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, unsigned int *result)
 {
 	int row = (defaultRow()) % fst->Height;
 	int column = (defaultColumn()) % fst->Width;
@@ -71,15 +71,13 @@ CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<u
 }
 
 
-__device__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, unsigned int *result)
+__device__ __inline__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, unsigned int *result)
 {
 	int row = (defaultRow()) % fst->Height;
 	int column = (defaultColumn()) % fst->Width;
 
 	unsigned int newValue = fst->At(row, column) ^ snd->At(row, column);
 	result[row * fst->Width + column] = newValue;
-	int x = result[0];
-	//result->SetAt(row, column, newValue);
 }
 
 __global__ void cudaArrayBitwiseXorGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
@@ -104,7 +102,7 @@ CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<u
 	return *result;
 }
 
-__device__ void cudaArrayWordNormDevice(unsigned int *arr, unsigned int arrHeight, unsigned int arrWidth, unsigned int* sum)
+__device__ __inline__ void cudaArrayWordNormDevice(unsigned int *arr, unsigned int arrHeight, unsigned int arrWidth, unsigned int* sum)
 {
 	int row = (defaultRow()) % arrHeight;
 	int column = (defaultColumn()) % arrWidth;
