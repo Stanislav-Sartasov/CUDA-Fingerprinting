@@ -4,7 +4,7 @@
 #include "BinTemplateCorrelation.cuh"
 
 #define MAX_FILE_NAME_LENGTH 1000
-#define MAX_FILE_LINE_LENGTH 10000
+#define MAX_FILE_LINE_LENGTH 100000
 
 Cylinder *q;
 unsigned int qLength;

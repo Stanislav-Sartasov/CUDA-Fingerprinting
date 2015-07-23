@@ -39,10 +39,9 @@ CUDAArray<float> LUTSqrt;
 CUDAArray<unsigned int> LUTNumPairs;
 CUDAArray<unsigned int> LUTTemplateDbLengths;
 
-CUDAArray<unsigned int> xorArray;
-__constant__ unsigned int xorArrayCellsCount;
-
 CUDAArray<float> similaritiesVector;
+
+__constant__ unsigned int xorArrayCellsCount;
 
 size_t freeMemory, totalMemory;
 
@@ -85,40 +84,8 @@ __global__ void computeLUTAngles(CUDAArray<int> LUTAngles)
 	LUTAngles.SetAt(threadIdx.x, LUTIndex, END_OF_LIST);
 }
 
-__global__ void computeXorArray(CUDAArray<unsigned int> xorArray)
-{
-	unsigned int threadIndex = defaultColumn();
 
-	if (xorArrayCellsCount > threadIndex)
-	{
-		unsigned int dbIndex = threadIndex / (queryLengthGlobal * CYLINDER_CELLS_COUNT);
-		unsigned int queryIndex = (threadIndex / CYLINDER_CELLS_COUNT) % queryLengthGlobal;
-
-		cudaArrayBitwiseXorDevice(
-			cylinderDbGPU.At(0, dbIndex).values,
-			queryGPU.At(0, queryIndex).values,
-			&UINT_ARRAY_AT(xorArray, dbIndex, CYLINDER_CELLS_COUNT * queryIndex));
-	}
-}
-
-__global__ void cumputeLUTPopCountXor(unsigned int *LUTArr, CUDAArray<unsigned int> xorArray)
-{
-	unsigned int threadIndex = defaultColumn();
-
-	if (xorArrayCellsCount > threadIndex)
-	{
-		unsigned int dbIndex = threadIndex / (queryLengthGlobal * CYLINDER_CELLS_COUNT);
-		unsigned int queryIndex = (threadIndex / CYLINDER_CELLS_COUNT) % queryLengthGlobal;
-
-		cudaArrayWordNormDevice(
-			&UINT_ARRAY_AT(xorArray, dbIndex, CYLINDER_CELLS_COUNT * queryIndex),
-			1,
-			CYLINDER_CELLS_COUNT,
-			&LUTArr[dbIndex * queryLengthGlobal + queryIndex]);
-	}
-}
-
-__global__ void generateBucketMatrix(CUDAArray<float> LUTSqrt, CUDAArray<int> LUTAngles, CUDAArray<unsigned int> LUTPopCountXor)
+__global__ void generateBucketMatrix(CUDAArray<float> LUTSqrt, CUDAArray<int> LUTAngles)
 {
 	unsigned int curCylinderIndex = defaultColumn();
 
@@ -134,9 +101,11 @@ __global__ void generateBucketMatrix(CUDAArray<float> LUTSqrt, CUDAArray<int> LU
 			CylinderGPU curCylinderQuery = queryGPU.At(0, curQueryIndex);
 
 			unsigned int xor[CYLINDER_CELLS_COUNT];
+			unsigned int* dbPtr = curCylinderDb.values->cudaPtr;
+			unsigned int* queryPtr = curCylinderQuery.values->cudaPtr;
 			unsigned int j;
 			for (j = 0; j < CYLINDER_CELLS_COUNT; j++) {
-				xor[j] = curCylinderDb.values->At(0, j) ^ curCylinderQuery.values->At(0, j);
+				xor[j] = dbPtr[j] ^ queryPtr[j];
 			}
 			int sum = 0;
 			for (j = 0; j < CYLINDER_CELLS_COUNT; j++) {
@@ -257,15 +226,6 @@ void initMCC(
 	LUTNumPairs = CUDAArray<unsigned int>(MAX_CYLINDERS_PER_TEMPLATE, 1);
 	computeLUTNumPairs << <1, MAX_CYLINDERS_PER_TEMPLATE >> >(LUTNumPairs);
 
-	cudaDeviceSynchronize();
-	cudaMemGetInfo(&freeMemory, &totalMemory);
-	printf("[before xorArray] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-	xorArray = CUDAArray<unsigned int>(cylinderCellsCount * MAX_QUERY_LENGTH, DB_LENGTH);
-	cudaDeviceSynchronize();
-	cudaMemGetInfo(&freeMemory, &totalMemory);
-	printf("[after xorArray] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-	cudaCheckError();
-
 	similaritiesVector = CUDAArray<float>(templateDbCount, 1);
 }
 
@@ -273,6 +233,9 @@ float * processMCC(
 	Cylinder *query, unsigned int queryLength,
 	unsigned int cylinderDbCount, unsigned int templateDbCount)
 {
+	clock_t startMethod = clock();
+	printf("Start method\n");
+
 	cudaMemcpyToSymbol(queryLengthGlobal, &queryLength, sizeof(unsigned int));
 	cudaCheckError();
 
@@ -285,63 +248,6 @@ float * processMCC(
 	memset(preLUTAngles, 0, (queryLength + 1) * QUANTIZED_ANGLES_COUNT * sizeof(int));
 	CUDAArray<int> LUTAngles = CUDAArray<int>(preLUTAngles, queryLength + 1, QUANTIZED_ANGLES_COUNT);
 	computeLUTAngles << <1, QUANTIZED_ANGLES_COUNT >> >(LUTAngles);
-	
-	//cudaDeviceSynchronize();
-	//cudaMemGetInfo(&freeMemory, &totalMemory);
-	//printf("[before XOR] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-
-	unsigned int xorCellsCount = CYLINDER_CELLS_COUNT * cylinderDbCount * queryLength;
-	
-	cudaMemcpyToSymbol(xorArrayCellsCount, &xorCellsCount, sizeof(unsigned int));
-	cudaCheckError();
-	
-	//cudaDeviceSynchronize();
-	//cudaMemGetInfo(&freeMemory, &totalMemory);
-	//printf("[before big arr] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-	//CUDAArray<unsigned int> arr = CUDAArray<unsigned int>(2048, 50000);
-	//cudaMemGetInfo(&freeMemory, &totalMemory);
-	//printf("[after big arr] Free memory: %ld; total memory: %ld\n", freeMemory, totalMemory);
-	//cudaCheckError();
-	
-	clock_t startXor = clock();
-	printf("Start XOR\n");
-
-	//computeXorArray << <cylinderDbCount, queryLength * CYLINDER_CELLS_COUNT >> >(xorArray);
-	cudaDeviceSynchronize();
-	cudaCheckError();
-
-	clock_t endXor = clock();
-	printf("XOR time: %ld\n", endXor - startXor);
-
-	//printCUDAArray2D(xorArray);
-
-	clock_t startLUTPopCountXorCreate = clock();
-	printf("Start LUTPopCountXor\n");
-
-	unsigned int* d_LUTArr;
-	cudaMalloc((void **)&d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int));
-	cudaCheckError();
-	cudaMemset(d_LUTArr, 0, cylinderDbCount * queryLength * sizeof(unsigned int));
-	cudaCheckError();
-	// Potentially dangerous (may exceed threads-per-block limitation)
-	//cumputeLUTPopCountXor << <cylinderDbCount, CYLINDER_CELLS_COUNT * queryLength>> >(d_LUTArr, xorArray);
-	cudaCheckError();
-
-	unsigned int* h_LUTArr = new unsigned int[cylinderDbCount * queryLength];
-	cudaMemcpy(h_LUTArr, d_LUTArr, cylinderDbCount * queryLength * sizeof(unsigned int), cudaMemcpyDeviceToHost);
-	cudaCheckError();
-
-	CUDAArray<unsigned int> LUTPopCountXor = CUDAArray<unsigned int>(h_LUTArr, queryLength, cylinderDbCount);
-
-	cudaDeviceSynchronize();
-
-	clock_t endLUTPopCountXorCreate = clock();
-	printf("LUTPopCountXor time: %ld\n", endLUTPopCountXorCreate - startLUTPopCountXorCreate);
-
-	//printCUDAArray1D(LUTPopCountXor);
-
-	clock_t startMethod = clock();
-	printf("Start method\n");
 
 	// Hopefully this works as well as the previous version with zeroMatrix (it seems like it doesn't :( )
 	//CUDAArray<unsigned int> preBucketMatrix = CUDAArray<unsigned int>(QUANTIZED_SIMILARITIES_COUNT, templateDbCount);
@@ -357,11 +263,7 @@ float * processMCC(
 	cudaCheckError();
 
 	generateBucketMatrix << <ceilMod(cylinderDbCount, THREADS_PER_BLOCK_MATRIX_GEN), THREADS_PER_BLOCK_MATRIX_GEN >> >(
-		LUTSqrt, LUTAngles, LUTPopCountXor);
-
-	cudaMemcpyFromSymbol(&preBucketMatrix, bucketMatrix, sizeof(CUDAArray<unsigned int>)); // for debug only
-	cudaCheckError();
-	//printCUDAArray2D(preBucketMatrix);
+		LUTSqrt, LUTAngles);
 	
 	computeLSS << <ceilMod(templateDbCount, THREADS_PER_BLOCK_LSS), THREADS_PER_BLOCK_LSS >> >
 		(LUTTemplateDbLengths, LUTNumPairs, similaritiesVector);
@@ -370,7 +272,6 @@ float * processMCC(
 	clock_t end = clock();
 
 	printf("Method time: %ld\n", end - startMethod);
-	printf("Overall algorithm time: %ld\n", end - startXor);
 
 	float *result = similaritiesVector.GetData();
 
