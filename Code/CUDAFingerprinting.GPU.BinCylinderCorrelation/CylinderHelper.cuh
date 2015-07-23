@@ -4,7 +4,7 @@
 #include "CUDAArray.cuh"
 #include "stdlib.h"
 
-class Cylinder
+struct Cylinder
 {
 public:
 	unsigned int *values;
@@ -27,7 +27,7 @@ public:
 	}
 };
 
-class CylinderGPU
+struct CylinderGPU
 {
 public:
 	CUDAArray<unsigned int> *values;

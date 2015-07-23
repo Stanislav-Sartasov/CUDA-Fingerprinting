@@ -7,7 +7,7 @@
 #define MAX_CYLINDERS_PER_TEMPLATE 256
 #define CYLINDER_CELLS_COUNT 8 // Hopefully this define is not necessary (constant memory again)
 
-#define DB_LENGTH 1000000
+#define DB_LENGTH 100000
 #define MAX_QUERY_LENGTH 64
 
 #define QUANTIZED_ANGLES_COUNT 256

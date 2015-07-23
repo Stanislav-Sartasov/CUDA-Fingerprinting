@@ -141,7 +141,7 @@ int main()
 
 	cudaDeviceSynchronize();
 	clock_t end = clock();
-	printf("TIME: %ld\n", end - start);
+	printf("Global processing time: %ld\n", end - start);
 	
 	printf("Similarities:\n");
 	for (unsigned int i = 0; i < templateDbCountTest; i++)
