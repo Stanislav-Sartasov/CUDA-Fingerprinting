@@ -14,8 +14,8 @@
 
 using namespace std;
 
-//#define defaultBlockSize 3
-#define BlockSize 32
+#define BigBlockSize 64
+#define BlockSize 48
 #define defaultBlockSize 16
 
 extern "C"
@@ -83,6 +83,51 @@ void Regularize (CUDAArray<float> source, CUDAArray<float> target)
 	cudaRegularize <<< gridSize, blockSize >>> (source, target);
 }
 
+__device__ __inline__ float Sum (CUDAArray<float> source, int tX, int tY, int row, int column)
+{
+	__shared__ float buf[BigBlockSize][BigBlockSize];
+	__shared__ float linBuf[BlockSize];
+
+	for ( int i = 0; i < BlockSize; i++ )
+	{
+		linBuf[i] = 0;
+		for ( int j = 0; j < BlockSize; j++ )
+		{
+			buf[i][j] = 0;
+		}
+	}
+
+	buf[tX][tY] = source.At (row, column);
+
+	__syncthreads();
+	if ( tX == 24 )
+	{
+		float sum = 0;
+
+		for ( int i = -BlockSize; i < BlockSize - 1 ; i++ )
+		{
+			sum += buf[i + BlockSize][tY];
+		}
+		linBuf[tY] = sum;
+	}
+
+	__syncthreads();
+	if ( tX == 24 && tY == 24 )
+	{
+		float sum = 0;
+
+		for ( int i = -BlockSize; i < BlockSize - 1 ; i++ )
+		{
+			sum += linBuf[i + BlockSize];
+		}
+		linBuf[0] = sum;
+	}
+
+	__syncthreads();
+
+	return linBuf[0];
+}
+
 __global__ void cudaStrengthen (CUDAArray<float> V_rReal, CUDAArray<float> V_rImaginary, CUDAArray<float> cMapAbs, CUDAArray<float> target)
 {
 	int row = defaultRow();
@@ -91,61 +136,11 @@ __global__ void cudaStrengthen (CUDAArray<float> V_rReal, CUDAArray<float> V_rIm
 	int tX = threadIdx.x;
 	int tY = threadIdx.y;
 
-	__shared__ float bufReal[defaultBlockSize][defaultBlockSize];
-	__shared__ float linBufReal[BlockSize];
-
-	__shared__ float bufImaginary[defaultBlockSize][defaultBlockSize];
-	__shared__ float linBufImaginary[defaultBlockSize];
-
-	__shared__ float bufDenom[defaultBlockSize][defaultBlockSize];
-	__shared__ float linBufDenom[defaultBlockSize];
-
-	bufReal[tX][tY] = V_rReal.At (row, column);
-	bufImaginary[tX][tY] = V_rImaginary.At (row, column);
-	bufDenom[tX][tY] = cMapAbs.At (row, column);
-
-	__syncthreads();
-	if ( tX == 0 )
-	{
-		float sumReal = 0;
-		float sumImaginary = 0;
-		float sumDenom = 0;
-
-		for ( int i = 0; i < defaultBlockSize; i++ )
-		{
-			sumReal += bufReal[i][tY];
-			sumImaginary += bufImaginary[i][tY];
-			sumDenom += bufDenom[i][tY];
-		}
-		linBufReal[tY] = sumReal;
-		linBufImaginary[tY] = sumImaginary;
-		linBufDenom[tY] = sumDenom;
-	}
-
-	__syncthreads();
-	if ( tX == 0 && tY == 0 )
-	{
-		float sumReal = 0;
-		float sumImaginary = 0;
-		float sumDenom = 0;
-
-		for ( int i = 0; i < defaultBlockSize; i++ )
-		{
-			sumReal += linBufReal[i];
-			sumImaginary += linBufImaginary[i];
-			sumDenom += linBufDenom[i];
-		}
-		linBufReal[0] = sumReal;
-		linBufImaginary[0] = sumImaginary;
-		linBufDenom[0] = sumDenom;
-	}
-	__syncthreads();
-
-	float R = linBufReal[tX];
-	float I = linBufImaginary[tX];
+	float R = Sum (V_rReal, tX, tY, row, column);
+	float I = Sum (V_rImaginary, tX, tY, row, column);
 
 	float numerator = sqrt (R * R + I * I);
-	float denominator = linBufDenom[0];
+	float denominator = Sum (cMapAbs, tX, tY, row, column);
 
 	float val = 1 - numerator / denominator;
 
@@ -156,11 +151,11 @@ void Strengthen (CUDAArray<float> V_rReal, CUDAArray<float> V_rImaginary, CUDAAr
 {
 	CUDAArray<float> target = CUDAArray<float> (V_rReal.Width, V_rReal.Height);
 
-	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
-	dim3 gridSize = dim3(ceilMod(V_rReal.Width, defaultBlockSize), ceilMod(V_rReal.Height, defaultBlockSize));
+	dim3 blockSize = dim3(BigBlockSize, BigBlockSize);
+	dim3 gridSize = dim3(ceilMod(V_rReal.Width, BigBlockSize), ceilMod(V_rReal.Height, BigBlockSize));
 
 	cudaStrengthen <<< gridSize, blockSize >>> (V_rReal, V_rImaginary, cMapAbs, target);
-
+	cudaError_t error = cudaGetLastError ();
 	target.GetData (str);
 	target.Dispose ();
 }
@@ -333,7 +328,7 @@ int main()
 
 	free(pic);
 	free (fPic);
-	free (matrix);
+//	free (matrix);
 	free (orient);
 
 	return 0;
