@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests
 {
     [TestClass]
-    public class BinCylinderCorrelationTests
+    public class BinCylinderCorrelationTest
     {
         [DllImport("CUDAFingerprinting.GPU.BinCylinderCorrelation.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "getBinCylinderCorrelation")]
         public static extern float getBinCylinderCorrelation(

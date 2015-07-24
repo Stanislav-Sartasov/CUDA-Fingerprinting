@@ -18,6 +18,18 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="BinCorrelationHelper.cu" />
+    <CudaCompile Include="BinCylinderCorrelation.cu" />
+    <CudaCompile Include="BinTemplateCorrelation.cu" />
+    <CudaCompile Include="BinTemplateMassiveTest.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BinCorrelationHelper.cuh" />
+    <ClInclude Include="BinCylinderCorrelation.cuh" />
+    <ClInclude Include="BinTemplateCorrelation.cuh" />
+    <ClInclude Include="CylinderHelper.cuh" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3F634018-B841-428F-858E-082AE3EFC94F}</ProjectGuid>
     <RootNamespace>CUDAFingerprinting_GPU_BinCylinderCorrelation</RootNamespace>
@@ -88,6 +100,9 @@
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
+    <CudaCompile>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -151,9 +166,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.targets" />

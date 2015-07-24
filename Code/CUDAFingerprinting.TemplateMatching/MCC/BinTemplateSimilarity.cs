@@ -8,9 +8,24 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
 {
     public class BinTemplateSimilarity
     {
-        public static double npParamMu = 20;
+        public static void PrintMatrix(uint[,] arr)
+        {
+            int rowLength = arr.GetLength(0);
+            int colLength = arr.GetLength(1);
+
+            for (int i = 0; i < rowLength; i++)
+            {
+                for (int j = 0; j < colLength; j++)
+                {
+                    Console.Write(string.Format("{0} ", arr[i, j]));
+                }
+                Console.Write(Environment.NewLine + Environment.NewLine);
+            }
+        }
+
+        public static int npParamMin = 11, npParamMax = 13;
+        public static double npParamMu = 30;
         public static double npParamTau = 2.0 / 5.0;
-        public static int npParamMin = 4, npParamMax = 12;
 
         public static uint bucketsCount = 64;
         public static uint[] buckets = new uint[bucketsCount];
@@ -88,20 +103,43 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
 
                 foreach (Cylinder queryCylinder in query.Cylinders)
                 {
+
                     uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
-                    double givenXORNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(givenXOR)); // Bitwise version
+
+                    //for (int i = 0; i < givenXOR.Length; i++)
+                    //{
+                    //    Console.Write(givenXOR[i] + ", ");
+                    //}
+                    //Console.WriteLine();
+                    uint oneBitsCount = CylinderHelper.GetOneBitsCount(givenXOR);
+                    //Console.Write(oneBitsCount + " ");
+
+                    double givenXORNorm = Math.Sqrt(oneBitsCount); // Bitwise version
                     //double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid version
 
-                    uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
-                    if (bucketIndex == bucketsCount)
+                    if (CylinderHelper.GetAngleDiff(queryCylinder.Angle, cylinderDb.Angle) < angleThreshold
+                        && queryCylinder.Norm + cylinderDb.Norm != 0)
                     {
-                        bucketIndex--;
+                        uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
+                        //if (bucketIndex >= 63)
+                        //{
+                        //    Console.Write("LOOOOL");
+                        //    Console.WriteLine(k);
+                        //}
+                        if (bucketIndex == bucketsCount)
+                        {
+                            bucketIndex--;
+                        }
+
+                        uint row = db.TemplateIndices[k];
+                        bucketMatrix[row, bucketIndex]++;
                     }
-
-                    bucketMatrix[db.TemplateIndices[k], bucketIndex]++;
-
                 }
             }
+
+            //Console.WriteLine("END");
+
+            PrintMatrix(bucketMatrix);
 
             for (int k = 0; k < dbTemplateLengths.Length; k++)
             {

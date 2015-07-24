@@ -54,6 +54,7 @@
     <Compile Include="MCC\BinTemplateSimilarityTests.cs" />
     <Compile Include="MCC\CylinderTestsHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MCC\TemplateDbGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.TemplateMatching\CUDAFingerprinting.TemplateMatching.csproj">

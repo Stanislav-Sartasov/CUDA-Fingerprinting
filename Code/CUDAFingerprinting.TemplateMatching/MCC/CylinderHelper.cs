@@ -8,9 +8,11 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
 {
     public class Cylinder
     {
-        public uint[] Values { get; private set; }
-        public double Angle { get; private set; }
-        public double Norm { get; private set; }
+        public uint[] Values { get; set; }
+        public double Angle { get; set; }
+        public double Norm { get; set; }
+
+        public Cylinder() { }
 
         public Cylinder(uint[] givenValues, double givenAngle, double givenNorm)
         {
@@ -77,10 +79,11 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
         public static double GetAngleDiff(double angle1, double angle2)
         {
             double diff = angle1 - angle2;
-            return
+            double res =
                 diff < -Math.PI ? diff + 2 * Math.PI :
                 diff >= Math.PI ? diff - 2 * Math.PI :
                 diff;
+            return res;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
     {
         public static uint[] ConvertArrayUintToBinary(uint[] intArray)
         {
-            uint[] binaryArray = new uint[(intArray.Length + 32 + 1) / 32]; // Same as ceilMod macro in GPU Solution
+            uint[] binaryArray = new uint[(intArray.Length + 32 - 1) / 32]; // Same as ceilMod macro in GPU Solution
 
             for (int i = 0; i < intArray.Length; i++)
             {
@@ -29,7 +29,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
 
         public static uint[] ConvertArrayBinaryToUint(uint[] binaryArray)
         {
-            uint[] intArray = new uint[binaryArray.Length * 32]; // Same as ceilMod macro in GPU Solution
+            uint[] intArray = new uint[binaryArray.Length * 32];
 
             for (int i = 0; i < binaryArray.Length; i++)
             {
