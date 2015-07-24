@@ -63,6 +63,16 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _1 {
+            get {
+                object obj = ResourceManager.GetObject("_1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _1_1 {
             get {
                 object obj = ResourceManager.GetObject("_1_1", resourceCulture);
@@ -103,6 +113,16 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _1testest {
+            get {
+                object obj = ResourceManager.GetObject("_1testest", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _2_6 {
             get {
                 object obj = ResourceManager.GetObject("_2_6", resourceCulture);
@@ -126,6 +146,26 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests {
         internal static System.Drawing.Bitmap _29_4 {
             get {
                 object obj = ResourceManager.GetObject("_29_4", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _44_8 {
+            get {
+                object obj = ResourceManager.GetObject("_44_8", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap binarizated1 {
+            get {
+                object obj = ResourceManager.GetObject("binarizated1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

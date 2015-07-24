@@ -37,6 +37,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,6 +47,7 @@
   <ItemGroup>
     <Compile Include="AdaptiveBinarization.cs" />
     <Compile Include="ImageBinarization.cs" />
+    <Compile Include="PoincareDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Segmentator.cs" />
     <Compile Include="Thinner.cs" />

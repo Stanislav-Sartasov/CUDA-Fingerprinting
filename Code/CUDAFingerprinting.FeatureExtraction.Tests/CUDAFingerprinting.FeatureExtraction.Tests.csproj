@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="AdaptiveBinarizationTest.cs" />
     <Compile Include="ImageBinarizationTest.cs" />
+    <Compile Include="PoincareDetectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -79,7 +80,9 @@
     <None Include="Resources\29_4.bmp" />
     <None Include="Resources\1_1.bmp" />
     <None Include="Resources\1_2.bmp" />
+    <Content Include="Resources\1.bmp" />
     <Content Include="Resources\1test.bmp" />
+    <Content Include="Resources\1testest.bmp" />
     <Content Include="Resources\2_6.bmp" />
     <None Include="Resources\connectedness.bmp" />
     <None Include="Resources\connectedness2.bmp" />
@@ -91,6 +94,8 @@
     <None Include="Resources\patt.bmp" />
     <None Include="Resources\small.bmp" />
     <Content Include="Resources\2_6Test.bmp" />
+    <Content Include="Resources\44_8.bmp" />
+    <Content Include="Resources\binarizated1.bmp" />
     <Content Include="Resources\test.bmp" />
   </ItemGroup>
   <ItemGroup>
