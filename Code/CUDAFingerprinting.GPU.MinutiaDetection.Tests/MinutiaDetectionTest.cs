@@ -4,6 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common;
 using System.IO;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
 {
@@ -11,8 +13,27 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
     public class MinutiaDetectionTest
     {
         [DllImport("..\\..\\..\\Debug\\CUDAFingerprinting.GPU.MinutiaDetection.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetMinutias")]
-        public static extern int GetMinutias(float[] dest, int[] data, double[] orientation, int width, int height);
+        public static extern int GetMinutias(IntPtr dest, int[] data, float[] orientation, int width, int height);
+        /*
+        public static Bitmap Fimage = Resources.skeleton;
+        public static int[,] Fbytes = ImageHelper.LoadImageAsInt(Fimage);
+        public static int[] Fbytes1D = array2Dto1D(Fbytes);
+        public static double[,] Ffield = (new PixelwiseOrientationField(Fbytes, 16)).Orientation;
+        public static float[] Ffield1D = array2Dto1D(Ffield);
+        public static Minutia[] FminutiasArray = new Minutia[Fbytes.GetLength(0) * Fbytes.GetLength(1)];
 
+        [TestMethod]
+        public void FMinutiaDetectorBasicTest()
+        {
+            int minutiasCount = GetMinutias(
+                    FminutiasArray,
+                    Fbytes1D,
+                    Ffield1D,
+                    Fbytes.GetLength(1),
+                    Fbytes.GetLength(0)
+                );
+        }
+        */
         [TestMethod]
         public void MinutiaDetectorBasicTest()
         {
@@ -20,24 +41,40 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
             var bytes = ImageHelper.LoadImageAsInt(image);
             PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
 
-            float[] minutiasArray = new float[bytes.GetLength(0) * bytes.GetLength(1) * 3];
-            
+            int minutiaSize = Marshal.SizeOf(typeof(Minutia));
+            IntPtr minutiasArrayPtr = Marshal.AllocHGlobal(minutiaSize * bytes.GetLength(0) * bytes.GetLength(1));
+
             int minutiasCount = GetMinutias(
-                minutiasArray,
-                array2Dto1D(bytes), 
-                array2Dto1D(field.Orientation), 
-                bytes.GetLength(1), 
+                minutiasArrayPtr,
+                array2Dto1D(bytes),
+                array2Dto1D(field.Orientation),
+                bytes.GetLength(1),
                 bytes.GetLength(0)
             );
-            
-            List<Minutia> minutias = MinutiasArrayToList(minutiasArray, minutiasCount);
+
+            List<Minutia> minutias = new List<Minutia>(minutiasCount);
+
+            for (int i = 0; i < minutiasCount; i++)
+            {
+                IntPtr ptr = new IntPtr(minutiasArrayPtr.ToInt32() + minutiaSize * i);
+                minutias.Add(
+                    (Minutia)Marshal.PtrToStructure(
+                        new IntPtr(minutiasArrayPtr.ToInt32() + minutiaSize * i), 
+                        typeof(Minutia)
+                    )
+                );
+            }
+
+            Marshal.FreeHGlobal(minutiasArrayPtr);
+
+            //List<Minutia> minutias = new List<Minutia>(minutiasArray.Take(minutiasCount));
 
             //field.SaveAboveToFile(image, Path.GetTempPath() + "//minutiaDetectionOrientationField.bmp", true);
 
-            System.Console.WriteLine(Path.GetTempPath());//result path
-            System.Console.WriteLine(minutias.Count);
+            //System.Console.WriteLine(Path.GetTempPath());//result path
+            //System.Console.WriteLine(minutias.Count);
             System.Console.WriteLine(minutiasCount);
-
+            
             ImageHelper.MarkMinutiae(
                 image,
                 minutias,
@@ -48,20 +85,6 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
                 minutias,
                 Path.GetTempPath() + "//minutiaDetectionMinutiaeWithDirections.png"
             );
-        }
-
-        private static List<Minutia> MinutiasArrayToList(float[] minutiasArray, int size)
-        {
-            List<Minutia> list = new List<Minutia>();
-            for (int i = 0; i < size; i++)
-            {
-                Minutia m = new Minutia();
-                m.X = Convert.ToInt32(minutiasArray[i * 3]);
-                m.Y = Convert.ToInt32(minutiasArray[i * 3 + 1]);
-                m.Angle = Convert.ToDouble(minutiasArray[i * 3 + 2]);
-                list.Add(m);
-            }
-            return list;
         }
 
         private static int[] array2Dto1D(int[,] source)
@@ -77,14 +100,23 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
             return res;
         }
 
-        private static double[] array2Dto1D(double[,] source)
+        private static float[] array2Dto1D(double[,] source)
         {
-            double[] res = new double[source.GetLength(0) * source.GetLength(1)];
+            float[] res = new float[source.GetLength(0) * source.GetLength(1)];
             for (int y = 0; y < source.GetLength(0); y++)
             {
                 for (int x = 0; x < source.GetLength(1); x++)
                 {
-                    res[y * source.GetLength(1) + x] = source[y, x];
+                    float result = (float)source[y, x];
+                    if (float.IsPositiveInfinity(result))
+                    {
+                        result = float.MaxValue;
+                    }
+                    else if (float.IsNegativeInfinity(result))
+                    {
+                        result = float.MinValue;
+                    }
+                    res[y * source.GetLength(1) + x] = result;
                 }
             }
             return res;
