@@ -12,7 +12,7 @@
 #include <math.h>
 #include "BinTemplateCorrelation.cuh"
 
-#define SEQUENTIAL
+//#define SEQUENTIAL
 
 #define cudaCheckError() {\
 	cudaError_t e = cudaGetLastError(); \
@@ -219,9 +219,12 @@ void convertToCylindersGPU(Cylinder *cylinders, unsigned int cylindersCount, CUD
 			curCylinder->values, curCylinder->valuesCount, curCylinder->angle, curCylinder->norm, curCylinder->templateIndex);
 	}
 
+	//free(cylindersGPUarr);
+
 	*cylindersGPU = CUDAArray<CylinderGPU>(cylindersGPUarr, cylindersCount, 1);
 }
 
+// Copypaste for ints (not unsigneds)
 void printAngles(int* arr, int width, int height)
 {
 	for (int i = 0; i < height; i++) {
@@ -234,9 +237,9 @@ void printAngles(int* arr, int width, int height)
 
 void printCUDAAngles(CUDAArray<int> arr)
 {
-	printf("Print CUDAArray 2D\n");
+	printf("Print angles CUDAArray\n");
 	printAngles(arr.GetData(), arr.Width, arr.Height);
-	printf("[end] Print CUDAArray 2D\n");
+	printf("[end] Print angles CUDAArray\n");
 }
 
 void initMCC(
