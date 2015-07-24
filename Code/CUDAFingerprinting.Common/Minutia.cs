@@ -1,22 +1,16 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace CUDAFingerprinting.Common
 {
-    [DebuggerDisplay("X={X}, Y={Y}")]
+    [StructLayout(LayoutKind.Sequential)]
     public struct Minutia
     {
-        public int X;
-        public int Y;
-        public double Angle;
-
-        public static bool operator ==(Minutia m1, Minutia m2)
-        {
-            return m1.Angle == m2.Angle && m1.X == m2.X && m1.Y == m2.Y;
-        }
-
-        public static bool operator !=(Minutia m1, Minutia m2)
-        {
-            return !(m1 == m2);
-        }
-    }
+        [MarshalAs(UnmanagedType.R4)]
+        public Single Angle;
+        [MarshalAs(UnmanagedType.I4)]
+        public Int32 X;
+        [MarshalAs(UnmanagedType.I4)]
+        public Int32 Y;
+    };
 }
