@@ -72,7 +72,7 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
                     }
 
 
-                    str[x, y] = 1 - cNum.Magnitude / denom;
+                    str[x, height - 1 - y] = 1 - cNum.Magnitude / denom;
                       
                 }
             }
