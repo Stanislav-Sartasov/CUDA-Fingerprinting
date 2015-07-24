@@ -41,7 +41,7 @@ extern "C"
 #define cudaCheckError() ;
 #endif
 
-#define BLOCK_DIM 4
+#define BLOCK_DIM 16
 
 __constant__ int BLACK = 0;
 __constant__ int GREY = 128;
@@ -95,98 +95,12 @@ __device__ inline bool InCircle(int xC, int yC, int R, int x, int y)
 	return (xC - x) * (xC - x) + (yC - y) * (yC - y) < R * R;
 }
 
-__device__ inline float GetCorrectAngle(int* data, float* orientation, int x, int y, int NeigboursCount)
-{
-	float angle = orientation[(h - 1 - y) * w + x];
-	float PI = 3.141592654f;
-	//for 'end line' minutia
-	if (NeigboursCount == 1)
-	{
-		if (angle > 0.0f)
-		{
-			if ((GetPixel(data, x, y - 1) +
-				GetPixel(data, x + 1, y - 1) +
-				GetPixel(data, x + 1, y))
-				<
-				(GetPixel(data, x, y + 1) +
-				GetPixel(data, x - 1, y + 1) +
-				GetPixel(data, x - 1, y)))
-			{
-				angle += PI;
-			}
-		}
-		else
-		{
-			if ((GetPixel(data, x, y + 1) +
-				GetPixel(data, x + 1, y + 1) +
-				GetPixel(data, x + 1, y))
-				<
-				(GetPixel(data, x, y - 1) +
-				GetPixel(data, x - 1, y - 1) +
-				GetPixel(data, x - 1, y)))
-			{
-				angle += PI;
-			}
-		}
-	}
-	//for 'fork' minutia
-	else if (NeigboursCount == 3)
-	{
-		for (int r = 1; r < 16; r++)
-		{
-			float normal = angle + PI / 2;
-			int aboveNormal = 0;
-			int belowNormal = 0;
-
-			for (int i = -r; i <= r; i++)
-			{
-				for (int j = -r; j <= r; j++)
-				{
-					if (i == j && j == 0)
-					{
-						continue;
-					}
-					if (GetPixel(data, x + j, y + i) == BLACK &&
-						InCircle(x, y, r, x + j, y + i))
-					{
-						float deltaNormalY = - tan(normal) * j;
-						if (((float)i) < deltaNormalY)
-						{
-							aboveNormal++;
-						}
-						else
-						{
-							belowNormal++;
-						}
-					}
-				}
-			}
-			if (aboveNormal == belowNormal)
-			{
-				continue;//?
-			}
-			else
-			{
-				if ((aboveNormal > belowNormal &&
-					tan(angle) > 0.0f) ||
-					(aboveNormal < belowNormal &&
-					tan(angle) < 0.0f))
-				{
-					angle += PI;
-				}
-				break;
-			}
-		}
-	}
-	return angle;
-}
-
 __device__ inline int GetP(int* data, int x, int y)
 {
 	return  !IsAvailablePixel(x, y) ?
-	WHITE :
-		  data[(h - 1 - y) * w + x] > GREY ?
-	  WHITE :
+		WHITE :
+		data[(h - 1 - y) * w + x] > GREY ?
+			WHITE :
 			BLACK;
 }
 
@@ -194,7 +108,7 @@ __device__ inline int GetP(int* data, int x, int y)
 //first kernel: finding minutias
 //second kernel: computing angle for every found minutia
 
-__global__ void ProcessPixel(Minutia* dest, int* data, float* orientation)
+__global__ void ProcessPixel(Minutia* destLines, Minutia* destForks, int* data)
 {
 	//x coord of image
 	int x = blockIdx.x * BLOCK_DIM + threadIdx.x;
@@ -256,36 +170,148 @@ __global__ void ProcessPixel(Minutia* dest, int* data, float* orientation)
 
 	int minutiasNumber = y * w + x;
 
-	dest[minutiasNumber].x = -1;
-	dest[minutiasNumber].y = -1;
-	dest[minutiasNumber].angle = -1.0f;
-
-	int NeigboursCount = MinutiaCode(Neigbourhood, x, y);
 	//count == 0 <=> isolated point - NOT minutia
 	//count == 1 <=> 'end line' - minutia
 	//count == 2 <=> part of the line - NOT minutia
 	//count == 3 <=> 'fork' - minutia
 	//count >= 3 <=> composit minutia - ignoring in this implementation
-	bool IsMinutia = ((NeigboursCount == 1) || (NeigboursCount == 3));
+	int NeigboursCount = MinutiaCode(Neigbourhood, x, y);
 
-	if (IsMinutia)
+	if (NeigboursCount == 1)
 	{
-		dest[minutiasNumber].x = x;
-		dest[minutiasNumber].y = y;
-		dest[minutiasNumber].angle = GetCorrectAngle(
-			Neigbourhood,
-			orientation,
-			x,
-			y,
-			NeigboursCount
-		);
-	}/* maybe, if it will be here, we can decrease time of an execution?
+		destLines[minutiasNumber].x = x;
+		destLines[minutiasNumber].y = y;
+
+		destForks[minutiasNumber].x = -1;
+	}
+	else if (NeigboursCount == 3)
+	{
+		destForks[minutiasNumber].x = x;
+		destForks[minutiasNumber].y = y;
+
+		destLines[minutiasNumber].x = -1;
+	}
 	else
 	{
-		dest[minutiasNumber].x = -1;
-		dest[minutiasNumber].y = -1;
-		dest[minutiasNumber].angle = -1.0f;
-	}*/
+		destLines[minutiasNumber].x = -1;
+		destForks[minutiasNumber].x = -1;
+	}
+}
+
+__device__ inline float GetCorrectAngleForLine(int* data, float* orientation, int x, int y)
+{
+	float angle = orientation[(h - 1 - y) * w + x];
+	float PI = 3.141592654f;
+	//for 'end line' minutia
+	if (angle > 0.0f)
+	{
+		if ((GetP(data, x, y - 1) +
+			GetP(data, x + 1, y - 1) +
+			GetP(data, x + 1, y))
+			<
+			(GetP(data, x, y + 1) +
+			GetP(data, x - 1, y + 1) +
+			GetP(data, x - 1, y)))
+		{
+			angle += PI;
+		}
+	}
+	else
+	{
+		if ((GetP(data, x, y + 1) +
+			GetP(data, x + 1, y + 1) +
+			GetP(data, x + 1, y))
+			<
+			(GetP(data, x, y - 1) +
+			GetP(data, x - 1, y - 1) +
+			GetP(data, x - 1, y)))
+		{
+			angle += PI;
+		}
+	}
+	return angle;
+}
+
+__device__ inline float GetCorrectAngleForFork(int* data, float* orientation, int x, int y)
+{
+	float angle = orientation[(h - 1 - y) * w + x];
+	float PI = 3.141592654f;
+	//for 'fork' minutia
+		for (int r = 1; r < 16; r++)
+		{
+			float normal = angle + PI / 2;
+			int aboveNormal = 0;
+			int belowNormal = 0;
+
+			for (int i = -r; i <= r; i++)
+			{
+				for (int j = -r; j <= r; j++)
+				{
+					if (i == j && j == 0)
+					{
+						continue;
+					}
+					if (!InCircle(x, y, r - 1, x + j, y + i) &&
+						InCircle(x, y, r, x + j, y + i) &&
+						GetP(data, x + j, y + i) == BLACK)
+					{
+						float deltaNormalY = -tan(normal) * j;
+						if (((float)i) < deltaNormalY)
+						{
+							aboveNormal++;
+						}
+						else
+						{
+							belowNormal++;
+						}
+					}
+				}
+			}
+			if (aboveNormal == belowNormal)
+			{
+				continue;//?
+			}
+			else
+			{
+				if ((aboveNormal > belowNormal &&
+					tan(angle) > 0.0f) ||
+					(aboveNormal < belowNormal &&
+					tan(angle) < 0.0f))
+				{
+					angle += PI;
+				}
+				break;
+			}
+		}
+	return angle;
+}
+
+__global__ void ProcessAnglesForLines(Minutia* dest, int* data, float* orientation, int minutiasCount)
+{
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	if (i < minutiasCount)
+	{
+		dest[i].angle = GetCorrectAngleForLine(
+			data,
+			orientation,
+			dest[i].x,
+			dest[i].y
+		);
+	}
+}
+
+__global__ void ProcessAnglesForForks(Minutia* dest, int* data, float* orientation, int minutiasCount)
+{
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	if (i < minutiasCount)
+	{
+		dest[i].angle = GetCorrectAngleForFork(
+			data,
+			orientation,
+			dest[i].x,
+			dest[i].y
+		);
+	}
 }
 
 //shift minutias data to beginning of array
@@ -303,7 +329,6 @@ int ShrinkResult(Minutia* dest, Minutia* destBuffer, int width, int height)
 			minutiasNumber++;
 		}
 	}
-	free(destBuffer);
 	return minutiasNumber;
 }
 
@@ -314,24 +339,22 @@ int ShrinkResult(Minutia* dest, Minutia* destBuffer, int width, int height)
 //dest[i * 3 + 2] - direction of i's minutia
 int GetMinutias(Minutia* dest, int* data, float* orientation, int width, int height)
 {
-#ifdef DEBUG
-	cudaEvent_t start, stop;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
-	cudaEventRecord(start, 0);
-#endif
-
 	cudaMemcpyToSymbol(w, &width, sizeof(width));
 	cudaCheckError();
 
 	cudaMemcpyToSymbol(h, &height, sizeof(height));
 	cudaCheckError();
 
-	Minutia* destBuffer = (Minutia*)malloc(sizeof(Minutia) * height * width);
+	Minutia* destBufferLines = (Minutia*)malloc(sizeof(Minutia) * height * width);
+	Minutia* destBufferForks = (Minutia*)malloc(sizeof(Minutia) * height * width);
 
 	//allocate memory on device & initialize
-	Minutia* devDest;
-	cudaMalloc((void**)&devDest, sizeof(Minutia) * height * width);
+	Minutia* devDestLines;
+	cudaMalloc((void**)&devDestLines, sizeof(Minutia) * height * width);
+	cudaCheckError();
+
+	Minutia* devDestForks;
+	cudaMalloc((void**)&devDestForks, sizeof(Minutia) * height * width);
 	cudaCheckError();
 
 	int* devData;
@@ -351,30 +374,45 @@ int GetMinutias(Minutia* dest, int* data, float* orientation, int width, int hei
 	dim3 gridSize = dim3(blocksRowSize, blocksColumnSize);
 	dim3 blockSize = dim3(BLOCK_DIM, BLOCK_DIM, 1);
 
-	ProcessPixel <<<gridSize, blockSize>>>(devDest, devData, devOrientation);
+	ProcessPixel << <gridSize, blockSize >> >(devDestLines, devDestForks, devData);
 
 	//getting results & free device memory
-	cudaMemcpy(destBuffer, devDest, sizeof(Minutia) * height * width, cudaMemcpyDeviceToHost);
+	cudaMemcpy(destBufferLines, devDestLines, sizeof(Minutia) * height * width, cudaMemcpyDeviceToHost);
 	cudaCheckError();
-	cudaFree(devDest);
-	cudaCheckError(); 
+	cudaMemcpy(destBufferForks, devDestForks, sizeof(Minutia) * height * width, cudaMemcpyDeviceToHost);
+	cudaCheckError();
+
+	Minutia* destBufferLinesShrinked = (Minutia*)malloc(sizeof(Minutia) * height * width);
+	Minutia* destBufferForksShrinked = (Minutia*)malloc(sizeof(Minutia) * height * width);
+
+	int minutiasCountLines = ShrinkResult(destBufferLinesShrinked, destBufferLines, width, height);
+	int minutiasCountForks = ShrinkResult(destBufferForksShrinked, destBufferForks, width, height);
+
+	free(destBufferLines);
+	free(destBufferForks);
+
+	cudaMemcpy(devDestLines, destBufferLinesShrinked, sizeof(Minutia) * height * width, cudaMemcpyHostToDevice);
+	cudaCheckError();
+	cudaMemcpy(devDestForks, destBufferForksShrinked, sizeof(Minutia) * height * width, cudaMemcpyHostToDevice);
+	cudaCheckError();
+
+	ProcessAnglesForLines << <dim3(ceilMod(minutiasCountLines, BLOCK_DIM)), dim3(BLOCK_DIM, 1, 1) >> >(devDestLines, devData, devOrientation, minutiasCountLines);
+	ProcessAnglesForForks << <dim3(ceilMod(minutiasCountForks, BLOCK_DIM)), dim3(BLOCK_DIM, 1, 1) >> >(devDestForks, devData, devOrientation, minutiasCountForks);
+
+	cudaMemcpy(dest, devDestLines, sizeof(Minutia) * minutiasCountLines, cudaMemcpyDeviceToHost);
+	cudaCheckError();
+	cudaMemcpy(dest + minutiasCountLines, devDestForks, sizeof(Minutia) * minutiasCountForks, cudaMemcpyDeviceToHost);
+	cudaCheckError();
+	cudaFree(devDestLines);
+	cudaCheckError();
+	cudaFree(devDestForks);
+	cudaCheckError();
 	cudaFree(devData);
 	cudaCheckError();
 	cudaFree(devOrientation);
 	cudaCheckError();
 
-#ifdef DEBUG
-	cudaEventRecord(stop, 0);	
-	cudaEventSynchronize(stop); 
-	float time;	
-	cudaEventElapsedTime(&time, start, stop); 
-
-	printf("\nGetMinutias without ShrinkResult execution time: %e ms", time);
-#endif
-	int minutiasCount = ShrinkResult(dest, destBuffer, width, height);
-
-
-	return minutiasCount;
+	return minutiasCountLines + minutiasCountForks;
 }
 
 #ifdef DEBUG
@@ -439,7 +477,7 @@ int main()
 
 	printf("\nTotal GetMinutias execution time:                %e ms\nBLOCK DIM: %d\nMinutias found: %d\n", time, BLOCK_DIM, minutiasCount);
 	
-	prntArr(minutiasArray, minutiasCount);
+	//prntArr(minutiasArray, minutiasCount);
 
 	overlapMinutias(img, minutiasArray, minutiasCount, width, height);
 	saveBmp("D:\\Ucheba\\Programming\\summerSchool\\Code\\Debug\\resultCUDA.bmp", img, width, height);
