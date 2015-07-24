@@ -12,6 +12,13 @@
 #include <math.h>
 #include "BinTemplateCorrelation.cuh"
 
+unsigned int checkValsFromTest(
+	Cylinder *query, unsigned int queryLength,
+	unsigned int cylinderDbCount, unsigned int templateDbCount)
+{
+	return query[0].values[0];
+}
+
 //#define SEQUENTIAL
 
 #define cudaCheckError() {\
@@ -382,7 +389,14 @@ float * processMCC(
 	printf("Method time: %ld\n", end - startMethod);
 	printf("Overall algorithm time: %ld\n", end - start);
 
+	LUTSqrt.Dispose();
+	LUTAngles.Dispose();
+	LUTNumPairs.Dispose();
+	bucketMatrix.Dispose();
+
 	float *result = similaritiesVector.GetData();
+
+	similaritiesVector.Dispose();
 
 	return result;
 }

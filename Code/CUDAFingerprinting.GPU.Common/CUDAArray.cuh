@@ -7,8 +7,8 @@
 template<typename T> class CUDAArray
 {
 private:
-public:
 	size_t deviceStride;
+public:
 	T* cudaPtr;
 	size_t Height;
 	size_t Width;

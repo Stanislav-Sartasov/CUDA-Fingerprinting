@@ -13,14 +13,14 @@ public:
 	float norm;
 	unsigned int templateIndex;
 
-	Cylinder(unsigned int givenValuesCount) 
+	Cylinder(unsigned int givenValuesCount)
 	{
 		values = (unsigned int *)malloc(givenValuesCount * sizeof(unsigned int));
 		valuesCount = givenValuesCount;
 	}
 
 	Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
-		valuesCount(givenValuesCount), angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex) 
+		valuesCount(givenValuesCount), angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex)
 	{
 		values = (unsigned int *)malloc(givenValuesCount * sizeof(unsigned int));
 		memcpy(values, givenValues, givenValuesCount * sizeof(unsigned int));
@@ -35,7 +35,7 @@ public:
 	float norm;
 	unsigned int templateIndex;
 
-	CylinderGPU(unsigned int givenValuesCount) 
+	CylinderGPU(unsigned int givenValuesCount)
 	{
 		CUDAArray<unsigned int> *preValues = new CUDAArray<unsigned int>(givenValuesCount, 1);
 		cudaMalloc(&values, sizeof(CUDAArray<unsigned int>));
@@ -43,7 +43,7 @@ public:
 	}
 
 	CylinderGPU(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
-		angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex) 
+		angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex)
 	{
 		CUDAArray<unsigned int> *preValues = new CUDAArray<unsigned int>(givenValues, givenValuesCount, 1);
 		cudaMalloc(&values, sizeof(CUDAArray<unsigned int>));

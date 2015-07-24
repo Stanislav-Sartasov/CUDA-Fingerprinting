@@ -130,7 +130,7 @@ namespace CUDAFingerprinting.Common.BinCylinderCorrelation.Tests
             Random rnd = new Random();
 
             string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            GenerateTemplateDb(100000, 2500, 255);
+            GenerateTemplateDb(10000, 250, 255);
             WriteDbToFile(homeFolder + "\\mcc_cs_db.txt", homeFolder + "\\mcc_c_db.txt");
 
             GenerateTemplateDb(32, 1, 255); // 1 cylinder for query (it necessary for algorithm to work)
