@@ -124,7 +124,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
             }
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void TestTemplateDbGenerator()
         {
             Random rnd = new Random();
