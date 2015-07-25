@@ -40,7 +40,7 @@ CUDAArray<float> MakeGabor16Filters(int angleNum, float* frequencyArr, int frNum
 	cudaMemcpy(dev_frArr, frequencyArr, frNum * sizeof(float), cudaMemcpyHostToDevice);
 
 	cudaCreateGaborFilter << < dim3(angleNum, frNum), dim3(16, 16) >> > (filters, 16, dev_frArr, bAngle);
-
+	cudaFree(dev_frArr);
 	return filters;
 }
 
@@ -54,7 +54,7 @@ CUDAArray<float> MakeGabor32Filters(int angleNum, float* frequencyArr, int frNum
 	cudaMemcpy(dev_frArr, frequencyArr, frNum * sizeof(float), cudaMemcpyHostToDevice);
 
 	cudaCreateGaborFilter << < dim3(angleNum, frNum), dim3(32, 32) >> > (filters, 32, dev_frArr, bAngle);
-
+	cudaFree(dev_frArr);
 	return filters;
 }
 
@@ -68,6 +68,7 @@ CUDAArray<float> MakeGaborFilters(int size, int angleNum, float* frequencyArr, i
 	cudaMemcpy(dev_frArr, frequencyArr, frNum * sizeof(float), cudaMemcpyHostToDevice);
 
 	cudaCreateGaborFilter << < dim3(angleNum, frNum), dim3(size, size) >> > (filters, size, dev_frArr, bAngle);
+	cudaFree(dev_frArr);
 	return filters;
 }
 

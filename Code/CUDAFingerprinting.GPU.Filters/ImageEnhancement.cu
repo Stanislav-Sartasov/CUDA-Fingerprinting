@@ -102,6 +102,15 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	dim3 gridSize  = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, filterSize, angleNum, dev_angles);
 	result.GetData(res);
+
+	result.Dispose();
+	img.Dispose();
+	orientMatrix.Dispose();
+	frequencyMatrix.Dispose();
+	filters.Dispose();
+
+	cudaFree(dev_angles);
+	free(angles);
 }
 
 //For filters 32x32.
@@ -136,6 +145,14 @@ void Enhance32(float* source, int imgWidth, int imgHeight, float* res, float* or
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, 32, angleNum, dev_angles);
 	result.GetData(res);
 
+	result.Dispose();
+	img.Dispose();
+	orientMatrix.Dispose();
+	frequencyMatrix.Dispose();
+	filters.Dispose();
+
+	cudaFree(dev_angles);
+	free(angles);
 }
 
 //For filters 16x16.
@@ -169,6 +186,15 @@ void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* or
 	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, 16, angleNum, dev_angles);
 	result.GetData(res);
+
+	result.Dispose();
+	img.Dispose();
+	orientMatrix.Dispose();
+	frequencyMatrix.Dispose();
+	filters.Dispose();
+
+	cudaFree(dev_angles);
+	free(angles);
 }
 //void main()
 //{
