@@ -6,19 +6,34 @@ using System.Threading.Tasks;
 
 namespace CUDAFingerprinting.Common.GaborFilter
 {
-    class GaborFilter
+    internal class GaborFilter
     {
-        public Filter[] Filters;
-        public int Count;
-
-        public GaborFilter(int count, int size, double frequency)
+        public Filter[,] Filters;
+        //public int Count;
+        public const int FrequencyCount = 4;
+        public static double[] FrequencyMatrix = 
         {
-            var bAngle = Math.PI / count;
-            Filters = new Filter[count];
+            1.0/25.0,
+            1.0/16.0,
+            1.0/9.0,
+            1.0/3.0
+        };
+      //  public static double[] FrequencyMatrix = new double[FrequencyCount];
+        public GaborFilter(int angleCount, int size)
+        {
+            var bAngle = Math.PI / angleCount;
+            Filters = new Filter[angleCount, FrequencyCount];
 
-            for (int i = 0; i < count; i++)
+            //for (int i = 0; i < FrequencyCount; i++)
+            //{
+            //    FrequencyMatrix[i] = 1.0 / 9.0;
+            //}
+            for (int i = 0; i < angleCount; i++)
             {
-                Filters[i] = new Filter(size, bAngle * i - Math.PI / 2, frequency);
+                for (int j = 0; j < FrequencyCount; j++)
+                {
+                    Filters[i, j] = new Filter(size, bAngle*i, FrequencyMatrix[j]);
+                }
             }
         }
     }

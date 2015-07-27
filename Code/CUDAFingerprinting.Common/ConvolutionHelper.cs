@@ -4,7 +4,8 @@ namespace CUDAFingerprinting.Common
 {
     public static class ConvolutionHelper
     {
-        public static double[,] Convolve(double[,] data, double[,] kernel)
+        public static double[,] Convolve(double[,] data, double[,] kernel, int multiplier = 1)
+        //the 'multiplier' parameter is used in Common.LocalRidgeFrequency.FilterFrequencies
         {
             int X = data.GetLength(0);
             int Y = data.GetLength(1);
@@ -27,10 +28,10 @@ namespace CUDAFingerprinting.Common
                     {
                         for (int j = -upperLimitJ; j <= centerJ; j++)
                         {
-                            var indexX = x + i;
+                            var indexX = x + i * multiplier;
                             if (indexX < 0) indexX = 0;
                             if (indexX >= X) indexX = X - 1;
-                            var indexY = y + j;
+                            var indexY = y + j * multiplier;
                             if (indexY < 0) indexY = 0;
                             if (indexY >= Y) indexY = Y - 1;
                             result[x, y] += kernel[centerI - i, centerJ - j] * data[indexX, indexY];

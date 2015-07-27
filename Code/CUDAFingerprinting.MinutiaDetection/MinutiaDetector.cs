@@ -158,7 +158,7 @@ namespace CUDAFingerprinting.MinutiaDetection
                         Minutia m = new Minutia();
                         m.X = x;
                         m.Y = y;
-                        m.Angle = GetCorrectAngle(
+                        m.Angle = (float) GetCorrectAngle(
                             data,
                             oField,
                             x,
