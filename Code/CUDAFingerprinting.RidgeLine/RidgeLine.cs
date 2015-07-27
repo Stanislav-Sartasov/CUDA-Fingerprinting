@@ -83,15 +83,15 @@ namespace CUDAFingerprinting.RidgeLine
             return _section[_wings + (mr < ml ? mr : -ml)];
         }  //Edit all method
 
-        private int MakeStep(int startPoint)  //Add step for second point
+        private int MakeStep(int startPoint)
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
 
             double angle = _orientation.GetOrientation(x, y) + (_diffAngle ? Math.PI : 0);
 
-            x += Convert.ToInt32(_step*Math.Cos(angle));
-            y += Convert.ToInt32(_step*Math.Sin(angle));
+            x += (int)(_step*Math.Cos(angle) + 0.5);
+            y += (int)(_step*Math.Sin(angle) + 0.5);
 
             double angle2 = _orientation.GetOrientation(x, y);
 
