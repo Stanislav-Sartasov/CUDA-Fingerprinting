@@ -79,5 +79,15 @@ namespace CUDAFingerprinting.RidgeLine {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SampleFinger3 {
+            get {
+                object obj = ResourceManager.GetObject("SampleFinger3", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

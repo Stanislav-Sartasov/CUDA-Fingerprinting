@@ -11,37 +11,30 @@ namespace CUDAFingerprinting.RidgeLine
     {
         static void TestSection()
         {
-            var image = Resources.SampleFinger2;
+            var image = Resources.SampleFinger3;
             var array = ImageHelper.LoadImageAsInt(image);
 
             int wing = 8;
 
-            RidgeLine newProssess = new RidgeLine(array, 2, wing);
+            RidgeLine newProssess = new RidgeLine(array, 5, wing);
 
-            newProssess.NewSelection(210, 180);
+            newProssess.GoToLine();
 
-            for (int i = 0; i < wing * 2 + 1; i++)
-            {
-                Console.Write("{0} ", newProssess._section[i]);
-            }
-            Console.WriteLine("\n{0}", array[210, 180]);
-            Console.WriteLine("{0}", newProssess.FindNextMax());
+            //var newImage = new int[2 * wing + 1, 255];
+            //Array.Clear(newImage, 0, newImage.Length);
 
-            var newImage = new int[2 * wing + 1, 255];
-            Array.Clear(newImage, 0, newImage.Length);
+            //for (int i = 0; i < 2 * wing + 1; i++)
+            //{
+            //    int x = newProssess._section[i]/1000;
+            //    int y = newProssess._section[i]%1000;
 
-            for (int i = 0; i < 2 * wing + 1; i++)
-            {
-                int x = newProssess._section[i]/1000;
-                int y = newProssess._section[i]%1000;
+            //    for (int j = 0; j < array[x, y]; j++)
+            //    {
+            //        newImage[i, j] = 120;
+            //    }
+            //}
 
-                for (int j = 0; j < array[x, y]; j++)
-                {
-                    newImage[i, j] = 120;
-                }
-            }
-
-            ImageHelper.SaveArray(newImage, "testSections.bmp");
+            //ImageHelper.SaveArray(newImage, "testSections.bmp");
         }
 
         static void Main()
