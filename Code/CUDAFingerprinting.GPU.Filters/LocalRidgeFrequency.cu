@@ -30,20 +30,12 @@ __device__ void CalculateSignatureLine(float* res, CUDAArray<float>* img, float 
 	for (int d = 0; d < w; d++)
 	{
 		int indX = (int)(x + (d - w / 2) * angleCos + (index - l / 2) * angleSin);
-		//float i2 = (x + (d - w / 2) * angleCos + (index - l / 2) * angleSin);
 		int indY = (int)(y + (d - w / 2) * angleSin + (l / 2 - index) * angleCos);
-		/*int k = indX + indY;
-		if ((indX < 0) || (indY < 0) || (indX >= width) || (indY >= height))
-			continue;*/
+
 		if ((indY - iStart < 0) || (indX - jStart < 0) || (indY - iStart >= 48) || (indX - jStart >= 48))
 		{
-			//signature+=indX + indY + i2;
 			continue;
 		}
-		/*indX = (int)(x + (d - w / 2) * angleCos + (index - l / 2) * angleSin);
-		indY = (int)(y + (d - w / 2) * angleSin + (l / 2 - index) * angleCos);*/
-		//signature += img->At(indX, indY);
-		//signature += buffer[(indY - iStart) + (48 - (indY - iStart)) * ((indY - iStart) / 48)][(indX - jStart) + (48 - (indX - jStart)) * ((indX - jStart) / 48)];
 		signature += buffer[(indX - jStart)][(indY - iStart)];
 	}
 	signature /= w;
@@ -51,30 +43,7 @@ __device__ void CalculateSignatureLine(float* res, CUDAArray<float>* img, float 
 	*res = signature;
 }
 
-__device__ void CalculateSignatureLine(float* res, CUDAArray<float>* img, int index, float angle, int x, int y, int w)
-{
-
-	float angleSin = sin(angle);
-	float angleCos = cos(angle);
-
-	int width = img->Width;
-	int height = img->Height;
-
-	float signature = 0;
-	for (int d = 0; d < w; d++)
-	{
-		int indX = (int)(x + (d - w / 2) * angleCos + (index - l / 2) * angleSin);
-		int indY = (int)(y + (d - w / 2) * angleSin + (l / 2 - index) * angleCos);
-		if ((indX < 0) || (indY < 0) || (indX >= width) || (indY >= height))
-			continue;
-		signature += img->At(indX, indY);
-	}
-	signature /= w;
-
-	*res = signature;
-}
-
-__global__ void CalculateFrequencyPixelBuf(CUDAArray<float> res, CUDAArray<float> img, CUDAArray<float> orientMatr, int w)
+__global__ void CalculateFrequencyPixel(CUDAArray<float> res, CUDAArray<float> img, CUDAArray<float> orientMatr, int w)
 {
 	int column = defaultColumn();
 	int row = defaultRow();
@@ -93,76 +62,22 @@ __global__ void CalculateFrequencyPixelBuf(CUDAArray<float> res, CUDAArray<float
 		if (tx == 0 && ty == 0)
 		{
 			iStart = row - w;
-			//iFinish = row + (3 * w) / 2 + 1;
 			if (iStart < 0) iStart = 0;
-			/*	else
-					if (iFinish > img.Height) iFinish = img.Height;*/
 
 			jStart = column - w;
-			//jFinish = column + (3 * w) / 2 + 1;
 			if (jStart < 0) jStart = 0;
-			/*else
-				if (jFinish > img.Width) jFinish = img.Width;*/
-
 		}
 		
-
-		//int bigNumber = 100; //Any number greater than 48
-		//for (int i = ty / 2 * 3; i < (ty / 2 + 1) * 3        - (ty % 2) * (tx /16) * bigNumber; i++)
-		//	buffer[i][tx + 16 * (ty % 2)] = img.At((iStart + i) % iFinish, (jStart + tx + 16 * (ty % 2)) % jFinish);
-				//we can write anything to areas we don't intend to use: and this way we don't use 'if'
-		
+		//FOR 16x16 BLOCKS:
 		for (int i = (ty / 3) * 9; i < (ty / 3 + 1) * 9- 6 * (ty / 15); i++)
 			buffer[i][tx + 16 * (ty % 3)] = img.At((iStart + i) % img.Height, (jStart + tx + 16 * (ty % 3)) % img.Width);
 
-	//	__syncthreads();
-		float a = 1, b = 2, c = 3;//vales are assigned for debugging
+		float a, b, c;
 		CalculateSignatureLine(&a, &img, buffer, iStart, jStart, 0, orientMatr.At(row, column), column, row, w);
 		CalculateSignatureLine(&b, &img, buffer, iStart, jStart, 1, orientMatr.At(row, column), column, row, w);
 		for (int i = 1; i < l - 1; i++)
 		{
 			CalculateSignatureLine(&c, &img, buffer, iStart, jStart, i + 1, orientMatr.At(row, column), column, row, w);
-		//	CalculateSignatureLine(&a, &img);
-			//In comparison below there has to be non-zero value so that we would be able to ignore minor irrelevant pits of black.
-			if ((a - b > 0.5) && (c - b  > 0.5))
-			{
-				if (prevMin != -1)
-				{
-					lengthsSum += i - prevMin;
-					summandNum++;
-					prevMin = i;
-				}
-				else
-				{
-					prevMin = i;
-				}
-			}
-			a = b;
-			b = c;
-		}
-		float frequency = (float)summandNum / lengthsSum;
-		if ((lengthsSum <= 0) || (frequency > 1.0f / 3.0f) || (frequency < 0.04f))
-			frequency = -1;
-		res.SetAt(row, column, frequency);
-	}
-}
-
-__global__ void CalculateFrequencyPixel(CUDAArray<float> res, CUDAArray<float> img, CUDAArray<float> orientMatr, int w)
-{
-	int column = defaultColumn();
-	int row = defaultRow();
-	if ((column < img.Width) && (row < img.Height)) {
-
-		int prevMin = -1;
-		int lengthsSum = 0;
-		int summandNum = 0;
-
-		float a, b, c;
-		CalculateSignatureLine(&a, &img, 0, orientMatr.At(row, column), column, row, w);
-		CalculateSignatureLine(&b, &img, 1, orientMatr.At(row, column), column, row, w);
-		for (int i = 1; i < l - 1; i++)
-		{
-			CalculateSignatureLine(&c, &img,  i + 1, orientMatr.At(row, column), column, row, w);
 			//In comparison below there has to be non-zero value so that we would be able to ignore minor irrelevant pits of black.
 			if ((a - b > 0.5) && (c - b  > 0.5))
 			{
@@ -189,37 +104,14 @@ __global__ void CalculateFrequencyPixel(CUDAArray<float> res, CUDAArray<float> i
 
 void CalculateFrequency(float* res, float* image, int height, int width, float* orientMatrix, int w)
 {
-	CUDAArray<float> img               = CUDAArray<float>(image, width, height);
-	CUDAArray<float> frequencyMatrix   = CUDAArray<float>(width, height);
-	CUDAArray<float> orientationMatrix = CUDAArray<float>(orientMatrix, width, height);
-
-	/*dim3 blockSize = dim3 (defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(width, (defaultThreadCount)), ceilMod(height, (defaultThreadCount)));*/
-
-	int count = 16;
-	dim3 blockSize = dim3(count, count);
-	dim3 gridSize = dim3(ceilMod(width, count), ceilMod(height, count));
-	CalculateFrequencyPixel<<<gridSize, blockSize>>>(frequencyMatrix, img, orientationMatrix, w);
-	frequencyMatrix.GetData(res);
-
-	img.Dispose();
-	frequencyMatrix.Dispose();
-	orientationMatrix.Dispose();
-}
-
-void CalculateFrequencyBuf(float* res, float* image, int height, int width, float* orientMatrix, int w)
-{
 	CUDAArray<float> img = CUDAArray<float>(image, width, height);
 	CUDAArray<float> frequencyMatrix = CUDAArray<float>(width, height);
 	CUDAArray<float> orientationMatrix = CUDAArray<float>(orientMatrix, width, height);
 
-	/*dim3 blockSize = dim3 (defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(width, (defaultThreadCount)), ceilMod(height, (defaultThreadCount)));*/
-
-	int count = 16;
+	const int count = 16;//CalculateFrequencyPixelBuf won't work with any other number (in order to do that buffer filling formula must be changed). But 16 is tha best.
 	dim3 blockSize = dim3(count, count);
 	dim3 gridSize = dim3(ceilMod(width, count), ceilMod(height, count));
-	CalculateFrequencyPixelBuf << <gridSize, blockSize >> >(frequencyMatrix, img, orientationMatrix, w);
+	CalculateFrequencyPixel << <gridSize, blockSize >> >(frequencyMatrix, img, orientationMatrix, w);
 	frequencyMatrix.GetData(res);
 
 	img.Dispose();
@@ -325,26 +217,11 @@ void FilterFrequencies(int imgWidth, int imgHeight, float* res, float* frequency
 	lowPassFilter.Dispose();
 }
 
-void GetFrequency(float* res, float* image, int height, int width, float* orientMatrix, int interpolationFilterSize, 
-	int interpolationSigma, int lowPassFilterSize, int lowPassFilterSigma, int w)
-{
-	float* initialFreq = (float*) malloc(height * width * sizeof(float));
-	CalculateFrequency(initialFreq, image, height, width, orientMatrix, w);
-
-	float* interpolatedFreq = (float*)malloc(height * width * sizeof(float));
-	Interpolate(width, height, interpolatedFreq, false, initialFreq, interpolationFilterSize, interpolationSigma, w);
-
-	FilterFrequencies(width, height, res, interpolatedFreq, lowPassFilterSize, lowPassFilterSigma, w);
-
-	free(initialFreq);
-	free(interpolatedFreq);
-}
-
-void GetFrequencyBuf(float* res, float* image, int height, int width, float* orientMatrix, int interpolationFilterSize,
+void GetFrequency(float* res, float* image, int height, int width, float* orientMatrix, int interpolationFilterSize,
 	int interpolationSigma, int lowPassFilterSize, int lowPassFilterSigma, int w)
 {
 	float* initialFreq = (float*)malloc(height * width * sizeof(float));
-	CalculateFrequencyBuf(initialFreq, image, height, width, orientMatrix, w);
+	CalculateFrequency(initialFreq, image, height, width, orientMatrix, w);
 
 	float* interpolatedFreq = (float*)malloc(height * width * sizeof(float));
 	Interpolate(width, height, interpolatedFreq, false, initialFreq, interpolationFilterSize, interpolationSigma, w);
@@ -369,21 +246,11 @@ void main()
 		{
 			source[i * width + j] = (float)img[i * width + j];
 		}
-	//float* b = (float*)malloc(height * width * sizeof(float));
-	//float* c = (float*)malloc(height * width * sizeof(float));
-	//float* d = (float*)malloc(height * width * sizeof(float));
 	float* g = (float*)malloc(height * width * sizeof(float));
 	float* h = (float*)malloc(height * width * sizeof(float));
 	float* orMatr =	OrientationFieldInPixels(source, width, height);
 
-	//GetFrequency(g, source, height, width, orMatr, 7, 1, 25, 4, 16);
-	GetFrequency(g, source, height, width, orMatr, 7, 1, 31, 5, 16);
-	GetFrequencyBuf(h, source, height, width, orMatr, 7, 1, 31, 5, 16);
-	//CalculateFrequency(b, source, height, width, orMatr, w);
-	//Interpolate(width, height, d, false, b, 7, 1, 16);
-	//
-	//FilterFrequencies(width, height, b, d, 19, 3, 16);
-	//Enhance(source, width, height, c, orMatr, b, 32, 8);
+	GetFrequency(h, source, height, width, orMatr, 7, 1, 25, 4, 16);
 	Enhance(source, width, height, g, orMatr, h, 32, 8);
 //	saveBmp("..\\res.bmp", c, width, height);
 	saveBmp("..\\res32.bmp", g, width, height);

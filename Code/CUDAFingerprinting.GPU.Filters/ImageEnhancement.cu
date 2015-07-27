@@ -65,16 +65,21 @@ __global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDA
 		{
 			for (int dcolumn = -upperCenter; dcolumn <= center; dcolumn++)
 			{
-				//float filterValue = cacheFilter[filterSize * freq + (center - drow)][ filterSize* angle + (center - dcolumn)];//filters.At(filterSize * freq + (center - drow), filterSize* angle + (center - dcolumn));
+				//float filterValue = cacheFilter[12][13];//[filterSize * freq + (center - drow)][ filterSize* angle + (center - dcolumn)];//filters.At(filterSize * freq + (center - drow), filterSize* angle + (center - dcolumn));
+			
 				float filterValue = filters.At(filterSize * freq + (center - drow), filterSize* angle + (center - dcolumn));
+				//float filterValue = 12;
 				int indexRow = row + drow;
 				int indexColumn = column + dcolumn;
 
 				if (indexRow < 0)    indexRow    = 0;
+				else
+					if (indexRow >= img.Height)   indexRow = img.Height - 1;
 				if (indexColumn < 0) indexColumn = 0;
-				if (indexRow >= img.Height)   indexRow    = img.Height - 1;
-				if (indexColumn >= img.Width) indexColumn = img.Width - 1;
-
+				else
+					if (indexColumn >= img.Width) indexColumn = img.Width - 1;
+				/*if ((indexRow < 0) || (indexColumn < 0) || (indexRow >= img.Height) || (indexColumn >= img.Width))
+					continue;*/
 				sum += filterValue * img.At(indexRow, indexColumn);
 			}
 		}
@@ -111,10 +116,8 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 
 	CUDAArray<float> filters = MakeGaborFilters(filterSize, angleNum, frArr, freqNum);
 
-	/*dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize  = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));*/
-	dim3 blockSize = dim3(16, 16);
-	dim3 gridSize = dim3(ceilMod(imgWidth, 16), ceilMod(imgHeight, 16));
+	dim3 blockSize = dim3(defaultThreadCount / 2, defaultThreadCount / 2);
+	dim3 gridSize = dim3(ceilMod(imgWidth, (defaultThreadCount / 2)), ceilMod(imgHeight, (defaultThreadCount / 2)));
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, filterSize, angleNum, dev_angles);
 	result.GetData(res);
 
@@ -155,10 +158,8 @@ void Enhance32(float* source, int imgWidth, int imgHeight, float* res, float* or
 
 	CUDAArray<float> filters = MakeGabor32Filters(angleNum, frArr, freqNum);
 
-	/*dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));*/
-	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
+	dim3 blockSize = dim3(defaultThreadCount /2, defaultThreadCount/2);
+	dim3 gridSize = dim3(ceilMod(imgWidth, (defaultThreadCount / 2)), ceilMod(imgHeight, (defaultThreadCount / 2)));
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, 32, angleNum, dev_angles);
 	result.GetData(res);
 
@@ -199,8 +200,8 @@ void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* or
 
 	CUDAArray<float> filters = MakeGabor16Filters(angleNum, frArr, freqNum);
 
-	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
+	dim3 blockSize = dim3(defaultThreadCount / 2, defaultThreadCount / 2);
+	dim3 gridSize = dim3(ceilMod(imgWidth, (defaultThreadCount / 2)), ceilMod(imgHeight, (defaultThreadCount / 2)));
 	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, 16, angleNum, dev_angles);
 	result.GetData(res);
 
