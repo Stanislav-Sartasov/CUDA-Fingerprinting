@@ -9,6 +9,16 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
     [TestClass]
     public class ConvexHullTests
     {
+        List<PointF> globalHull = new List<PointF>(
+            new PointF[]
+            {
+                new PointF(0, 1),
+                new PointF(2, 0),
+                new PointF(8, 3),
+                new PointF(6, 6),
+                new PointF(1, 9),
+            });
+
         [TestMethod]
         public void ConvexHullBuildTest()
         {
@@ -27,20 +37,10 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
 
             List<PointF> resPointList = ConvexHull.GetConvexHull(pointList);
 
-            List<PointF> resToCheck = new List<PointF>(
-                new PointF[]
-                {
-                    new PointF(1, 9),
-                    new PointF(6, 6),
-                    new PointF(8, 3),
-                    new PointF(2, 0),
-                    new PointF(0, 1)
-                });
-
-            List<PointF> resToCheckRev = new List<PointF>(resToCheck);
+            List<PointF> resToCheckRev = new List<PointF>(globalHull);
             resToCheckRev.Reverse();
 
-            Assert.IsTrue(resPointList.SequenceEqual(resToCheck) || resPointList.SequenceEqual(resToCheckRev));
+            Assert.IsTrue(resPointList.SequenceEqual(globalHull) || resPointList.SequenceEqual(resToCheckRev));
         }
 
         [TestMethod]
@@ -76,19 +76,9 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         [TestMethod]
         public void ConvexHullExtendedTest()
         {
-            List<PointF> hull = new List<PointF>(
-                new PointF[]
-                {
-                    new PointF(0, 1),
-                    new PointF(2, 0),
-                    new PointF(8, 3),
-                    new PointF(6, 6),
-                    new PointF(1, 9),
-                });
-
             double omega = 3;
 
-            List<PointF> extendedHull = ConvexHullMCCExtension.ExtendHull(hull, omega);
+            List<PointF> extendedHull = ConvexHullModified.ExtendHull(globalHull, omega);
 
             bool[,] field = FieldFiller.GetFieldFilling(20, 20, extendedHull);
 

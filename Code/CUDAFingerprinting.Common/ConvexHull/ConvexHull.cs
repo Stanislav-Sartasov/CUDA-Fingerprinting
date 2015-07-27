@@ -5,48 +5,6 @@ using System;
 
 namespace CUDAFingerprinting.Common.ConvexHull
 {
-    public static class VectorHelper
-    {
-        // Vector product of 2 vectors (only z coordinate, given vectors are supposed to be arranged on a plane)
-        public static int VectorProductInt(PointF v1, PointF v2)
-        {
-            return (int)(v1.X * v2.Y - v1.Y * v2.X);
-        }
-
-        public static PointF Difference(PointF v1, PointF v2)
-        {
-            PointF x = new PointF(v1.X - v2.X, v1.Y - v2.Y);
-            return x;
-        }
-
-        // Helper function for 3 points 
-        // A, B, C -> going from A to B, where is C, to the left or to the right?
-        // > 0 - left (positive rotation)
-        // = 0 - all 3 points are collinear
-        // < 0 - right
-        public static int Rotate(PointF A, PointF B, PointF C)
-        {
-            return VectorProductInt(Difference(B, A), Difference(C, B));
-        }
-
-        // Segment intersection 
-        public static bool Intersect(PointF A, PointF B, PointF C, PointF D)
-        {
-            // <= in the 1st case and < in the second are appropriate for the specific use of this helper
-            return Rotate(A, B, C) * Rotate(A, B, D) <= 0 && Rotate(C, D, A) * Rotate(C, D, B) < 0;
-        }
-
-        public static double Norm(PointF v)
-        {
-            return Math.Sqrt(v.X * v.X + v.Y * v.Y);
-        }
-
-        public static double PointDistance(PointF A, PointF B)
-        {
-            return Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
-        }
-    }
-
     // Special comparer for our points (radial with respect to the starting point)
     public class RadialComparer : IComparer<PointF>
     {

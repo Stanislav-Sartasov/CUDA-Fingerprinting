@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CUDAFingerprinting.Common.ConvexHull
 {
-    public class ConvexHullMCCExtension
+    public class ConvexHullModified
     {
         public static List<PointF> ExtendHull(List<PointF> hull, double omega)
         {
