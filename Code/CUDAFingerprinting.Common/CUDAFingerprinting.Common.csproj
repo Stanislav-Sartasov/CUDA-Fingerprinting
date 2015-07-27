@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConvexHull\ConvexHull.cs" />
+    <Compile Include="ConvexHull\ConvexHullMCCExtension.cs" />
     <Compile Include="ConvolutionHelper.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="ImageHelper.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="SingularityRegionDetection.cs" />
     <Compile Include="SymmetryHelper.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

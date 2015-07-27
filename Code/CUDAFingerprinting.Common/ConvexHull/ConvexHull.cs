@@ -4,7 +4,6 @@ using System.Drawing;
 
 namespace CUDAFingerprinting.Common.ConvexHull
 {
-    // Product of vectors, difference betweeen vectors, distance between Points
     public static class VectorHelper
     {
         // Vector product of 2 vectors (only z coordinate, given vectors are supposed to be arranged on a plane)
@@ -19,9 +18,21 @@ namespace CUDAFingerprinting.Common.ConvexHull
             return x;
         }
 
-        public static int Distance(Point v1, Point v2)
+        // Helper function for 3 points 
+        // A, B, C -> going from A to B, where is C, to the left or to the right?
+        // > 0 - left (positive rotation)
+        // = 0 - all 3 points are collinear
+        // < 0 - right
+        public static int Rotate(Point A, Point B, Point C)
         {
-            return (v1.X - v2.X) * (v1.X - v2.X) + (v1.Y - v2.Y) * (v1.Y - v2.Y);
+            return VectorProduct(Difference(B, A), Difference(C, B));
+        }
+        
+        // Segment intersection 
+        public static bool Intersect(Point A, Point B, Point C, Point D)
+        {
+            // <= in the 1st case and < in the second are appropriate for the specific use of this helper
+            return Rotate(A, B, C) * Rotate(A, B, D) <= 0 && Rotate(C, D, A) * Rotate(C, D, B) < 0;
         }
     }
 
@@ -38,10 +49,7 @@ namespace CUDAFingerprinting.Common.ConvexHull
         public int Compare(Point v1, Point v2)
         {
             int result = 1;
-            if (VectorHelper.VectorProduct(
-                    VectorHelper.Difference(v1, FirstPoint),
-                    VectorHelper.Difference(v2, FirstPoint))
-                 < 0)
+            if (VectorHelper.Rotate(FirstPoint, v1, v2) > 0)
             {
                 result = -1;
             }
@@ -86,14 +94,11 @@ namespace CUDAFingerprinting.Common.ConvexHull
 
             for (int i = 2; i < points.Count; i++)
             {
-                while (VectorHelper.VectorProduct(
-                            VectorHelper.Difference(top, nextToTop),
-                            VectorHelper.Difference(points[i], nextToTop))
-                        < 0)
+                while (VectorHelper.Rotate(nextToTop, top, points[i]) < 0)
                 {
                     hullStack.Pop();
                     top = nextToTop;
-                    nextToTop = hullStack.Peek();
+                    nextToTop = hullStack.ElementAt(1);
                 }
 
                 hullStack.Push(points[i]);
@@ -116,8 +121,58 @@ namespace CUDAFingerprinting.Common.ConvexHull
             {
                 hullList.Add(hullStack.ElementAt(i));
             }
+            hullList.Reverse();
 
             return hullList;
+        }
+    }
+
+    public static class FieldFiller
+    {
+        // Algorithm for any convex area (and even for some not convex)
+        public static bool IsPointInsideHull(Point point, List<Point> hull)
+        {
+            int n = hull.Count;
+
+            // If point is outside the segment (n - 1, 0, 1), it's always outside the hull
+            if (VectorHelper.Rotate(hull[0], hull[1], point) < 0 || VectorHelper.Rotate(hull[0], hull[n - 1], point) > 0)
+            {
+                return false;
+            }
+
+            // Binary search
+            int p = 1, r = n - 1;
+            while (r - p > 1)
+            {
+                int q = (p + r) / 2;
+                if (VectorHelper.Rotate(hull[0], hull[q], point) < 0)
+                {
+                    r = q;
+                }
+                else
+                {
+                    p = q;
+                }
+            }
+
+            return !VectorHelper.Intersect(hull[0], point, hull[p], hull[r]);
+        }
+        
+        public static bool[,] GetFieldFilling(int rows, int columns, List<Point> minutiae)
+        {
+            bool[,] field = new bool[rows, columns];
+            List<Point> hull = ConvexHull.GetConvexHull(minutiae);
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    Point curPoint = new Point(i, j);
+
+                    field[i, j] = IsPointInsideHull(curPoint, hull) ? true : false;
+                }
+            }
+
+            return field;
         }
     }
 }
