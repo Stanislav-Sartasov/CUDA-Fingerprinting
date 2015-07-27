@@ -82,6 +82,24 @@
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1_1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1_4.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\otpechatok.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Finger.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1_2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\4_8.bmp" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

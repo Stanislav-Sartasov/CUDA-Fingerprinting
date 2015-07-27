@@ -15,8 +15,8 @@ namespace CUDAFingerprinting.Common.GaborFilter
         {
             Matrix = new double[size, size];
 
-            var aCos = Math.Cos(Math.PI / 2 + angle);
-            var aSin = Math.Sin(Math.PI / 2 + angle);
+            var aCos = Math.Cos(angle);
+            var aSin = Math.Sin(angle);
 
             int center = size / 2;
             int upperCenter = (size & 1) == 0 ? center - 1 : center;

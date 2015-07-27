@@ -10,66 +10,101 @@
 #include "ImageLoading.cuh"
 #include "OrientationField.cuh"
 #include "math_constants.h"
-extern "C"
-{
-	__declspec(dllexport) void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
-		float frequency, int filterSize, int angleNum);
-	__declspec(dllexport) void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
-		float frequency, int angleNum);
-	__declspec(dllexport) void Enhance32(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
-		float frequency, int angleNum);
-}
-__global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDAArray<float> orientMatrix, float frequency,
-	CUDAArray<float> filters, int angleNum, float* angles)
+#include "ImageEnhancement.cuh"
+__global__ void EnhancePixel(CUDAArray<float> img, CUDAArray<float> result, CUDAArray<float> orientMatrix, CUDAArray<float> frequencyMatrix,
+	CUDAArray<float> filters, int filterSize, int angleNum, float* angles)
 {
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int filterSize  = filters.Height;
-	int center      = filterSize / 2;
-	int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
-
 	if (row < img.Height && column < img.Width) {
+		int center = filterSize / 2;
+		int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
+
+		const int freqNum = 4;
+		float frArr[freqNum] = {
+			1.0 / 25.0,
+			1.0 / 16.0,
+			1.0 / 9.0,
+			1.0 / 3.0
+		};
+
+		/*__shared__ float cacheFilter[16 * 4][16 * 8];
+		int tx = threadIdx.x;
+		int ty = threadIdx.y;
+		for (int i = (ty / 8) * 32; i < (ty / 8 + 1) * 32; i++)
+		{
+			cacheFilter[i][(ty % 8) * tx] = filters.At(i, (ty % 8) * tx);
+		}
+		__syncthreads();*/
+
 		float diff = FLT_MAX;
 		int angle = 0;
+		float curOr = orientMatrix.At(row, column);
 		for (int angInd = 0; angInd < angleNum; angInd++)
 		{
-			if (abs(angles[angInd] - orientMatrix.At(row, column)) < diff)
+			if (abs(angles[angInd] - curOr) < diff)
 			{
 				angle = angInd;
-				diff = abs(angles[angInd] - orientMatrix.At(row, column));
+				diff = abs(angles[angInd] - curOr);
 			}
 		}
+
+		diff = FLT_MAX;
+		int freq = 0;
+		float curFreq = frequencyMatrix.At(row, column);
+		for (int freqInd = 0; freqInd < freqNum; freqInd++)
+		if (abs(frArr[freqInd] - curFreq) < diff)
+			{
+				freq = freqInd;
+				diff = abs(frArr[freqInd] - curFreq);
+			}
 
 		float sum = 0;
 		for (int drow = -upperCenter; drow <= center; drow++)
 		{
 			for (int dcolumn = -upperCenter; dcolumn <= center; dcolumn++)
 			{
-				float filterValue = filters.At(center - drow, filterSize* angle + (center - dcolumn));
+				//float filterValue = cacheFilter[12][13];//[filterSize * freq + (center - drow)][ filterSize* angle + (center - dcolumn)];//filters.At(filterSize * freq + (center - drow), filterSize* angle + (center - dcolumn));
+			
+				float filterValue = filters.At(filterSize * freq + (center - drow), filterSize* angle + (center - dcolumn));
+				//float filterValue = 12;
 				int indexRow = row + drow;
 				int indexColumn = column + dcolumn;
 
 				if (indexRow < 0)    indexRow    = 0;
+				else
+					if (indexRow >= img.Height)   indexRow = img.Height - 1;
 				if (indexColumn < 0) indexColumn = 0;
-				if (indexRow >= img.Height)   indexRow    = img.Height - 1;
-				if (indexColumn >= img.Width) indexColumn = img.Width - 1;
-
+				else
+					if (indexColumn >= img.Width) indexColumn = img.Width - 1;
+				/*if ((indexRow < 0) || (indexColumn < 0) || (indexRow >= img.Height) || (indexColumn >= img.Width))
+					continue;*/
 				sum += filterValue * img.At(indexRow, indexColumn);
 			}
 		}
 		if (sum > 255) sum = 255;
-		if (sum < 0)   sum = 0;
+		else
+			if (sum < 0)  sum = 0;
 		result.SetAt(row, column, sum);
 	}
 }
 //For filters of arbitrary size. Works only for filters with size less or equal to 32.
 void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix, 
-	float frequency, int filterSize, int angleNum)
+	float* frequencyMatr, int filterSize, int angleNum)
 {
 	CUDAArray<float> result       = CUDAArray<float>(imgWidth, imgHeight);
 	CUDAArray<float> img          = CUDAArray<float>(source, imgWidth, imgHeight);
 	CUDAArray<float> orientMatrix = CUDAArray<float>(orientationMatrix, imgWidth, imgHeight);
+	CUDAArray<float> frequencyMatrix = CUDAArray<float>(frequencyMatr, imgWidth, imgHeight);
+
+	const int freqNum = 4;
+	float frArr[freqNum] = {
+		1.0 / 25.0,
+		1.0 / 16.0,
+		1.0 / 9.0,
+		1.0 / 3.0
+	};
 
 	float* angles = (float*)malloc(angleNum * sizeof(float));//passing small array is better than creating it multiple times, I think.
 	const float constAngle = CUDART_PI_F / angleNum;
@@ -79,20 +114,39 @@ void Enhance(float* source, int imgWidth, int imgHeight, float* res, float* orie
 	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
 
-	CUDAArray<float> filters = MakeGaborFilters(filterSize, angleNum, frequency);
+	CUDAArray<float> filters = MakeGaborFilters(filterSize, angleNum, frArr, freqNum);
 
-	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize  = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
-	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, dev_angles);
+	dim3 blockSize = dim3(defaultThreadCount / 2, defaultThreadCount / 2);
+	dim3 gridSize = dim3(ceilMod(imgWidth, (defaultThreadCount / 2)), ceilMod(imgHeight, (defaultThreadCount / 2)));
+	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, filterSize, angleNum, dev_angles);
 	result.GetData(res);
+
+	result.Dispose();
+	img.Dispose();
+	orientMatrix.Dispose();
+	frequencyMatrix.Dispose();
+	filters.Dispose();
+
+	cudaFree(dev_angles);
+	free(angles);
 }
+
 //For filters 32x32.
 void Enhance32(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
-	float frequency, int angleNum)
+	float* frequencyMatr, int angleNum)
 {
 	CUDAArray<float> result = CUDAArray<float>(imgWidth, imgHeight);
 	CUDAArray<float> img = CUDAArray<float>(source, imgWidth, imgHeight);
 	CUDAArray<float> orientMatrix = CUDAArray<float>(orientationMatrix, imgWidth, imgHeight);
+	CUDAArray<float> frequencyMatrix = CUDAArray<float>(frequencyMatr, imgWidth, imgHeight);
+
+	const int freqNum = 4;
+	float frArr[freqNum] = {
+		1.0 / 25.0,
+		1.0 / 16.0,
+		1.0 / 9.0,
+		1.0 / 3.0
+	};
 
 	float* angles = (float*)malloc(angleNum * sizeof(float));//passing small array is better than creating it multiple times, I think.
 	const float constAngle = CUDART_PI_F / angleNum;
@@ -102,21 +156,39 @@ void Enhance32(float* source, int imgWidth, int imgHeight, float* res, float* or
 	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
 
-	CUDAArray<float> filters = MakeGabor32Filters(angleNum, frequency);
+	CUDAArray<float> filters = MakeGabor32Filters(angleNum, frArr, freqNum);
 
-	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
-	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, dev_angles);
+	dim3 blockSize = dim3(defaultThreadCount /2, defaultThreadCount/2);
+	dim3 gridSize = dim3(ceilMod(imgWidth, (defaultThreadCount / 2)), ceilMod(imgHeight, (defaultThreadCount / 2)));
+	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, 32, angleNum, dev_angles);
 	result.GetData(res);
+
+	result.Dispose();
+	img.Dispose();
+	orientMatrix.Dispose();
+	frequencyMatrix.Dispose();
+	filters.Dispose();
+
+	cudaFree(dev_angles);
+	free(angles);
 }
 
 //For filters 16x16.
 void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* orientationMatrix,
-	float frequency, int angleNum)
+	float* frequencyMatr, int angleNum)
 {
 	CUDAArray<float> result = CUDAArray<float>(imgWidth, imgHeight);
 	CUDAArray<float> img = CUDAArray<float>(source, imgWidth, imgHeight);
 	CUDAArray<float> orientMatrix = CUDAArray<float>(orientationMatrix, imgWidth, imgHeight);
+	CUDAArray<float> frequencyMatrix = CUDAArray<float>(frequencyMatr, imgWidth, imgHeight);
+
+	const int freqNum = 4;
+	float frArr[freqNum] = {
+		1.0 / 25.0,
+		1.0 / 16.0,
+		1.0 / 9.0,
+		1.0 / 3.0
+	};
 
 	float* angles = (float*)malloc(angleNum * sizeof(float));//passing small array is better than creating it multiple times, I think.
 	const float constAngle = CUDART_PI_F / angleNum;
@@ -126,12 +198,21 @@ void Enhance16(float* source, int imgWidth, int imgHeight, float* res, float* or
 	cudaMalloc((void**)&dev_angles, angleNum * sizeof(float));
 	cudaMemcpy(dev_angles, angles, angleNum * sizeof(float), cudaMemcpyHostToDevice);
 
-	CUDAArray<float> filters = MakeGabor16Filters(angleNum, frequency);
+	CUDAArray<float> filters = MakeGabor16Filters(angleNum, frArr, freqNum);
 
-	dim3 blockSize = dim3(defaultThreadCount, defaultThreadCount);
-	dim3 gridSize = dim3(ceilMod(imgWidth, defaultThreadCount), ceilMod(imgHeight, defaultThreadCount));
-	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequency, filters, angleNum, dev_angles);
+	dim3 blockSize = dim3(defaultThreadCount / 2, defaultThreadCount / 2);
+	dim3 gridSize = dim3(ceilMod(imgWidth, (defaultThreadCount / 2)), ceilMod(imgHeight, (defaultThreadCount / 2)));
+	EnhancePixel << <gridSize, blockSize >> >(img, result, orientMatrix, frequencyMatrix, filters, 16, angleNum, dev_angles);
 	result.GetData(res);
+
+	result.Dispose();
+	img.Dispose();
+	orientMatrix.Dispose();
+	frequencyMatrix.Dispose();
+	filters.Dispose();
+
+	cudaFree(dev_angles);
+	free(angles);
 }
 //void main()
 //{
