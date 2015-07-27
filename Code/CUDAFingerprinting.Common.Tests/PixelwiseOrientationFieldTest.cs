@@ -25,5 +25,17 @@ namespace CUDAFingerprinting.Common.Tests
 			//double orientation = field.GetOrientation(1, 1);
 			field.SaveAboveToFile(image, Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
 		}
+
+        [TestMethod]
+        public void PixelwiseOrientationTest0()
+        {
+            var image = Resources.SampleFinger4;
+            var bytes = ImageHelper.LoadImageAsInt(Resources.SampleFinger4);
+
+            PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
+
+            //double orientation = field.GetOrientation(1, 1);
+            field.SaveAboveToFile(image, Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
+        }
 	}
 }

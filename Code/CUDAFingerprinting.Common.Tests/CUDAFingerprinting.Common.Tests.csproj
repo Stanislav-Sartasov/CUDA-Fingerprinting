@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\8_2.bmp" />
+    <None Include="Resources\test32x32Filter.bmp" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

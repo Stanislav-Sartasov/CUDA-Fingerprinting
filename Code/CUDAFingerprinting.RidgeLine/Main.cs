@@ -16,7 +16,7 @@ namespace CUDAFingerprinting.RidgeLine
 
             int wing = 8;
 
-            RidgeLine newProssess = new RidgeLine(array, 5, wing);
+            RidgeLine newProssess = new RidgeLine(array, 10, wing);
 
             newProssess.GoToLine();
 

@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common;
 using System.Drawing;
+using CUDAFingerprinting.Common.Tests;
 
 namespace CUDAFingerprinting.Common.SingularityRegionDetection.Test
 {
@@ -11,8 +12,8 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection.Test
         [TestMethod]
         public void SingularityRegionDetectionTest()
         {
-            var image = Resources._8_2;
-            var intBmp = ImageHelper.LoadImageAsInt(Resources._8_2);
+            var image = Resources.SampleFinger;
+            var intBmp = ImageHelper.LoadImageAsInt(Resources.SampleFinger);
 
             PixelwiseOrientationField field = new PixelwiseOrientationField(intBmp, 8);
 

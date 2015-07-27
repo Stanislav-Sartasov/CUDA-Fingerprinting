@@ -13,7 +13,10 @@ namespace CUDAFingerprinting.RidgeLine
         private OrientationField _orientation;
         private int _step;
         private int _wings;
+        private bool _diffAngle;
+
         private const int BuildUp = 1000;  //specially for trade coordinates between methods
+        private const double _pi4 = Math.PI/4;
 
         public int[] _section;
 
@@ -24,9 +27,10 @@ namespace CUDAFingerprinting.RidgeLine
             _step = step;
             _wings = wings;
             _section = new int[2*wings + 1];
+            _diffAngle = false;
         }
 
-        void NewSelection(int mid)
+        void NewSection(int mid)
         {
             int i = mid/BuildUp;
             int j = mid%BuildUp;
@@ -46,7 +50,7 @@ namespace CUDAFingerprinting.RidgeLine
                 _section[_wings - k] = xs * BuildUp + ys;
                 _section[_wings + k] = xe * BuildUp + ye;
             }
-        }
+        } //All right
 
         int FindNextMax()
         {
@@ -77,17 +81,28 @@ namespace CUDAFingerprinting.RidgeLine
             }
 
             return _section[_wings + (mr < ml ? mr : -ml)];
-        }
+        }  //Edit all method
 
-        int MakeStep(int startPoint)
+        private int MakeStep(int startPoint)  //Add step for second point
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
 
-            double angle = _orientation.GetOrientation(x, y);
+            double angle = _orientation.GetOrientation(x, y) + (_diffAngle ? Math.PI : 0);
 
-            x += Convert.ToInt32(_step * Math.Cos(angle));
-            y += Convert.ToInt32(_step * Math.Sin(angle));
+            x += Convert.ToInt32(_step*Math.Cos(angle));
+            y += Convert.ToInt32(_step*Math.Sin(angle));
+
+            double angle2 = _orientation.GetOrientation(x, y);
+
+            if (Math.Abs(angle - angle2) > _pi4)
+            {
+                _diffAngle = true;
+            }
+            else
+            {
+                _diffAngle = false;
+            }
 
             return x*BuildUp + y;
         }
@@ -95,11 +110,11 @@ namespace CUDAFingerprinting.RidgeLine
         bool CheckofStopCriteria()
         {
             return true;
-        }
+        } //Write this method
 
         public void GoToLine()
         {
-            NewSelection(210180);
+            NewSection(210180);
 
             for (int i = 0; i < _wings * 2 + 1; i++)
             {
@@ -118,7 +133,7 @@ namespace CUDAFingerprinting.RidgeLine
 
             Console.WriteLine("\n{0}\n", max);
 
-            NewSelection(MakeStep(max));
+            NewSection(MakeStep(max));
 
             for (int i = 0; i < _wings * 2 + 1; i++)
             {
@@ -135,6 +150,6 @@ namespace CUDAFingerprinting.RidgeLine
             max = FindNextMax();
 
             Console.WriteLine("\n{0}\n", max);
-        }
+        }  //Delete useless code and write normal algo
     }
 }
