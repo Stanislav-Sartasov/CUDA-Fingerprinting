@@ -10,7 +10,7 @@ namespace ImageEnhancmentTest
         [TestMethod]
         public void ImageEnhancmentTest()
         {
-            var bmp = Resources.SampleFinger4;
+            var bmp = Resources.SampleFinger;
             double[,] imgDoubles = ImageHelper.LoadImage(bmp);
 
             imgDoubles.DoNormalization(100, 100);
