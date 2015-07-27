@@ -40,6 +40,11 @@ namespace CUDAFingerprinting.Common.ConvexHull
         {
             return Math.Sqrt(v.X * v.X + v.Y * v.Y);
         }
+
+        public static double PointDistance(PointF A, PointF B)
+        {
+            return Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
+        }
     }
 
     // Special comparer for our points (radial with respect to the starting point)
@@ -164,10 +169,9 @@ namespace CUDAFingerprinting.Common.ConvexHull
             return !VectorHelper.Intersect(hull[0], point, hull[p], hull[r]);
         }
 
-        public static bool[,] GetFieldFilling(int rows, int columns, List<PointF> minutiae)
+        public static bool[,] GetFieldFilling(int rows, int columns, List<PointF> hull)
         {
             bool[,] field = new bool[rows, columns];
-            List<PointF> hull = ConvexHull.GetConvexHull(minutiae);
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
