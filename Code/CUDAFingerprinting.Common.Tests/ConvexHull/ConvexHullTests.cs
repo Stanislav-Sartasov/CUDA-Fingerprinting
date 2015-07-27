@@ -12,32 +12,32 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         [TestMethod]
         public void ConvexHullBuildTest()
         {
-            List<Point> pointList = new List<Point>(
-                new Point[] 
+            List<PointF> pointList = new List<PointF>(
+                new PointF[] 
                 {
-                    new Point(0, 1),
-                    new Point(2, 0),
-                    new Point(4, 2),
-                    new Point(8, 3),
-                    new Point(6, 6),
-                    new Point(3, 7),
-                    new Point(2, 6),
-                    new Point(1, 9)
+                    new PointF(0, 1),
+                    new PointF(2, 0),
+                    new PointF(4, 2),
+                    new PointF(8, 3),
+                    new PointF(6, 6),
+                    new PointF(3, 7),
+                    new PointF(2, 6),
+                    new PointF(1, 9)
                 });
 
-            List<Point> resPointList = ConvexHull.GetConvexHull(pointList);
+            List<PointF> resPointList = ConvexHull.GetConvexHull(pointList);
 
-            List<Point> resToCheck = new List<Point>(
-                new Point[]
+            List<PointF> resToCheck = new List<PointF>(
+                new PointF[]
                 {
-                    new Point(1, 9),
-                    new Point(6, 6),
-                    new Point(8, 3),
-                    new Point(2, 0),
-                    new Point(0, 1)
+                    new PointF(1, 9),
+                    new PointF(6, 6),
+                    new PointF(8, 3),
+                    new PointF(2, 0),
+                    new PointF(0, 1)
                 });
 
-            List<Point> resToCheckRev = new List<Point>(resToCheck);
+            List<PointF> resToCheckRev = new List<PointF>(resToCheck);
             resToCheckRev.Reverse();
 
             Assert.IsTrue(resPointList.SequenceEqual(resToCheck) || resPointList.SequenceEqual(resToCheckRev));
@@ -46,17 +46,17 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         [TestMethod]
         public void ConvexHullFieldFillingTest()
         {
-            List<Point> hull = new List<Point>(
-                new Point[]
+            List<PointF> hull = new List<PointF>(
+                new PointF[]
                 {
-                    new Point(1, 9),
-                    new Point(6, 6),
-                    new Point(8, 3),
-                    new Point(2, 0),
-                    new Point(0, 1)
+                    new PointF(1, 9),
+                    new PointF(6, 6),
+                    new PointF(8, 3),
+                    new PointF(2, 0),
+                    new PointF(0, 1)
                 });
 
-            bool[,] field = FieldFiller.GetFieldFilling(10, 10, hull);
+            bool[,] field = FieldFiller.GetFieldFilling(20, 20, hull);
 
             int[,] intField = new int[field.GetLength(0), field.GetLength(1)];
             for (int i = 0; i < field.GetLength(0); i++)
@@ -71,6 +71,40 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
             Bitmap image = ImageHelper.SaveArrayToBitmap(intField);
 
             image.Save("FieldFilling.jpg");
+        }
+
+        [TestMethod]
+        public void ConvexHullExtendedTest()
+        {
+            List<PointF> hull = new List<PointF>(
+                new PointF[]
+                {
+                    new PointF(0, 1),
+                    new PointF(2, 0),
+                    new PointF(8, 3),
+                    new PointF(6, 6),
+                    new PointF(1, 9),
+                });
+
+            double omega = 3;
+
+            List<PointF> extendedHull = ConvexHullMCCExtension.ExtendHull(hull, omega);
+
+            bool[,] field = FieldFiller.GetFieldFilling(20, 20, extendedHull);
+
+            int[,] intField = new int[field.GetLength(0), field.GetLength(1)];
+            for (int i = 0; i < field.GetLength(0); i++)
+            {
+                for (int j = 0; j < field.GetLength(1); j++)
+                {
+                    // Swapping indices for an image to look like a standard cartesian coords (up-directed y-axis)
+                    intField[i, j] = field[j, i] ? 255 : 0;
+                }
+            }
+
+            Bitmap image = ImageHelper.SaveArrayToBitmap(intField);
+
+            image.Save("FieldFillingExtended.jpg");
         }
     }
 }

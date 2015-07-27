@@ -1,20 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
+using System;
 
 namespace CUDAFingerprinting.Common.ConvexHull
 {
     public static class VectorHelper
     {
         // Vector product of 2 vectors (only z coordinate, given vectors are supposed to be arranged on a plane)
-        public static int VectorProduct(Point v1, Point v2)
+        public static int VectorProductInt(PointF v1, PointF v2)
         {
-            return v1.X * v2.Y - v1.Y * v2.X;
+            return (int)(v1.X * v2.Y - v1.Y * v2.X);
         }
 
-        public static Point Difference(Point v1, Point v2)
+        public static PointF Difference(PointF v1, PointF v2)
         {
-            Point x = new Point(v1.X - v2.X, v1.Y - v2.Y);
+            PointF x = new PointF(v1.X - v2.X, v1.Y - v2.Y);
             return x;
         }
 
@@ -23,37 +24,42 @@ namespace CUDAFingerprinting.Common.ConvexHull
         // > 0 - left (positive rotation)
         // = 0 - all 3 points are collinear
         // < 0 - right
-        public static int Rotate(Point A, Point B, Point C)
+        public static int Rotate(PointF A, PointF B, PointF C)
         {
-            return VectorProduct(Difference(B, A), Difference(C, B));
+            return VectorProductInt(Difference(B, A), Difference(C, B));
         }
-        
+
         // Segment intersection 
-        public static bool Intersect(Point A, Point B, Point C, Point D)
+        public static bool Intersect(PointF A, PointF B, PointF C, PointF D)
         {
             // <= in the 1st case and < in the second are appropriate for the specific use of this helper
             return Rotate(A, B, C) * Rotate(A, B, D) <= 0 && Rotate(C, D, A) * Rotate(C, D, B) < 0;
         }
+
+        public static double Norm(PointF v)
+        {
+            return Math.Sqrt(v.X * v.X + v.Y * v.Y);
+        }
     }
 
     // Special comparer for our points (radial with respect to the starting point)
-    public class RadialComparer : IComparer<Point>
+    public class RadialComparer : IComparer<PointF>
     {
-        private Point FirstPoint;
+        private PointF FirstPoint;
 
-        public RadialComparer(Point fp)
+        public RadialComparer(PointF fp)
         {
             FirstPoint = fp;
         }
 
-        public int Compare(Point v1, Point v2)
+        public int Compare(PointF v1, PointF v2)
         {
             int result = 1;
             if (VectorHelper.Rotate(FirstPoint, v1, v2) > 0)
             {
                 result = -1;
             }
-            else if ((v1.X == v2.X) && (v1.Y == v2.Y)) // <=> VectorProduct == 0
+            else if ((v1.X == v2.X) && (v1.Y == v2.Y)) // <=> VectorProductInt == 0
             {
                 result = 0;
             }
@@ -65,9 +71,9 @@ namespace CUDAFingerprinting.Common.ConvexHull
     public static class ConvexHull
     {
         // Sort points on the plane
-        private static void Sort(List<Point> list)
+        private static void Sort(List<PointF> list)
         {
-            Point firstPoint = new Point(list[0].X, list[0].Y);
+            PointF firstPoint = new PointF(list[0].X, list[0].Y);
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i].X < firstPoint.X)
@@ -81,16 +87,16 @@ namespace CUDAFingerprinting.Common.ConvexHull
         }
 
         // Build convex hull using Graham Scan
-        private static Stack<Point> Build(List<Point> points)
+        private static Stack<PointF> Build(List<PointF> points)
         {
-            Point firstPoint = points[0];
+            PointF firstPoint = points[0];
 
-            Stack<Point> hullStack = new Stack<Point>();
+            Stack<PointF> hullStack = new Stack<PointF>();
             hullStack.Push(points[0]);
             hullStack.Push(points[1]);
 
-            Point top = points[1];
-            Point nextToTop = points[0];
+            PointF top = points[1];
+            PointF nextToTop = points[0];
 
             for (int i = 2; i < points.Count; i++)
             {
@@ -110,13 +116,13 @@ namespace CUDAFingerprinting.Common.ConvexHull
         }
 
 
-        public static List<Point> GetConvexHull(List<Point> points)
+        public static List<PointF> GetConvexHull(List<PointF> points)
         {
             Sort(points);
 
-            Stack<Point> hullStack = Build(points);
+            Stack<PointF> hullStack = Build(points);
 
-            List<Point> hullList = new List<Point>();
+            List<PointF> hullList = new List<PointF>();
             for (int i = 0; i < hullStack.Count(); i++)
             {
                 hullList.Add(hullStack.ElementAt(i));
@@ -130,7 +136,7 @@ namespace CUDAFingerprinting.Common.ConvexHull
     public static class FieldFiller
     {
         // Algorithm for any convex area (and even for some not convex)
-        public static bool IsPointInsideHull(Point point, List<Point> hull)
+        public static bool IsPointInsideHull(PointF point, List<PointF> hull)
         {
             int n = hull.Count;
 
@@ -157,16 +163,16 @@ namespace CUDAFingerprinting.Common.ConvexHull
 
             return !VectorHelper.Intersect(hull[0], point, hull[p], hull[r]);
         }
-        
-        public static bool[,] GetFieldFilling(int rows, int columns, List<Point> minutiae)
+
+        public static bool[,] GetFieldFilling(int rows, int columns, List<PointF> minutiae)
         {
             bool[,] field = new bool[rows, columns];
-            List<Point> hull = ConvexHull.GetConvexHull(minutiae);
+            List<PointF> hull = ConvexHull.GetConvexHull(minutiae);
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    Point curPoint = new Point(i, j);
+                    PointF curPoint = new PointF(i, j);
 
                     field[i, j] = IsPointInsideHull(curPoint, hull) ? true : false;
                 }
