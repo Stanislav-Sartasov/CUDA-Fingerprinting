@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using CUDAFingerprinting.Common;
 
 namespace CUDAFingerprinting.RidgeLine
@@ -14,7 +16,7 @@ namespace CUDAFingerprinting.RidgeLine
         private int _step;
         private int _wings;
         private bool _diffAngle;
-
+        private bool[,] _visited;
         private const int BuildUp = 1000;  //specially for trade coordinates between methods
         private const double _pi4 = Math.PI/4;
 
@@ -105,6 +107,57 @@ namespace CUDAFingerprinting.RidgeLine
             }
 
             return x*BuildUp + y;
+        }
+
+        void Paint(int lstartPoint, int rstartPoint, double angle, double orientation, int stepDistX, int stepDistY)
+        {
+            int xd = (int)(Math.Cos(angle) + 0.5);
+            int yd = (int)(Math.Sin(angle) + 0.5);
+
+            int xdAlongLine = (int)(Math.Cos(orientation) + 0.5);
+            int ydAlongLine = (int)(Math.Sin(orientation) + 0.5);
+
+            int xstart = lstartPoint/BuildUp;
+            int xend = rstartPoint/BuildUp;
+            if (xstart > xend)
+            {
+                int temp = xstart;
+                xstart = xend;
+                xend = temp;
+            }
+
+            int ystart = lstartPoint % BuildUp;
+            int yend = rstartPoint % BuildUp;
+            if (ystart > yend)
+            {
+                int temp = ystart;
+                ystart = yend;
+                yend = temp;
+            }
+            int i = ystart;
+            int j = xstart;
+            while ((i <= yend) && (j <= xend))
+            {
+                int ycur = i;
+                int xcur = j;
+                int xLimit = xcur + stepDistX;
+                int yLimit = ycur + stepDistY;
+                while ((ycur < yLimit) && (xcur < xLimit))
+                {
+                    _visited[xcur, ycur] = true;
+                    ycur += yd;
+                    xcur += xd;
+                }
+                i += ydAlongLine;
+                j += xdAlongLine;
+            }
+            //for (int i = ystart; i <= yend; i++)
+            //{
+            //    for (int j = xstart; j <= xend; j++)
+            //    {
+
+            //    }
+            //}
         }
 
         bool CheckofStopCriteria()
