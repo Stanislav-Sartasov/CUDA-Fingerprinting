@@ -3,8 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include "ImageLoading.cuh"
 #include "ConvexHullModified.cuh"
+
+#define DEBUG
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -23,7 +26,7 @@ Point* extendHull(Point* hull, int hullLength, float omega)
 		Point diff = difference(snd, fst);
 
 		Point orthogonalDiff = Point(diff.y, -diff.x);
-		double orthogonalDiffNorm = norm(orthogonalDiff);
+		float orthogonalDiffNorm = norm(orthogonalDiff);
 
 		Point moveVector = Point(
 			orthogonalDiff.x / orthogonalDiffNorm * omega,
@@ -55,7 +58,7 @@ bool** getRoundFieldFilling(
 		{
 			for (int k = kMin; k < kMax; k++)
 			{
-				Point curPoint = Point(j, k);
+				Point curPoint = Point((float)j, (float)k);
 				if (pointDistance(curPoint, hullPoint) < omega)
 				{
 					field[j][k] = true;
@@ -102,16 +105,17 @@ int main()
 
 	float omega = 40;
 
+	clock_t start = clock();
+
 	Point* hull = (Point*)malloc(TEST_POINT_COUNT * sizeof(Point)); // maximum hull length
 	int hullLength; // var used to bound "actual" hull length
 
 	getConvexHull(points, TEST_POINT_COUNT, hull, &hullLength);
 
-
 	Point* extendedHull = extendHull(hull, hullLength, omega);
 	int extendedHullLength = hullLength * 2;
 
-
+#ifdef DEBUG
 	printf("Printing hull\n");
 	for (int i = 0; i < hullLength; i++)
 	{
@@ -127,20 +131,31 @@ int main()
 		printf("%f, %f\n", extendedHull[i].x, extendedHull[i].y);
 	}
 	printf("[end] Printing exnteded hull\n");
+#endif
 
-
+#ifdef DEBUG
 	bool** field = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, hull, hullLength);
 	bool** extendedField = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, extendedHull, extendedHullLength);
+#endif
 	bool** extendedRoundedField = getRoundFieldFilling(
 		TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, omega, hull, hullLength, extendedHull, extendedHullLength);
 
+#ifdef DEBUG
 	printHullMathCoords(field, "ConvexHull.jpg");
 	printHullMathCoords(extendedField, "ConvexHullExtended.jpg");
 	printHullMathCoords(extendedRoundedField, "ConvexHullExtendedRounded.jpg");
+#endif
+
 
 	free(hull);
+#ifdef DEBUG
 	free(field);
 	free(extendedField);
+#endif
+	free(extendedRoundedField);
+
+	clock_t end = clock();
+	printf("TIME: %ld\n", end - start);
 
 	return 0;
 }
