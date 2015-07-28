@@ -17,8 +17,13 @@ namespace CUDAFingerprinting.RidgeLine
     {
         public int X;
         public int Y;
-        private double Angle;
+        public double Angle;
         public MinutiaTypes Type;
+
+        public Minutia()
+        {
+            
+        }
         public Minutia(int x, int y, double angle, MinutiaTypes type)
         {
             X = x;
@@ -51,6 +56,7 @@ namespace CUDAFingerprinting.RidgeLine
             _section = new int[2*wings + 1];
             _diffAngle = false;
             _visited = new bool[image.GetLength(0), image.GetLength(1)];
+            Minutias = new List<Minutia>();
         }
 
         private void NewSection(int mid)
@@ -87,7 +93,12 @@ namespace CUDAFingerprinting.RidgeLine
                 int x = _section[lPoint]/BuildUp;
                 int y = _section[lPoint]%BuildUp;
 
-                if (_image[x, y] > 125)
+                if (x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0))
+                {
+                    break;
+                }
+
+                if (_image[y, x] > 125)
                 {
                     check = true;
                 }
@@ -104,7 +115,12 @@ namespace CUDAFingerprinting.RidgeLine
                 int x = _section[rPoint]/BuildUp;
                 int y = _section[rPoint]%BuildUp;
 
-                if (_image[x, y] > 125)
+                if (x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0))
+                {
+                    break;
+                }
+
+                if (_image[y, x] > 125)
                 {
                     check = false;
                 }
@@ -183,7 +199,7 @@ namespace CUDAFingerprinting.RidgeLine
             return MinutiaTypes.NotMinutia;
         }
 
-        public Minutia FollowLine(int startPoint, Directions direction)
+        Minutia FollowLine(int startPoint, Directions direction)
         {
             NewSection(startPoint);
             MinutiaTypes minutiaType;
@@ -206,10 +222,16 @@ namespace CUDAFingerprinting.RidgeLine
             return res;
         }
 
+        public List<Minutia> GetMinutiaList()
+        {
+            return Minutias;
+        }
+
         public void FindMinutiaLine(int startPoint, double duplicateDelta, int colorThreshold = 30)
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
+
             if (_image[y, x] < colorThreshold)
             {
             var minutia1 = FollowLine(startPoint, Directions.Forward);
@@ -244,7 +266,6 @@ namespace CUDAFingerprinting.RidgeLine
 
         void CheckAndDeleteFalseMinutia(Minutia minutia, double delta)
         {
-            if (!IsDuplicate(minutia, delta)) return;
             var i =
                 Minutias.FindIndex(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
 

@@ -9,37 +9,25 @@ namespace CUDAFingerprinting.RidgeLine
 {
     class Program
     {
-        static void TestSection()
-        {
-            var image = Resources.SampleFinger3;
-            var array = ImageHelper.LoadImageAsInt(image);
-
-            int wing = 8;
-
-            RidgeLine newProssess = new RidgeLine(array, 10, wing);
-
-            //newProssess.GoToLine();
-
-            //var newImage = new int[2 * wing + 1, 255];
-            //Array.Clear(newImage, 0, newImage.Length);
-
-            //for (int i = 0; i < 2 * wing + 1; i++)
-            //{
-            //    int x = newProssess._section[i]/1000;
-            //    int y = newProssess._section[i]%1000;
-
-            //    for (int j = 0; j < array[x, y]; j++)
-            //    {
-            //        newImage[i, j] = 120;
-            //    }
-            //}
-
-            //ImageHelper.SaveArray(newImage, "testSections.bmp");
-        }
-
         static void Main()
         {
-            //TestSection();
+            var bmp = Resources.SampleFinger3;
+            var image = ImageHelper.LoadImageAsInt(bmp);
+
+            var detectingMinutias = new RidgeLine(image, 4, 4);
+
+            for (int i = 0; i < image.GetLength(1); i++)
+            {
+                for (int j = 0; j < image.GetLength(0); j++)
+                {
+                    detectingMinutias.FindMinutiaLine(i * 1000 + j, 5.0, 125);
+                }
+            }
+
+            foreach (var minutia in detectingMinutias.GetMinutiaList())
+            {
+                Console.WriteLine("x = {0}; y = {1}; Type = {2}; Angle = {3}", minutia.X, minutia.Y, minutia.Type, minutia.Angle);
+            }
         }
     }
 }
