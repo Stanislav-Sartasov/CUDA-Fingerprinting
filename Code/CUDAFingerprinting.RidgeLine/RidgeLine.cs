@@ -204,20 +204,25 @@ namespace CUDAFingerprinting.RidgeLine
             return res;
         }
 
-        public Minutia[] FindMinutiaLine(int startPoint)
+        Minutia[] FindMinutiaLine(int startPoint)
         {
             var minutia1 = FollowLine(startPoint, Directions.Forward);
             var minutia2 = FollowLine(startPoint, Directions.Back);
             return (new Minutia[2] {minutia1, minutia2});
         }
 
-        public bool IsDuplicate(Minutia minutia, double delta)
+        void CheckAndDeleteFalseMinutia(Minutia minutia, double delta)
         {
-            if (Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta))
-            {
-                return true;
-            }
-            return false;
+            if (!IsDuplicate(minutia, delta)) return;
+            var i =
+                Minutias.FindIndex(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
+
+            Minutias.RemoveAt(i);
+        }
+
+        bool IsDuplicate(Minutia minutia, double delta)
+        {
+            return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
         }
     }
 
