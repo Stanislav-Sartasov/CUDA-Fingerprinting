@@ -18,7 +18,7 @@ namespace CUDAFingerprinting.RidgeLine
 
             RidgeLine newProssess = new RidgeLine(array, 10, wing);
 
-            newProssess.GoToLine();
+            //newProssess.GoToLine();
 
             //var newImage = new int[2 * wing + 1, 255];
             //Array.Clear(newImage, 0, newImage.Length);
@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.RidgeLine
 
         static void Main()
         {
-            TestSection();
+            //TestSection();
         }
     }
 }

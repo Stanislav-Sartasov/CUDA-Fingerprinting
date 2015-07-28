@@ -211,7 +211,7 @@ namespace CUDAFingerprinting.RidgeLine
             int y = startPoint%BuildUp;
             if (_image[y, x] < threshold)
             {
-                var minutia1 = FollowLine(startPoint, Directions.Forward);
+            var minutia1 = FollowLine(startPoint, Directions.Forward);
                 if (minutia1.Type == 1)
                 {
                     if (!(IsDuplicate(minutia1, duplicateDelta)))
@@ -219,12 +219,21 @@ namespace CUDAFingerprinting.RidgeLine
                         Minutias.Add(minutia1);
                     }
                 }
-                var minutia2 = FollowLine(startPoint, Directions.Back);
-                return (new Minutia[2] {minutia1, minutia2});
-            }
+            var minutia2 = FollowLine(startPoint, Directions.Back);
+            return (new Minutia[2] {minutia1, minutia2});
+        }
         }
 
-        public bool IsDuplicate(Minutia minutia, double delta)
+        void CheckAndDeleteFalseMinutia(Minutia minutia, double delta)
+        {
+            if (!IsDuplicate(minutia, delta)) return;
+            var i =
+                Minutias.FindIndex(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
+
+            Minutias.RemoveAt(i);
+        }
+
+        bool IsDuplicate(Minutia minutia, double delta)
         {
             return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
         }
