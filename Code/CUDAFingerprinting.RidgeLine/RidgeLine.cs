@@ -30,6 +30,7 @@ namespace CUDAFingerprinting.RidgeLine
             _wings = wings;
             _section = new int[2*wings + 1];
             _diffAngle = false;
+            _visited = new bool[image.GetLength(0), image.GetLength(1)];
         }
 
         void NewSection(int mid)
@@ -109,61 +110,55 @@ namespace CUDAFingerprinting.RidgeLine
             return x*BuildUp + y;
         }
 
-        void Paint(int lstartPoint, int rstartPoint, double angle, double orientation, int stepDistX, int stepDistY)
+        void Paint(int lstartPoint, int rstartPoint, double angle, int stepDistX, int stepDistY)
         {
             int xd = (int)(Math.Cos(angle) + 0.5);
             int yd = (int)(Math.Sin(angle) + 0.5);
 
-            int xdAlongLine = (int)(Math.Cos(orientation) + 0.5);
-            int ydAlongLine = (int)(Math.Sin(orientation) + 0.5);
+            for (int i = lstartPoint; i <= rstartPoint; i++)
+            {
+                int xcur = _section[i]/BuildUp;
+                int ycur = _section[i]%BuildUp;
 
-            int xstart = lstartPoint/BuildUp;
-            int xend = rstartPoint/BuildUp;
-            if (xstart > xend)
-            {
-                int temp = xstart;
-                xstart = xend;
-                xend = temp;
-            }
-
-            int ystart = lstartPoint % BuildUp;
-            int yend = rstartPoint % BuildUp;
-            if (ystart > yend)
-            {
-                int temp = ystart;
-                ystart = yend;
-                yend = temp;
-            }
-            int i = ystart;
-            int j = xstart;
-            while ((i <= yend) && (j <= xend))
-            {
-                int ycur = i;
-                int xcur = j;
                 int xLimit = xcur + stepDistX;
                 int yLimit = ycur + stepDistY;
+
                 while ((ycur < yLimit) && (xcur < xLimit))
                 {
-                    _visited[xcur, ycur] = true;
+                    _visited[ycur, xcur] = true;
                     ycur += yd;
                     xcur += xd;
                 }
-                i += ydAlongLine;
-                j += xdAlongLine;
             }
-            //for (int i = ystart; i <= yend; i++)
-            //{
-            //    for (int j = xstart; j <= xend; j++)
-            //    {
 
+            //int i = ystart;
+            //int j = xstart;
+            //while ((i <= yend) && (j <= xend))
+            //{
+            //    int ycur = i;
+            //    int xcur = j;
+            //    int xLimit = xcur + stepDistX;
+            //    int yLimit = ycur + stepDistY;
+            //    while ((ycur < yLimit) && (xcur < xLimit))
+            //    {
+            //        _visited[xcur, ycur] = true;
+            //        ycur += yd;
+            //        xcur += xd;
             //    }
+            //    i += ydAlongLine;
+            //    j += xdAlongLine;
             //}
         }
 
-        bool CheckofStopCriteria()
+        bool CheckStopCriteria(int threshold = 200)
         {
-            return true;
-        } //Write this method
+            double mean = 0;
+            for (int i = 0; i < _wings*2 + 1; i++)
+                mean += _section[i];
+            mean /= (_wings*2 + 1);
+            if (mean > threshold) return true;
+            return false;
+        }
 
         public void GoToLine()
         {
