@@ -12,13 +12,14 @@ using Microsoft.Win32;
 namespace CUDAFingerprinting.RidgeLine
 {
     enum Directions { Forward, Back}
+    enum MinutiaTypes { NotMinutia, LineEnding, Intersection}
     class Minutia
     {
         public int X;
         public int Y;
         private double Angle;
-        public int Type;
-        public Minutia(int x, int y, double angle,int type)
+        public MinutiaTypes Type;
+        public Minutia(int x, int y, double angle, MinutiaTypes type)
         {
             X = x;
             Y = y;
@@ -167,25 +168,25 @@ namespace CUDAFingerprinting.RidgeLine
             }
         }
 
-        private int CheckStopCriteria(int threshold = 200)
+        private MinutiaTypes CheckStopCriteria(int threshold = 200)
         {
             double mean = 0;
             for (int i = 0; i < _wings*2 + 1; i++)
                 mean += _section[i];
             mean /= (_wings*2 + 1);
-            if (mean > threshold) return 1; //line ends
+            if (mean > threshold) return MinutiaTypes.LineEnding;
 
             int xcenter = _section[_wings]/BuildUp;
             int ycenter = _section[_wings]%BuildUp;
-            if (_visited[ycenter, xcenter]) return 2; //intersection
+            if (_visited[ycenter, xcenter]) return MinutiaTypes.Intersection; 
 
-            return 0; //no minutia
+            return MinutiaTypes.NotMinutia;
         }
 
         public Minutia FollowLine(int startPoint, Directions direction)
         {
             NewSection(startPoint);
-            int flag;
+            MinutiaTypes minutiaType;
             int xcur, ycur;
             double angle;
             do
@@ -199,29 +200,46 @@ namespace CUDAFingerprinting.RidgeLine
 
                 startPoint = MakeStep(startPoint, direction);
                 NewSection(startPoint);
-                flag = CheckStopCriteria();
-            } while (flag == 0);
-            Minutia res = new Minutia(xcur, ycur, angle, flag);
+                minutiaType = CheckStopCriteria();
+            } while (minutiaType == MinutiaTypes.NotMinutia);
+            Minutia res = new Minutia(xcur, ycur, angle, minutiaType);
             return res;
         }
 
-        public Minutia[] FindMinutiaLine(int startPoint, double duplicateDelta, int threshold = 30)
+        public void FindMinutiaLine(int startPoint, double duplicateDelta, int colorThreshold = 30)
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
-            if (_image[y, x] < threshold)
+            if (_image[y, x] < colorThreshold)
             {
-            var minutia1 = FollowLine(startPoint, Directions.Forward);
-                if (minutia1.Type == 1)
+                var minutia1 = FollowLine(startPoint, Directions.Forward);
+                if (minutia1.Type == MinutiaTypes.LineEnding)
                 {
-                    if (!(IsDuplicate(minutia1, duplicateDelta)))
-                    {
+                    if (IsDuplicate(minutia1, duplicateDelta))
+                        CheckAndDeleteFalseMinutia(minutia1, duplicateDelta);
+                    else
                         Minutias.Add(minutia1);
-                    }
                 }
-            var minutia2 = FollowLine(startPoint, Directions.Back);
-            return (new Minutia[2] {minutia1, minutia2});
-        }
+                else
+                {
+                    if (!IsDuplicate(minutia1, duplicateDelta))
+                        Minutias.Add(minutia1);
+                }
+
+                var minutia2 = FollowLine(startPoint, Directions.Back);
+                if (minutia2.Type == MinutiaTypes.Intersection)
+                {
+                    if (IsDuplicate(minutia2, duplicateDelta))
+                        CheckAndDeleteFalseMinutia(minutia2, duplicateDelta);
+                    else
+                        Minutias.Add(minutia2);
+                }
+                else
+                {
+                    if (!IsDuplicate(minutia2, duplicateDelta))
+                        Minutias.Add(minutia2);
+                }
+            }
         }
 
         void CheckAndDeleteFalseMinutia(Minutia minutia, double delta)
