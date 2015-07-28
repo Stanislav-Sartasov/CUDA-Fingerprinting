@@ -20,9 +20,9 @@ namespace CUDAFingerprinting.Common
         }
 
         // Vector product of 2 vectors (only z coordinate, given vectors are supposed to be arranged on a plane)
-        public static int VectorProductInt(PointF v1, PointF v2)
+        public static double VectorProduct(PointF v1, PointF v2)
         {
-            return (int)(v1.X * v2.Y - v1.Y * v2.X);
+            return v1.X * v2.Y - v1.Y * v2.X;
         }
 
         public static PointF Difference(PointF v1, PointF v2)
@@ -36,16 +36,18 @@ namespace CUDAFingerprinting.Common
         // > 0 - left (positive rotation)
         // = 0 - all 3 points are collinear
         // < 0 - right
-        public static int Rotate(PointF A, PointF B, PointF C)
+        public static double Rotate(PointF A, PointF B, PointF C)
         {
-            return VectorProductInt(Difference(B, A), Difference(C, B));
+            return VectorProduct(Difference(B, A), Difference(C, B));
         }
 
         // Segment intersection 
         public static bool Intersect(PointF A, PointF B, PointF C, PointF D)
         {
             // <= in the 1st case and < in the second are appropriate for the specific use of this helper (localization problem)
-            return Rotate(A, B, C) * Rotate(A, B, D) <= 0 && Rotate(C, D, A) * Rotate(C, D, B) < 0;
+            bool a = Rotate(A, B, C) * Rotate(A, B, D) <= 0;
+            bool b = Rotate(C, D, A) * Rotate(C, D, B) < 0;
+            return a && b;
         }
     }
 }

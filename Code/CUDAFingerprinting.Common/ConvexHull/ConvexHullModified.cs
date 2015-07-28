@@ -58,9 +58,13 @@ namespace CUDAFingerprinting.Common.ConvexHull
 
                 PointF hullPoint = hull[((i + 1) / 2) % hull.Count];
 
-                for (int j = (int)Math.Round(hullPoint.X - omega); j < (int)Math.Round(hullPoint.X + omega); j++)
+                int jMin = Math.Max((int)Math.Round(hullPoint.X - omega), 0);
+                int jMax = Math.Min((int)Math.Round(hullPoint.X + omega), rows);
+                int kMin = Math.Max((int)Math.Round(hullPoint.Y - omega), 0);
+                int kMax = Math.Min((int)Math.Round(hullPoint.Y + omega), columns);
+                for (int j = jMin; j < jMax; j++)
                 {
-                    for (int k = (int)Math.Round(hullPoint.Y - omega); k < (int)Math.Round(hullPoint.Y + omega); k++)
+                    for (int k = kMin; k < kMax; k++)
                     {
                         PointF curPoint = new PointF(j, k);
                         if (VectorHelper.PointDistance(curPoint, hullPoint) < omega)
