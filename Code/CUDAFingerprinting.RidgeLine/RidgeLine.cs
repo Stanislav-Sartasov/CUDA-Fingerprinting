@@ -1,15 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using CUDAFingerprinting.Common;
+using Microsoft.Win32;
 
 namespace CUDAFingerprinting.RidgeLine
 {
-    class RidgeLine
+    enum Directions { Forward, Back}
+    class Minutia
+    {
+        public int X;
+        public int Y;
+        private double Angle;
+
+        public Minutia(int x, int y, double angle)
+        {
+            X = x;
+            Y = y;
+            Angle = angle;
+        }
+    }
+    internal class RidgeLine
     {
         private int[,] _image;
         private OrientationField _orientation;
@@ -17,10 +33,12 @@ namespace CUDAFingerprinting.RidgeLine
         private int _wings;
         private bool _diffAngle;
         private bool[,] _visited;
-        private const int BuildUp = 1000;  //specially for trade coordinates between methods
+        private const int BuildUp = 1000; //specially for trade coordinates between methods
         private const double _pi4 = Math.PI/4;
 
         public int[] _section;
+
+        public List<Minutia> Minutias ;
 
         public RidgeLine(int[,] image, int step, int wings)
         {
@@ -33,29 +51,29 @@ namespace CUDAFingerprinting.RidgeLine
             _visited = new bool[image.GetLength(0), image.GetLength(1)];
         }
 
-        void NewSection(int mid)
+        private void NewSection(int mid)
         {
             int i = mid/BuildUp;
             int j = mid%BuildUp;
 
-            double angle = _orientation.GetOrientation(i, j) + Math.PI / 2;
+            double angle = _orientation.GetOrientation(i, j) + Math.PI/2;
 
-            _section[_wings] = i * BuildUp + j;
+            _section[_wings] = i*BuildUp + j;
 
             for (var k = 1; k <= _wings; k++)
             {
                 int xs, ys, xe, ye;
-                xs = Convert.ToInt32(i - k * Math.Cos(angle));
-                ys = Convert.ToInt32(j - k * Math.Sin(angle));
-                xe = Convert.ToInt32(i + k * Math.Cos(angle));
-                ye = Convert.ToInt32(j + k * Math.Sin(angle));
+                xs = Convert.ToInt32(i - k*Math.Cos(angle));
+                ys = Convert.ToInt32(j - k*Math.Sin(angle));
+                xe = Convert.ToInt32(i + k*Math.Cos(angle));
+                ye = Convert.ToInt32(j + k*Math.Sin(angle));
 
-                _section[_wings - k] = xs * BuildUp + ys;
-                _section[_wings + k] = xe * BuildUp + ye;
+                _section[_wings - k] = xs*BuildUp + ys;
+                _section[_wings + k] = xe*BuildUp + ye;
             }
         } //All right
 
-        int[] FindEdges()
+        private int[] FindEdges()
         {
             int lPoint = _wings;
             int rPoint = _wings;
@@ -64,8 +82,8 @@ namespace CUDAFingerprinting.RidgeLine
 
             while (!check)
             {
-                int x = _section[lPoint] / BuildUp;
-                int y = _section[lPoint] % BuildUp;
+                int x = _section[lPoint]/BuildUp;
+                int y = _section[lPoint]%BuildUp;
 
                 if (_image[x, y] > 125)
                 {
@@ -81,8 +99,8 @@ namespace CUDAFingerprinting.RidgeLine
 
             while (check)
             {
-                int x = _section[rPoint] / BuildUp;
-                int y = _section[rPoint] % BuildUp;
+                int x = _section[rPoint]/BuildUp;
+                int y = _section[rPoint]%BuildUp;
 
                 if (_image[x, y] > 125)
                 {
@@ -92,24 +110,25 @@ namespace CUDAFingerprinting.RidgeLine
                 {
                     rPoint--;
 
-                    if (rPoint > _wings * 2) break;
+                    if (rPoint > _wings*2) break;
                 }
             }
 
             var res = new int[2] {lPoint, rPoint};
 
             return res;
-        }  
+        }
 
-        private int MakeStep(int startPoint)
+        private int MakeStep(int startPoint, Directions direction)//direction should be 0 or 1
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
 
-            double angle = _orientation.GetOrientation(x, y) + (_diffAngle ? Math.PI : 0);
 
-            x += (int)(_step*Math.Cos(angle) + 0.5);
-            y += (int)(_step*Math.Sin(angle) + 0.5);
+            double angle = _orientation.GetOrientation(x, y) + (_diffAngle ? Math.PI : 0) + ((int)direction) * Math.PI;
+
+            x += (int) (_step*Math.Cos(angle) + 0.5);
+            y += (int) (_step*Math.Sin(angle) + 0.5);
 
             double angle2 = _orientation.GetOrientation(x, y);
 
@@ -125,10 +144,10 @@ namespace CUDAFingerprinting.RidgeLine
             return x*BuildUp + y;
         }
 
-        void Paint(int lstartPoint, int rstartPoint, double angle, int stepDistX, int stepDistY)
+        private void Paint(int lstartPoint, int rstartPoint, double angle, int stepDistX, int stepDistY)
         {
-            int xd = (int)(Math.Cos(angle) + 0.5);
-            int yd = (int)(Math.Sin(angle) + 0.5);
+            int xd = (int) (Math.Cos(angle) + 0.5);
+            int yd = (int) (Math.Sin(angle) + 0.5);
 
             for (int i = lstartPoint; i <= rstartPoint; i++)
             {
@@ -145,39 +164,61 @@ namespace CUDAFingerprinting.RidgeLine
                     xcur += xd;
                 }
             }
-
-            //int i = ystart;
-            //int j = xstart;
-            //while ((i <= yend) && (j <= xend))
-            //{
-            //    int ycur = i;
-            //    int xcur = j;
-            //    int xLimit = xcur + stepDistX;
-            //    int yLimit = ycur + stepDistY;
-            //    while ((ycur < yLimit) && (xcur < xLimit))
-            //    {
-            //        _visited[xcur, ycur] = true;
-            //        ycur += yd;
-            //        xcur += xd;
-            //    }
-            //    i += ydAlongLine;
-            //    j += xdAlongLine;
-            //}
         }
 
-        bool CheckStopCriteria(int threshold = 200)
+        private int CheckStopCriteria(int threshold = 200)
         {
             double mean = 0;
             for (int i = 0; i < _wings*2 + 1; i++)
                 mean += _section[i];
             mean /= (_wings*2 + 1);
-            if (mean > threshold) return true;
+            if (mean > threshold) return 1; //line ends
+
+            int xcenter = _section[_wings]/BuildUp;
+            int ycenter = _section[_wings]%BuildUp;
+            if (_visited[ycenter, xcenter]) return 2; //intersection
+
+            return 0; //no minutia
+        }
+
+        public Minutia FollowLine(int startPoint, Directions direction)
+        {
+            NewSection(startPoint);
+            int flag;
+            int xcur, ycur;
+            double angle;
+            do
+            {
+                xcur = startPoint / BuildUp;
+                ycur = startPoint % BuildUp;
+                angle = _orientation.GetOrientation(xcur, ycur) + (_diffAngle ? Math.PI : 0) + ((int)direction) * Math.PI;
+
+                var edges = FindEdges();
+                Paint(edges[0], edges[1], angle, (int) (_step*Math.Cos(angle) + 0.5), (int) (_step*Math.Sin(angle) + 0.5));
+
+                startPoint = MakeStep(startPoint, direction);
+                NewSection(startPoint);
+                flag = CheckStopCriteria();
+            } while (flag == 0);
+            Minutia res = new Minutia(xcur, ycur, angle);
+            return res;
+        }
+
+        public Minutia[] FindMinutiaLine(int startPoint)
+        {
+            var minutia1 = FollowLine(startPoint, Directions.Forward);
+            var minutia2 = FollowLine(startPoint, Directions.Back);
+            return (new Minutia[2] {minutia1, minutia2});
+        }
+
+        public bool IsDuplicate(Minutia minutia, double delta)
+        {
+            if (Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta))
+            {
+                return true;
+            }
             return false;
         }
-
-        public void GoToLine()
-        {
-
-        }
     }
+
 }
