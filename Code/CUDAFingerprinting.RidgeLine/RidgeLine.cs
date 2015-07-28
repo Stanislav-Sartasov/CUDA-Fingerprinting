@@ -17,7 +17,7 @@ namespace CUDAFingerprinting.RidgeLine
         public int X;
         public int Y;
         private double Angle;
-        public int Type;
+        public int Type ;
         public Minutia(int x, int y, double angle,int type)
         {
             X = x;
@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.RidgeLine
 
         public int[] _section;
 
-        public List<Minutia> Minutias ;
+        public List<Minutia> Minutias;
 
         public RidgeLine(int[,] image, int step, int wings)
         {
@@ -182,7 +182,7 @@ namespace CUDAFingerprinting.RidgeLine
             return 0; //no minutia
         }
 
-        public Minutia FollowLine(int startPoint, Directions direction)
+        Minutia FollowLine(int startPoint, Directions direction)
         {
             NewSection(startPoint);
             int flag;
@@ -221,7 +221,7 @@ namespace CUDAFingerprinting.RidgeLine
                 }
             var minutia2 = FollowLine(startPoint, Directions.Back);
             return (new Minutia[2] {minutia1, minutia2});
-        }
+            }
         }
 
         void CheckAndDeleteFalseMinutia(Minutia minutia, double delta)
@@ -235,7 +235,7 @@ namespace CUDAFingerprinting.RidgeLine
 
         bool IsDuplicate(Minutia minutia, double delta)
         {
-            return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
+            return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta && minutia.Type == x.Type);
         }
     }
 
