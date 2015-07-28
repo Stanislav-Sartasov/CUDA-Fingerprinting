@@ -49,7 +49,7 @@ __constant__ int WHITE = 255;
 
 __constant__ int w;
 __constant__ int h;
-/**/
+
 __device__ inline bool IsAvailablePixel(int x, int y)
 {
 	return !(x < 0 || y < 0 || x >= w || y >= h);

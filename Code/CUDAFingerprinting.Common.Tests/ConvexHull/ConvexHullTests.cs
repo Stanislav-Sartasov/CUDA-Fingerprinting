@@ -9,28 +9,31 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
     [TestClass]
     public class ConvexHullTests
     {
+        public static int bmpX = 1100, bmpY = 1100;
+        public static double omega = 40;
 
-        List<PointF> globalHullToCheck = new List<PointF>(
+        public static List<PointF> globalHullToCheck = new List<PointF>(
             new PointF[]
             {
-                new PointF(0, 1),
-                new PointF(2, 0),
-                new PointF(8, 3),
-                new PointF(6, 6),
-                new PointF(1, 9),
+                new PointF(0, 100),
+                new PointF(200, 0),
+                new PointF(800, 300),
+                new PointF(600, 600),
+                new PointF(100, 900),
             });
 
-        List<PointF> globalHull = new List<PointF>(
-            new PointF[]
-            {
-                new PointF(100, 100),
-                new PointF(400, 100),
-                new PointF(400, 1000),
-                new PointF(100, 1000)
-            });
-        
+        public static List<PointF> globalHull = globalHullToCheck;
+            //new List<PointF>(
+            //new PointF[]
+            //{
+            //    new PointF(100, 100),
+            //    new PointF(400, 100),
+            //    new PointF(400, 1000),
+            //    new PointF(100, 1000)
+            //});
+
         // Prints hull calculated based on globalHull
-        public void PrintHull(bool[,] field, string filename)
+        public void PrintHullMathCoords(bool[,] field, string filename)
         {
             int[,] intField = new int[field.GetLength(1), field.GetLength(0)];
             for (int i = 0; i < field.GetLength(1); i++)
@@ -58,14 +61,14 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
             List<PointF> pointList = new List<PointF>(
                 new PointF[] 
                 {
-                    new PointF(0, 1),
-                    new PointF(2, 0),
-                    new PointF(4, 2),
-                    new PointF(8, 3),
-                    new PointF(6, 6),
-                    new PointF(3, 7),
-                    new PointF(2, 6),
-                    new PointF(1, 9)
+                    new PointF(0, 100),
+                    new PointF(200, 0),
+                    new PointF(400, 200),
+                    new PointF(800, 300),
+                    new PointF(600, 600),
+                    new PointF(300, 700),
+                    new PointF(200, 600),
+                    new PointF(100, 900)
                 });
 
             List<PointF> resPointList = ConvexHull.GetConvexHull(pointList);
@@ -79,33 +82,29 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         [TestMethod]
         public void ConvexHullFieldFillingTest()
         {
-            bool[,] field = FieldFiller.GetFieldFilling(500, 1100, globalHull);
+            bool[,] field = FieldFiller.GetFieldFilling(bmpX, bmpY, globalHull);
 
-            PrintHull(field, "FieldFilling.jpg");
+            PrintHullMathCoords(field, "FieldFilling.jpg");
         }
 
         [TestMethod]
         public void ConvexHullExtendedTest()
         {
-            double omega = 40;
-
             List<PointF> extendedHull = ConvexHullModified.ExtendHull(globalHull, omega);
 
-            bool[,] field = FieldFiller.GetFieldFilling(1100, 1100, extendedHull);
+            bool[,] field = FieldFiller.GetFieldFilling(bmpX, bmpY, extendedHull);
 
-            PrintHull(field, "FieldFillingExtended.jpg");
+            PrintHullMathCoords(field, "FieldFillingExtended.jpg");
         }
 
         [TestMethod]
         public void ConvexHullExtendedRoundedTest()
         {
-            double omega = 40;
-
             List<PointF> extendedHull = ConvexHullModified.ExtendHull(globalHull, omega);
 
-            bool[,] field = ConvexHullModified.GetRoundedFieldFilling(1100, 1100, 40, globalHull, extendedHull);
+            bool[,] field = ConvexHullModified.GetRoundedFieldFilling(bmpX, bmpY, omega, globalHull, extendedHull);
 
-            PrintHull(field, "FieldFillingExtendedRounded.jpg");
+            PrintHullMathCoords(field, "FieldFillingExtendedRounded.jpg");
         }
     }
 }

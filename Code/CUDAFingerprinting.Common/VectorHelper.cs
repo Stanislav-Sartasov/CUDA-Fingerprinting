@@ -45,9 +45,7 @@ namespace CUDAFingerprinting.Common
         public static bool Intersect(PointF A, PointF B, PointF C, PointF D)
         {
             // <= in the 1st case and < in the second are appropriate for the specific use of this helper (localization problem)
-            bool a = Rotate(A, B, C) * Rotate(A, B, D) <= 0;
-            bool b = Rotate(C, D, A) * Rotate(C, D, B) < 0;
-            return a && b;
+            return Rotate(A, B, C) * Rotate(A, B, D) <= 0 && Rotate(C, D, A) * Rotate(C, D, B) < 0;
         }
     }
 }
