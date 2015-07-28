@@ -55,36 +55,51 @@ namespace CUDAFingerprinting.RidgeLine
             }
         } //All right
 
-        int FindNextMax()
+        int[] FindEdges()
         {
-            int x = _section[_wings] / BuildUp;
-            int y = _section[_wings] % BuildUp;
+            int lPoint = _wings;
+            int rPoint = _wings;
 
-            int min = _image[x, y];
+            bool check = false;
 
-            int ml = 0, mr = 0;
-
-            for (int i = 1; i < _wings; i++)
+            while (!check)
             {
-                x = _section[_wings + i] / BuildUp;
-                y = _section[_wings + i] % BuildUp;
+                int x = _section[lPoint] / BuildUp;
+                int y = _section[lPoint] % BuildUp;
 
-                if (_image[x, y] < min)
+                if (_image[x, y] > 125)
                 {
-                    mr = i;
+                    check = true;
                 }
-
-                x = _section[_wings - i] / BuildUp;
-                y = _section[_wings - i] % BuildUp;
-
-                if (_image[x, y] < min)
+                else
                 {
-                    ml = i;
+                    lPoint--;
+
+                    if (lPoint < 0) break;
                 }
             }
 
-            return _section[_wings + (mr < ml ? mr : -ml)];
-        }  //Edit all method
+            while (check)
+            {
+                int x = _section[rPoint] / BuildUp;
+                int y = _section[rPoint] % BuildUp;
+
+                if (_image[x, y] > 125)
+                {
+                    check = false;
+                }
+                else
+                {
+                    rPoint--;
+
+                    if (rPoint > _wings * 2) break;
+                }
+            }
+
+            var res = new int[2] {lPoint, rPoint};
+
+            return res;
+        }  
 
         private int MakeStep(int startPoint)
         {
@@ -162,42 +177,7 @@ namespace CUDAFingerprinting.RidgeLine
 
         public void GoToLine()
         {
-            NewSection(210180);
 
-            for (int i = 0; i < _wings * 2 + 1; i++)
-            {
-                Console.Write("{0} ", _section[i]);
-            }
-            Console.WriteLine();
-            for (int i = 0; i < _wings * 2 + 1; i++)
-            {
-                int x = _section[i] / 1000;
-                int y = _section[i] % 1000;
-
-                Console.Write("{0} ", _image[x, y]);
-            }
-
-            int max = FindNextMax();
-
-            Console.WriteLine("\n{0}\n", max);
-
-            NewSection(MakeStep(max));
-
-            for (int i = 0; i < _wings * 2 + 1; i++)
-            {
-                Console.Write("{0} ", _section[i]);
-            }
-            Console.WriteLine();
-            for (int i = 0; i < _wings * 2 + 1; i++)
-            {
-                int x = _section[i] / 1000;
-                int y = _section[i] % 1000;
-
-                Console.Write("{0} ", _image[x, y]);
-            }
-            max = FindNextMax();
-
-            Console.WriteLine("\n{0}\n", max);
-        }  //Delete useless code and write normal algo
+        }
     }
 }
