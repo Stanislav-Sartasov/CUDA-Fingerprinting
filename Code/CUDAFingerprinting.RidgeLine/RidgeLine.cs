@@ -120,6 +120,12 @@ namespace CUDAFingerprinting.RidgeLine
                 {
                     lPoint--;
 
+                    if (_section[lPoint] == -1)
+                    {
+                        lPoint++;
+                        check = true;
+                    }
+
                     if (lPoint == 0) break;
                 }
             }
@@ -142,6 +148,12 @@ namespace CUDAFingerprinting.RidgeLine
                 else
                 {
                     rPoint--;
+                    
+                    if (_section[rPoint] == -1)
+                    {
+                        rPoint++;
+                        check = false;
+                    }
 
                     if (rPoint == _wings*2) break;
                 }
