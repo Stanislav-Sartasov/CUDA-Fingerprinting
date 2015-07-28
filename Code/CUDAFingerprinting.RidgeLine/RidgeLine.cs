@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.RidgeLine
         private int _step;
         private int _wings;
         private bool _diffAngle;
-        private bool[,] _visited;
+        public bool[,] _visited;
         private const int BuildUp = 1000; //specially for trade coordinates between methods
         private const double _pi4 = Math.PI/4;
 
@@ -64,6 +64,7 @@ namespace CUDAFingerprinting.RidgeLine
             int i = mid/BuildUp;
             int j = mid%BuildUp;
 
+
             double angle = _orientation.GetOrientation(i, j) + Math.PI/2;
 
             _section[_wings] = i*BuildUp + j;
@@ -75,6 +76,18 @@ namespace CUDAFingerprinting.RidgeLine
                 ys = Convert.ToInt32(j - k*Math.Sin(angle));
                 xe = Convert.ToInt32(i + k*Math.Cos(angle));
                 ye = Convert.ToInt32(j + k*Math.Sin(angle));
+
+                if (xs < 0 || ys < 0 || xs >= _image.GetLength(1) || ys >= _image.GetLength(0))
+                {
+                    ys = -1;
+                    xs = 0;
+                }
+
+                if (xe < 0 || ye < 0 || xe >= _image.GetLength(1) || ye >= _image.GetLength(0))
+                {
+                    ye = -1;
+                    xe = 0;
+                }
 
                 _section[_wings - k] = xs*BuildUp + ys;
                 _section[_wings + k] = xe*BuildUp + ye;
@@ -95,6 +108,7 @@ namespace CUDAFingerprinting.RidgeLine
 
                 if (x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0))
                 {
+                    if (lPoint < _wings) lPoint++;
                     break;
                 }
 
@@ -106,7 +120,7 @@ namespace CUDAFingerprinting.RidgeLine
                 {
                     lPoint--;
 
-                    if (lPoint < 0) break;
+                    if (lPoint == 0) break;
                 }
             }
 
@@ -117,6 +131,7 @@ namespace CUDAFingerprinting.RidgeLine
 
                 if (x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0))
                 {
+                    if (rPoint > _wings) rPoint--;
                     break;
                 }
 
@@ -128,7 +143,7 @@ namespace CUDAFingerprinting.RidgeLine
                 {
                     rPoint--;
 
-                    if (rPoint > _wings*2) break;
+                    if (rPoint == _wings*2) break;
                 }
             }
 
@@ -147,6 +162,11 @@ namespace CUDAFingerprinting.RidgeLine
 
             x += (int) (_step*Math.Cos(angle) + 0.5);
             y += (int) (_step*Math.Sin(angle) + 0.5);
+
+            if (x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0))
+            {
+                return -1;
+            }
 
             double angle2 = _orientation.GetOrientation(x, y);
 
@@ -186,15 +206,17 @@ namespace CUDAFingerprinting.RidgeLine
 
         private MinutiaTypes CheckStopCriteria(int threshold = 200)
         {
+            int xcenter = _section[_wings] / BuildUp;
+            int ycenter = _section[_wings] % BuildUp;
+            if (_visited[ycenter, xcenter]) return MinutiaTypes.Intersection; 
+
             double mean = 0;
             for (int i = 0; i < _wings*2 + 1; i++)
                 mean += _section[i];
             mean /= (_wings*2 + 1);
             if (mean > threshold) return MinutiaTypes.LineEnding;
 
-            int xcenter = _section[_wings]/BuildUp;
-            int ycenter = _section[_wings]%BuildUp;
-            if (_visited[ycenter, xcenter]) return MinutiaTypes.Intersection; 
+            
 
             return MinutiaTypes.NotMinutia;
         }
@@ -209,12 +231,14 @@ namespace CUDAFingerprinting.RidgeLine
             {
                 xcur = startPoint / BuildUp;
                 ycur = startPoint % BuildUp;
+
                 angle = _orientation.GetOrientation(xcur, ycur) + (_diffAngle ? Math.PI : 0) + ((int)direction) * Math.PI;
 
                 var edges = FindEdges();
                 Paint(edges[0], edges[1], angle, (int) (_step*Math.Cos(angle) + 0.5), (int) (_step*Math.Sin(angle) + 0.5));
 
                 startPoint = MakeStep(startPoint, direction);
+                if (startPoint < 0) return null;
                 NewSection(startPoint);
                 minutiaType = CheckStopCriteria();
             } while (minutiaType == MinutiaTypes.NotMinutia);
@@ -234,7 +258,11 @@ namespace CUDAFingerprinting.RidgeLine
 
             if (_image[y, x] < colorThreshold)
             {
-            var minutia1 = FollowLine(startPoint, Directions.Forward);
+                _visited[y, x] = true;
+
+                var minutia1 = FollowLine(startPoint, Directions.Forward);
+                if(minutia1 == null) return;
+
                 if (minutia1.Type == MinutiaTypes.LineEnding)
                     {
                     if (IsDuplicate(minutia1, duplicateDelta))
@@ -248,7 +276,8 @@ namespace CUDAFingerprinting.RidgeLine
                         Minutias.Add(minutia1);
                 }
 
-            var minutia2 = FollowLine(startPoint, Directions.Back);
+                var minutia2 = FollowLine(startPoint, Directions.Back);
+                if (minutia2 == null) return;
                 if (minutia2.Type == MinutiaTypes.Intersection)
                 {
                     if (IsDuplicate(minutia2, duplicateDelta))
