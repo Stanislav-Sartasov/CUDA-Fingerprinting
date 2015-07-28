@@ -40,7 +40,7 @@ namespace CUDAFingerprinting.RidgeLine
 
         public int[] _section;
 
-        public List<Minutia> Minutias ;
+        public List<Minutia> Minutias;
 
         public RidgeLine(int[,] image, int step, int wings)
         {
@@ -212,21 +212,21 @@ namespace CUDAFingerprinting.RidgeLine
             int y = startPoint%BuildUp;
             if (_image[y, x] < colorThreshold)
             {
-                var minutia1 = FollowLine(startPoint, Directions.Forward);
+            var minutia1 = FollowLine(startPoint, Directions.Forward);
                 if (minutia1.Type == MinutiaTypes.LineEnding)
-                {
+                    {
                     if (IsDuplicate(minutia1, duplicateDelta))
                         CheckAndDeleteFalseMinutia(minutia1, duplicateDelta);
                     else
                         Minutias.Add(minutia1);
-                }
+                    }
                 else
                 {
                     if (!IsDuplicate(minutia1, duplicateDelta))
                         Minutias.Add(minutia1);
                 }
 
-                var minutia2 = FollowLine(startPoint, Directions.Back);
+            var minutia2 = FollowLine(startPoint, Directions.Back);
                 if (minutia2.Type == MinutiaTypes.Intersection)
                 {
                     if (IsDuplicate(minutia2, duplicateDelta))
@@ -239,7 +239,7 @@ namespace CUDAFingerprinting.RidgeLine
                     if (!IsDuplicate(minutia2, duplicateDelta))
                         Minutias.Add(minutia2);
                 }
-            }
+        }
         }
 
         void CheckAndDeleteFalseMinutia(Minutia minutia, double delta)
@@ -253,7 +253,7 @@ namespace CUDAFingerprinting.RidgeLine
 
         bool IsDuplicate(Minutia minutia, double delta)
         {
-            return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
+            return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta && minutia.Type == x.Type);
         }
     }
 
