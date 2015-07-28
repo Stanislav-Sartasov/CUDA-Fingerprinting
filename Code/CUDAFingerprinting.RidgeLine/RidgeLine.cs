@@ -17,12 +17,13 @@ namespace CUDAFingerprinting.RidgeLine
         public int X;
         public int Y;
         private double Angle;
-
-        public Minutia(int x, int y, double angle)
+        public int Type;
+        public Minutia(int x, int y, double angle,int type)
         {
             X = x;
             Y = y;
             Angle = angle;
+            Type = type;
         }
     }
     internal class RidgeLine
@@ -200,24 +201,32 @@ namespace CUDAFingerprinting.RidgeLine
                 NewSection(startPoint);
                 flag = CheckStopCriteria();
             } while (flag == 0);
-            Minutia res = new Minutia(xcur, ycur, angle);
+            Minutia res = new Minutia(xcur, ycur, angle, flag);
             return res;
         }
 
-        public Minutia[] FindMinutiaLine(int startPoint)
+        public Minutia[] FindMinutiaLine(int startPoint, double duplicateDelta, int threshold = 30)
         {
-            var minutia1 = FollowLine(startPoint, Directions.Forward);
-            var minutia2 = FollowLine(startPoint, Directions.Back);
-            return (new Minutia[2] {minutia1, minutia2});
+            int x = startPoint/BuildUp;
+            int y = startPoint%BuildUp;
+            if (_image[y, x] < threshold)
+            {
+                var minutia1 = FollowLine(startPoint, Directions.Forward);
+                if (minutia1.Type == 1)
+                {
+                    if (!(IsDuplicate(minutia1, duplicateDelta)))
+                    {
+                        Minutias.Add(minutia1);
+                    }
+                }
+                var minutia2 = FollowLine(startPoint, Directions.Back);
+                return (new Minutia[2] {minutia1, minutia2});
+            }
         }
 
         public bool IsDuplicate(Minutia minutia, double delta)
         {
-            if (Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta))
-            {
-                return true;
-            }
-            return false;
+            return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta);
         }
     }
 
