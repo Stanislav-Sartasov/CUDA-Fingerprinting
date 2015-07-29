@@ -20,6 +20,8 @@ unsigned int checkValsFromTest(
 }
 
 //#define SEQUENTIAL
+// 2 implementations: sequential & with additional LUTs (xor & popcount ones, takes way more memory)
+// As is, sequential code is faster, yet I believe the second version might be useful as well
 
 #define cudaCheckError() {\
 	cudaError_t e = cudaGetLastError(); \
