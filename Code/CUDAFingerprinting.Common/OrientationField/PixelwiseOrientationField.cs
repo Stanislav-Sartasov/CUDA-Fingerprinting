@@ -65,7 +65,7 @@ namespace CUDAFingerprinting.Common
 
 		public double GetOrientation(int x, int y)                  // метод, определяющий по входным координатам (х, у) поле напрваления в этой точке
 		{
-			return this._orientation[x, y];
+			return this._orientation[y, x];//In my opinion, ther was a mistake: 'y' stands for rows, and 'x' stands for columns, right?
 		}
 
 	
