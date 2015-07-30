@@ -198,9 +198,9 @@ namespace CUDAFingerprinting.RidgeLine
             int y = startPoint%BuildUp;
 
 
-            double angle = _orientation.GetOrientation(x, y) + ((int) direction)*Math.PI + (_diffAngle ? Math.PI : 0);
+            double angle = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
             while (angle > Math.PI*2) angle -=Math.PI*2;
-
+            double angCheck = _orientation.GetOrientation(x, y);
             x += (int) (_step*Math.Cos(angle) + 0.5);
             y += (int) (_step*Math.Sin(angle) + 0.5);
 
@@ -209,10 +209,11 @@ namespace CUDAFingerprinting.RidgeLine
                 return -1;
             }
 
-            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + Math.PI * 2;
-            while (angle > Math.PI * 2) angle -= Math.PI * 2;
+            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
+            double ang2check = _orientation.GetOrientation(x, y);
+            while (angle2 > Math.PI * 2) angle2 -= Math.PI * 2;
             //if (Math.Abs(angle - angle2) > _pi4)
-            if (Math.Abs(angle - angle2) > Math.PI / 2.0)
+            if (Math.Abs(angCheck - ang2check) > Math.PI / 2.0)
             {
                 _diffAngle = !_diffAngle;
             }
