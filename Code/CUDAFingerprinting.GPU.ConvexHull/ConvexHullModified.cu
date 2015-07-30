@@ -8,7 +8,8 @@
 #include "ImageLoading.cuh"
 #include "ConvexHullModified.cuh"
 
-//#define DEBUG
+#define DEBUG
+//#define NONPARALLEL
 
 #ifdef DEBUG
 #define cudaCheckError() {\
@@ -25,11 +26,13 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-#define BLOCK_DIM 32
+#define BLOCK_DIM 16
 
 Point* hull;
-//__constant__ Point d_extendedHull[TEST_POINT_COUNT];
+__constant__ Point d_extendedHull[TEST_POINT_COUNT * 2];
 bool* extendedRoundedField;
+size_t pitch;
+bool* d_extendedRoundedField;
 
 // Modified hull code
 
@@ -92,6 +95,7 @@ void getRoundFieldFilling(
 
 #ifdef DEBUG
 #ifdef NONPARALLEL
+
 void printHullMathCoords(bool** field, char *filename)
 {
 	int* linearizedField = (int*)malloc(TEST_FIELD_HEIGHT * TEST_FIELD_WIDTH * sizeof(int));
@@ -111,7 +115,7 @@ void printHullMathCoords(bool** field, char *filename)
 	free(linearizedField);
 }
 
-#else
+#else // NONPARALLEL
 
 void printHullMathCoords(bool* field, char *filename)
 {
@@ -131,6 +135,8 @@ void printHullMathCoords(bool* field, char *filename)
 	free(intField);
 }
 
+#endif // NONPARALLEL
+
 void printHull(Point* hull, int hullLength)
 {
 	printf("Printing hull\n");
@@ -140,23 +146,29 @@ void printHull(Point* hull, int hullLength)
 	}
 	printf("[end] Printing hull\n");
 }
-#endif
+
 #endif
 
 // [end] Printing hull code (file & console)
 
-int main()
-{	
-	bool* d_extendedRoundedField;
-	// Maybe it's better to make pitch extern of smth like that as well 
-	// (in constant memory, in order not to pass it to getFieldFillingParallel)?
-	// (seems like it's impossible with CUDA, once again :( )
-	size_t pitch;
-	cudaMallocPitch((void**)&d_extendedRoundedField, &pitch, TEST_FIELD_WIDTH, TEST_FIELD_HEIGHT);
-
+void initConvexHull()
+{
 	hull = (Point*)malloc(TEST_POINT_COUNT * sizeof(Point)); // maximum hull length
 
 	extendedRoundedField = (bool *)malloc(TEST_FIELD_HEIGHT * TEST_FIELD_WIDTH * sizeof(bool));
+
+#ifndef NONPARALLEL
+	cudaMallocPitch((void**)&d_extendedRoundedField, &pitch, TEST_FIELD_WIDTH, TEST_FIELD_HEIGHT);
+#endif
+}
+
+void processConvexHull()
+{
+#ifndef NONPARALLEL
+	//int maxExtendedHullLength = TEST_POINT_COUNT * 2;
+	//Point* d_extendedHull;
+	//cudaMalloc((void **)&d_extendedHull, sizeof(Point)* maxExtendedHullLength);
+#endif
 
 	Point points[TEST_POINT_COUNT] =
 	{
@@ -171,10 +183,6 @@ int main()
 	};
 
 	float omega = 40;
-
-	int maxExtendedHullLength = TEST_POINT_COUNT * 2;
-	Point* d_extendedHull;
-	cudaMalloc((void **)&d_extendedHull, sizeof(Point)* maxExtendedHullLength);
 
 	clock_t start = clock();
 
@@ -195,11 +203,12 @@ int main()
 #ifdef NONPARALLEL
 	bool** field = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, hull, hullLength);
 	bool** extendedField = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, extendedHull, extendedHullLength);
-	bool** extendedRoundedField = getRoundFieldFilling(
-		TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, omega, hull, hullLength, extendedHull, extendedHullLength);
+	// For now nonparallel version without rounded field, legacy code, somewhat how it should look like
+	//bool** extendedRoundedField = getRoundFieldFilling(
+	//	TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, omega, hull, hullLength, extendedHull, extendedHullLength);
 #else
-	cudaMemcpy(d_extendedHull, extendedHull, sizeof(Point)* extendedHullLength, cudaMemcpyHostToDevice);
-	//cudaMemcpyToSymbol(d_extendedHull, extendedHull, sizeof(Point)* extendedHullLength);
+	//cudaMemcpy(d_extendedHull, extendedHull, sizeof(Point)* extendedHullLength, cudaMemcpyHostToDevice);
+	cudaMemcpyToSymbol(d_extendedHull, extendedHull, sizeof(Point)* extendedHullLength);
 
 	dim3 gridDim = dim3(ceilMod(TEST_FIELD_WIDTH, BLOCK_DIM), ceilMod(TEST_FIELD_WIDTH, BLOCK_DIM));
 	dim3 blockDim = dim3(BLOCK_DIM, BLOCK_DIM);
@@ -225,16 +234,37 @@ int main()
 #ifdef NONPARALLEL
 	printHullMathCoords(field, "ConvexHull.jpg");
 	printHullMathCoords(extendedField, "ConvexHullExtended.jpg");
-#endif
+#else
 	printHullMathCoords(extendedRoundedField, "ConvexHullExtendedRounded.jpg");
 #endif
+#endif
 
-	free(hull);
+	// Freeing to in termination in order not to create additional global vars for nonparallel
+	// (which would be initialized separately)
+	// (just no need to speed up nonparallel version)
 #ifdef NONPARALLEL
 	free(field);
 	free(extendedField);
+//#else
+//	cudaFree(d_extendedHull);
 #endif
+}
+
+void terminateConvexHull()
+{
+	free(hull);
+#ifndef NONPARALLEL
+	cudaFree(d_extendedHull);
 	free(extendedRoundedField);
+	cudaFree(d_extendedRoundedField);
+#endif
+}
+
+int main()
+{
+	initConvexHull();
+	processConvexHull();
+	terminateConvexHull();
 
 	return 0;
 }
