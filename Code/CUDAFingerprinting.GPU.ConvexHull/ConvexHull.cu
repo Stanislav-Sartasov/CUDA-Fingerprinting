@@ -15,10 +15,12 @@ int comparator(const void *a, const void *b)
 	Point A = *(Point *)a;
 	Point B = *(Point *)b;
 
+	float res = rotate(firstPoint, A, B);
+
 	return
-		rotate(firstPoint, A, B) > 0 ? -1 :
-		A.x == B.x && A.y == B.y ? 0 :
-		1;
+		res > 0 ? -1 :
+		res < 0 ? 1 :
+		0;
 }
 
 void setFirstPoint(Point* points, int pointsLength)
@@ -63,7 +65,7 @@ void buildHull(Point* points, int pointsLength, Point* hull, int *hullLength)
 		{
 			_hullLength--;
 			top = nextToTop;
-			nextToTop = points[--curNextToTopIndex];
+			nextToTop = hull[--curNextToTopIndex];
 		}
 
 		hull[_hullLength++] = points[i];
