@@ -136,8 +136,13 @@ namespace CUDAFingerprinting.RidgeLine
                         check = true;
                     }
 
-                    if (lPoint == 0) break;
+                    if (lPoint == 0)
+                    {
+                        if (_image[_section[lPoint]%BuildUp, _section[lPoint]/BuildUp] > 125)
+                            lPoint++;
+                        break;
                 }
+            }
             }
 
             while (check)
@@ -173,7 +178,12 @@ namespace CUDAFingerprinting.RidgeLine
                         check = false;
                     }
 
-                    if (rPoint == _wings*2) break;
+                    if (rPoint == _wings*2)
+                    {
+                        if (_image[_section[rPoint]%BuildUp, _section[rPoint]/BuildUp] > 125)
+                            rPoint--;
+                        break;
+                    }
                 }
             }
 
@@ -199,8 +209,8 @@ namespace CUDAFingerprinting.RidgeLine
                 return -1;
             }
 
-            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI;
-
+            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + Math.PI * 2;
+            while (angle > Math.PI * 2) angle -= Math.PI * 2;
             //if (Math.Abs(angle - angle2) > _pi4)
             if (Math.Abs(angle - angle2) > Math.PI / 2.0)
             {
@@ -273,7 +283,7 @@ namespace CUDAFingerprinting.RidgeLine
                 var edges = FindEdges();
                 Paint(edges[0], edges[1], angle, (int) (_step*Math.Cos(angle) + 0.5), (int) (_step*Math.Sin(angle) + 0.5));
 
-                startPoint = MakeStep(startPoint, direction);
+                startPoint = MakeStep(_section[(edges[0] + edges[1]) / 2], direction);
                 if (startPoint < 0) return null;
                 NewSection(startPoint);
                 if (_section[_wings] == -1) return null;
@@ -302,37 +312,37 @@ namespace CUDAFingerprinting.RidgeLine
                 var minutia1 = FollowLine(startPoint, Directions.Forward);
                 if (minutia1 != null)
                 {
-                    if (minutia1.Type == MinutiaTypes.LineEnding)//WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
+                if (minutia1.Type == MinutiaTypes.LineEnding)//WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
                     {
-                        if (IsDuplicate(minutia1, duplicateDelta))
-                            CheckAndDeleteFalseMinutia(minutia1, duplicateDelta);
-                        else
-                            Minutias.Add(minutia1);
-                    }
+                    if (IsDuplicate(minutia1, duplicateDelta))
+                        CheckAndDeleteFalseMinutia(minutia1, duplicateDelta);
                     else
-                    {
-                        if (!IsDuplicate(minutia1, duplicateDelta))
-                            Minutias.Add(minutia1);
+                        Minutias.Add(minutia1);
                     }
+                else
+                {
+                    if (!IsDuplicate(minutia1, duplicateDelta))
+                        Minutias.Add(minutia1);
+                }
                 }
                 _diffAngle = false;
 
                 var minutia2 = FollowLine(startPoint, Directions.Back);
                 if (minutia2 != null)
                 {
-                    if (minutia2.Type == MinutiaTypes.LineEnding)//WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
-                    {
-                        if (IsDuplicate(minutia2, duplicateDelta))
-                            CheckAndDeleteFalseMinutia(minutia2, duplicateDelta);
-                        else
-                            Minutias.Add(minutia2);
-                    }
+                if (minutia2.Type == MinutiaTypes.LineEnding)//WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
+                {
+                    if (IsDuplicate(minutia2, duplicateDelta))
+                        CheckAndDeleteFalseMinutia(minutia2, duplicateDelta);
                     else
-                    {
-                        if (!IsDuplicate(minutia2, duplicateDelta))
-                            Minutias.Add(minutia2);
-                    }
+                        Minutias.Add(minutia2);
                 }
+                else
+                {
+                    if (!IsDuplicate(minutia2, duplicateDelta))
+                        Minutias.Add(minutia2);
+                }
+        }
             }
 
             _diffAngle = false;

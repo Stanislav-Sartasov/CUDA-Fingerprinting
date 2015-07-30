@@ -22,10 +22,10 @@ namespace CUDAFingerprinting.RidgeLine
                 {
                     detectingMinutias.FindMinutiaLine(i * 1000 + j, 5.0, 50);
                 }
-                if (i%10 == 0)
-                {
-                    MakeBmp(detectingMinutias._visited);
-                }
+                //if (i%10 == 0)
+                //{
+                //    MakeBmp(detectingMinutias._visited);
+                //}
             }
 
             foreach (var minutia in detectingMinutias.GetMinutiaList())
