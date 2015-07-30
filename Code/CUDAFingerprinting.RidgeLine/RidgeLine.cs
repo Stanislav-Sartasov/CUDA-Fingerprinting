@@ -122,6 +122,7 @@ namespace CUDAFingerprinting.RidgeLine
                 }
                 if (_image[y, x] > 125)
                 {
+                    lPoint++;
                     check = true;
                 }
                 else
@@ -134,7 +135,12 @@ namespace CUDAFingerprinting.RidgeLine
                         check = true;
                     }
 
-                    if (lPoint == 0) break;
+                    if (lPoint == 0)
+                    {
+                        if (_image[_section[lPoint]%BuildUp, _section[lPoint]/BuildUp] > 125)
+                            lPoint++;
+                        break;
+                    }
                 }
             }
 
@@ -157,6 +163,7 @@ namespace CUDAFingerprinting.RidgeLine
 
                 if (_image[y, x] > 125)
                 {
+                    rPoint--;
                     check = false;
                 }
                 else
@@ -170,7 +177,12 @@ namespace CUDAFingerprinting.RidgeLine
                         check = false;
                     }
 
-                    if (rPoint == _wings*2) break;
+                    if (rPoint == _wings*2)
+                    {
+                        if (_image[_section[rPoint]%BuildUp, _section[rPoint]/BuildUp] > 125)
+                            rPoint--;
+                        break;
+                    }
                 }
             }
 
@@ -196,8 +208,8 @@ namespace CUDAFingerprinting.RidgeLine
                 return -1;
             }
 
-            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI;
-
+            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + Math.PI * 2;
+            while (angle > Math.PI * 2) angle -= Math.PI * 2;
             //if (Math.Abs(angle - angle2) > _pi4)
             if (Math.Abs(angle - angle2) > Math.PI / 2.0)
             {
@@ -273,7 +285,7 @@ namespace CUDAFingerprinting.RidgeLine
                 var edges = FindEdges();
                 Paint(edges[0], edges[1], angle, (int) (_step*Math.Cos(angle) + 0.5), (int) (_step*Math.Sin(angle) + 0.5));
 
-                startPoint = MakeStep(startPoint, direction);
+                startPoint = MakeStep(_section[(edges[0] + edges[1]) / 2], direction);
                 if (startPoint < 0) return null;
                 NewSection(startPoint);
                 if (_section[_wings] == -1) return null;
