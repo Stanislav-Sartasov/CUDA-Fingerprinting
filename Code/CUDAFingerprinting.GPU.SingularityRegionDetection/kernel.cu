@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -21,36 +21,14 @@ __global__ void cudaSinCos (CUDAArray<float> cMapReal, CUDAArray<float> cMapImag
 {
 	int row = defaultRow ();
 	int column = defaultColumn ();
-
-	/*int tX = threadIdx.x;
-	int tY = threadIdx.y;
-	
-	__shared__ float bufSource[defaultBlockSize][defaultBlockSize];
-	__shared__ float bufReal[defaultBlockSize][defaultBlockSize];
-	__shared__ float bufImaginary[defaultBlockSize][defaultBlockSize];
-
-	
-	bufSource[tX][tY] = source.At(row, column);
-
-	__syncthreads ();
-	if ( tX == 0 && tY == 0 )
+	if (row < cMapReal.Height && column < cMapReal.Width && row >= 0 && column >= 0)
 	{
-		for ( int i = 0; i < source.Width; i++ )
-		{
-			for ( int j = 0; j < source.Height; j++ )
-			{
-				bufReal[i][j] = sin (2 * bufSource[i][j]);
-				bufImaginary[i][j] = cos (2 * bufSource[i][j]);
-			}
-		}
-	}
-	__syncthreads ();
-	
-	cMapReal.SetAt (row, column, bufReal[tX][tY]);
-	cMapImaginary.SetAt (row, column, bufImaginary[tX][tY]);*/
-
-	cMapReal.SetAt(row, column, sin(2 * source.At(row, column)));
-	cMapImaginary.SetAt(row, column, cos(2 * source.At(row, column)));
+		float value = source.At(row, column);
+		float sinValue = sin(2 * value);
+		float cosValue = cos(2 * value);
+		cMapImaginary.SetAt(row, column, cosValue);
+		cMapReal.SetAt(row, column, sinValue);
+	}	
 }
 
 void SinCos (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> source)
@@ -66,32 +44,35 @@ __global__ void cudaModule (CUDAArray<float> cMapReal, CUDAArray<float> cMapImag
 	int row = defaultRow ();
 	int column = defaultColumn ();
 
-	int tX = threadIdx.x;
-	int tY = threadIdx.y;
-
-	__shared__ float bufReal[defaultBlockSize][defaultBlockSize];
-	__shared__ float bufImaginary[defaultBlockSize][defaultBlockSize];
-	__shared__ float bufAbs[defaultBlockSize][defaultBlockSize];
-
-	bufReal[tX][tY] = cMapReal.At(row, column);
-	bufImaginary[tX][tY] =  cMapImaginary.At (row, column);
-
-	__syncthreads ();
-	if ( tX == 0 && tY == 0 )
+	if (row < cMapReal.Height && column < cMapReal.Width)
 	{
-		for ( int i = 0; i < cMapReal.Width; i++ )
+		int tX = threadIdx.x;
+		int tY = threadIdx.y;
+
+		__shared__ float bufReal[defaultBlockSize][defaultBlockSize];
+		__shared__ float bufImaginary[defaultBlockSize][defaultBlockSize];
+		__shared__ float bufAbs[defaultBlockSize][defaultBlockSize];
+
+		bufReal[tX][tY] = cMapReal.At(row, column);
+		bufImaginary[tX][tY] = cMapImaginary.At(row, column);
+
+		__syncthreads();
+		if (tX == 0 && tY == 0)
 		{
-			for ( int j = 0; j < cMapReal.Height; j++ )
+			for (int i = 0; i < 16; i++)
 			{
-				float R = bufReal[i][j];
-				float I = bufImaginary[i][j];
-				bufAbs[i][j] = sqrt(R * R + I * I);
+				for (int j = 0; j < 16; j++)
+				{
+					float R = bufReal[i][j];
+					float I = bufImaginary[i][j];
+					bufAbs[i][j] = sqrt(R * R + I * I);
+				}
 			}
 		}
-	}
-	__syncthreads ();
+		__syncthreads();
 
-	cMapAbs.SetAt (row, column, bufAbs[tX][tY]);
+		cMapAbs.SetAt(row, column, bufAbs[tX][tY]);
+	}
 }
 
 void Module (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> cMapAbs)
@@ -107,39 +88,42 @@ __global__ void cudaRegularize (CUDAArray<float> source, CUDAArray<float> target
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int tX = threadIdx.x;
-	int tY = threadIdx.y;
-
-	__shared__ float buf[defaultBlockSize][defaultBlockSize];
-	__shared__ float linBuf[defaultBlockSize];
-	buf[tX][tY] = source.At (row, column);
-
-	__syncthreads();
-	if ( tX == 0 )
+	if (row < source.Height && column < source.Width)
 	{
-		float sum = 0;
-		for ( int i = 0; i < defaultBlockSize; i++ )
+		int tX = threadIdx.x;
+		int tY = threadIdx.y;
+
+		__shared__ float buf[defaultBlockSize][defaultBlockSize];
+		__shared__ float linBuf[defaultBlockSize];
+		buf[tX][tY] = source.At(row, column);
+
+		__syncthreads();
+		if (tX == 0)
 		{
-			sum += buf[i][tY];
+			float sum = 0;
+			for (int i = 0; i < defaultBlockSize; i++)
+			{
+				sum += buf[i][tY];
+			}
+			linBuf[tY] = sum;
 		}
-		linBuf[tY] = sum;
-	}
 
-	__syncthreads();
-	if ( tX == 0 && tY == 0 )
-	{
-		float sum = 0;
-		for ( int i = 0; i < defaultBlockSize; i++ )
+		__syncthreads();
+		if (tX == 0 && tY == 0)
 		{
-			sum += linBuf[i];
+			float sum = 0;
+			for (int i = 0; i < defaultBlockSize; i++)
+			{
+				sum += linBuf[i];
+			}
+			linBuf[0] = sum;
 		}
-		linBuf[0] = sum;
+		__syncthreads();
+
+		float val = linBuf[0] / (defaultBlockSize * defaultBlockSize);
+
+		target.SetAt(row, column, val);
 	}
-	__syncthreads();
-
-	float val = linBuf[0] / ( defaultBlockSize * defaultBlockSize );
-
-	target.SetAt (row, column, val);
 }
 
 void Regularize (CUDAArray<float> source, CUDAArray <float> target)
@@ -164,30 +148,24 @@ __device__ __inline__ float bufValue (CUDAArray<float> source, int row, int colu
 
 __device__ __inline__ float Sum (CUDAArray<float> source, int tX, int tY, int row, int column)
 {
-	__shared__ float buf[48][48];
+	__shared__ float buf[bigBlockSize][bigBlockSize];
 
-	if ( tX >= 16 && tX <= 31 && tY >= 16 && tY <= 31 )
-		for ( int i = -1; i < 2; i++ )
-			for ( int j = -1; j < 2; j++ )
-				buf[tX + 16 * i][tY + 16 * j] = bufValue (source, row + 16 * i, column + 16 * j);
+	for ( int i = -1; i < 2; i++ )
+		for ( int j = -1; j < 2; j++ )
+			buf[tX + 16 * i][tY + 16 * j] = bufValue (source, row + 16 * i, column + 16 * j);
 
-	__syncthreads();
-	
-	if ( tX == 0 && tY == 0 )
+	__syncthreads();	
+	float sum = 0;
+	for ( int i = tX - 16; i < tX + 16; i++ )
 	{
-		float sum = 0;
-		for ( int i = tX - 16; i < tX + 16; i++ )
+		for ( int j = tY - 16; j < tY + 16; j++ )
 		{
-			for ( int j = tY - 16; j < tY + 16; j++ )
-			{
-				sum += buf[i][j];
-			}			
-		}
-		buf[0][0] = sum;
+			sum += buf[i][j];
+		}			
 	}
 	__syncthreads();
 
-	return buf[0][0];
+	return sum;
 }
 
 __global__ void cudaStrengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> cMapAbs, CUDAArray<float> target)
@@ -195,18 +173,21 @@ __global__ void cudaStrengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMap
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	int tX = threadIdx.x;
-	int tY = threadIdx.y;
+	if (row < cMapReal.Height && column < cMapReal.Width)
+	{
+		int tX = threadIdx.x;
+		int tY = threadIdx.y;
 
-	float R = Sum (cMapReal, tX, tY, row, column);
-	float I = Sum (cMapImaginary, tX, tY, row, column);
+		float R = Sum(cMapReal, tX, tY, row, column);
+		float I = Sum(cMapImaginary, tX, tY, row, column);
 
-	float numerator = sqrt (R * R + I * I);
-	float denominator = Sum (cMapAbs, tX, tY, row, column);
+		float numerator = sqrt(R * R + I * I);
+		float denominator = Sum(cMapAbs, tX, tY, row, column);
 
-	float val = 1 - numerator / denominator;
+		float val = 1 - numerator / denominator;
 
-	target.SetAt (row, column, val);
+		target.SetAt(row, column, val);
+	}
 }
 
 void Strengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> cMapAbs, CUDAArray<float> result)
@@ -242,19 +223,19 @@ void Detect (float* orient, int width, int height)
 	CUDAArray<float> cMapImaginary = CUDAArray<float> (width, height);
 	CUDAArray<float> cMapAbs = CUDAArray<float> (width, height);
 
-	float* ptr1 = new float[width * height];
-	float* ptr2 = new float[width * height];
-
+	float* ptr1 = (float*)malloc(sizeof(float)*width*height);
+	float* ptr2 = (float*)malloc(sizeof(float)*width*height);
+	cMapImaginary.GetData(ptr2);
 	SinCos (cMapReal, cMapImaginary, source);
+	cudaError_t error = cudaGetLastError();
 	cMapReal.GetData (ptr1);
-	ptr2 = cMapImaginary.GetData ();
+	cMapImaginary.GetData(ptr2);
 
 	ofstream sin ("gpuSin.doc");
 	for ( int i = 0; i < width; i++ )
 	{
 		sin << i << "] ";
-		for 
-		( int j = 0; j < height; j++ )
+		for ( int j = 0; j < height; j++ )
 		{
 			sin << j << ") " << ptr1[i*width + j] << " ";
 		}
@@ -269,7 +250,7 @@ void Detect (float* orient, int width, int height)
 		for
 			(int j = 0; j < height; j++)
 		{
-			cos << j << ") " << ptr2[i * width + j] << " ";
+			cos << "(" << j << ")" << ptr2[i * width + j] << " ";
 		}
 		cos << endl;
 	}
