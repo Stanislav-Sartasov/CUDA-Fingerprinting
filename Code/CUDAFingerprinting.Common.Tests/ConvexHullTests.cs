@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.IO;
 
 namespace CUDAFingerprinting.Common.ConvexHull.Tests
 {
@@ -12,7 +13,7 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         public static int bmpX = 1100, bmpY = 1100;
         public static double omega = 40;
 
-        public static List<PointF> globalHullToCheck = new List<PointF>(
+        public static List<PointF> globalHull = new List<PointF>(
             new PointF[]
             {
                 new PointF(0, 100),
@@ -22,15 +23,26 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
                 new PointF(100, 900),
             });
 
-        public static List<PointF> globalHull = globalHullToCheck;
-            //new List<PointF>(
-            //new PointF[]
-            //{
-            //    new PointF(100, 100),
-            //    new PointF(400, 100),
-            //    new PointF(400, 1000),
-            //    new PointF(100, 1000)
-            //});
+        public static List<PointF> globalHullMassive;
+
+        public static void ParsePoints(string path)
+        {
+            using (var file = new StreamReader(path))
+            {
+                int pointCount = Int32.Parse(file.ReadLine());
+
+                globalHullMassive = new List<PointF>();
+
+                for (int i = 0; i < pointCount; i++)
+                {
+                    string[] pointStr = file.ReadLine().Split(new Char[] { ',', ' ' });
+                    // [2] because string gets split like "x", " ", "y", don't know how to "fix" it
+                    float x = Single.Parse(pointStr[0]), y = Single.Parse(pointStr[2]);
+                    PointF curPoint = new PointF(x, y);
+                    globalHullMassive.Add(curPoint);
+                }
+            }
+        }
 
         // Prints hull calculated based on globalHull
         public void PrintHullMathCoords(bool[,] field, string filename)
@@ -56,7 +68,7 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         }
 
         [TestMethod]
-        public void ConvexHullBuildTest()
+        public void TestConvexHullBuild()
         {
             List<PointF> pointList = new List<PointF>(
                 new PointF[] 
@@ -70,17 +82,17 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
                     new PointF(200, 600),
                     new PointF(100, 900)
                 });
-
+            
             List<PointF> resPointList = ConvexHull.GetConvexHull(pointList);
 
-            List<PointF> resToCheckRev = new List<PointF>(globalHullToCheck);
+            List<PointF> resToCheckRev = new List<PointF>(globalHull);
             resToCheckRev.Reverse();
 
-            Assert.IsTrue(resPointList.SequenceEqual(globalHullToCheck) || resPointList.SequenceEqual(resToCheckRev));
+            Assert.IsTrue(resPointList.SequenceEqual(globalHull) || resPointList.SequenceEqual(resToCheckRev));
         }
 
         [TestMethod]
-        public void ConvexHullFieldFillingTest()
+        public void TestConvexHullFieldFilling()
         {
             bool[,] field = FieldFiller.GetFieldFilling(bmpX, bmpY, globalHull);
 
@@ -88,7 +100,7 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         }
 
         [TestMethod]
-        public void ConvexHullExtendedTest()
+        public void TestConvexHullExtended()
         {
             List<PointF> extendedHull = ConvexHullModified.ExtendHull(globalHull, omega);
 
@@ -98,11 +110,26 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
         }
 
         [TestMethod]
-        public void ConvexHullExtendedRoundedTest()
+        public void TestConvexHullExtendedRounded()
         {
             List<PointF> extendedHull = ConvexHullModified.ExtendHull(globalHull, omega);
 
             bool[,] field = ConvexHullModified.GetRoundedFieldFilling(bmpX, bmpY, omega, globalHull, extendedHull);
+
+            PrintHullMathCoords(field, "FieldFillingExtendedRounded.jpg");
+        }
+
+        [TestMethod]
+        public void TestConvexHullExtendedRoundedMassive()
+        {
+            string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            ParsePoints(homeFolder + "\\convex_hull_db.txt");
+
+            List<PointF> hull = ConvexHull.GetConvexHull(globalHullMassive);
+
+            List<PointF> extendedHull = ConvexHullModified.ExtendHull(hull, omega);
+
+            bool[,] field = ConvexHullModified.GetRoundedFieldFilling(bmpX, bmpY, omega, hull, extendedHull);
 
             PrintHullMathCoords(field, "FieldFillingExtendedRounded.jpg");
         }

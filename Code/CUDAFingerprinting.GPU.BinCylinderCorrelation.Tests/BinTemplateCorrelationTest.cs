@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CUDAFingerprinting.TemplateMatching.MCC.Tests;
 using CUDAFingerprinting.TemplateMatching.MCC;
+using CUDAFingerprinting.TemplateMatching.MCC.Tests;
 using System.Runtime.InteropServices;
 
 namespace CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests

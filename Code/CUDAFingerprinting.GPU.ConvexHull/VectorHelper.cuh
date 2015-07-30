@@ -1,13 +1,6 @@
 #ifndef CUDAFINGERPRINTING_VECTORHELPER
 #define CUDAFINGERPRINTING_VECTORHELPER
 
-struct Minutia
-{
-	float angle;
-	int x;
-	int y;
-};
-
 struct Point
 {
 	float x;

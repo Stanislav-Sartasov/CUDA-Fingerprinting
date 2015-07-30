@@ -9,7 +9,7 @@
 #include "ImageLoading.cuh"
 #include "ConvexHullModified.cuh"
 
-//#define DEBUG
+#define DEBUG
 //#define NONPARALLEL
 
 #define MAX_FILE_NAME_LENGTH 1000
@@ -33,7 +33,10 @@
 #define BLOCK_DIM 32
 
 Point* hull;
-//__device__ Point d_extendedHull[TEST_POINT_COUNT * 2];
+// Is it possible to store this in constant memory? 
+// As for now it's not passed properly as a parameter 
+// (global var usage bad practice & impossible from another file)
+//__constant__ Point d_extendedHull[TEST_POINT_COUNT * 2];
 bool* extendedRoundedField;
 size_t pitch;
 bool* d_extendedRoundedField;

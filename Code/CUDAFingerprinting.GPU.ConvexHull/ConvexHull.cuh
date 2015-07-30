@@ -3,7 +3,7 @@
 
 #include "VectorHelper.cuh"
 
-#define TEST_POINT_COUNT 60
+#define TEST_POINT_COUNT 15
 #define TEST_FIELD_WIDTH 1100
 #define TEST_FIELD_HEIGHT 1100
 

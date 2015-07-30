@@ -17,17 +17,9 @@ namespace CUDAFingerprinting.Common.ConvexHull
 
         public int Compare(PointF A, PointF B)
         {
-            int result = 1;
-            if (VectorHelper.Rotate(FirstPoint, A, B) > 0)
-            {
-                result = -1;
-            }
-            else if (A.X == B.X && A.Y == B.Y) // <=> VectorProductInt == 0
-            {
-                result = 0;
-            }
-
-            return result;
+            double direction = VectorHelper.Rotate(FirstPoint, A, B);
+            return
+                direction >= 0 ? -1 : 1;
         }
     }
 

@@ -17,10 +17,8 @@ int comparator(const void *a, const void *b)
 
 	float res = rotate(firstPoint, A, B);
 
-	return
-		res > 0 ? -1 :
-		res < 0 ? 1 :
-		0;
+	return 
+		res >= 0 ? -1 : 1;
 }
 
 void setFirstPoint(Point* points, int pointsLength)
