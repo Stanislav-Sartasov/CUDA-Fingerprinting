@@ -14,7 +14,7 @@ namespace CUDAFingerprinting.RidgeLine
             var bmp = Resources.SampleFinger4;
             var image = ImageHelper.LoadImageAsInt(bmp);
 
-            var detectingMinutias = new RidgeLine(image, 5, 3);
+            var detectingMinutias = new RidgeLine(image, 1, 3);
 
             for (int i = 16; i < image.GetLength(1) - 16; i++)
             {

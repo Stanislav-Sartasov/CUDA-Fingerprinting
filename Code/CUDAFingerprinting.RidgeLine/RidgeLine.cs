@@ -187,7 +187,7 @@ namespace CUDAFingerprinting.RidgeLine
                 }
             }
 
-            var res = new int[2] {lPoint, rPoint};
+            var res = new int[2] {_section[lPoint], _section[rPoint]};
 
             return res;
         }
@@ -209,7 +209,7 @@ namespace CUDAFingerprinting.RidgeLine
                 return -1;
             }
 
-            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
+            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
             double ang2check = _orientation.GetOrientation(x, y);
             while (angle2 > Math.PI * 2) angle2 -= Math.PI * 2;
             //if (Math.Abs(angle - angle2) > _pi4)
@@ -222,24 +222,21 @@ namespace CUDAFingerprinting.RidgeLine
             return x*BuildUp + y;
         }
 
-        private void Paint(int lstartPoint, int rstartPoint, double angle, int stepDistX, int stepDistY)
+        private void Paint(int[] edges1, int[] edges2)
         {
-            int xd = (int) (Math.Cos(angle) + 0.5);
-            int yd = (int) (Math.Sin(angle) + 0.5);
+            List<int> lX = new List<int>() { edges1[0] / BuildUp, edges1[1] / BuildUp, edges2[0] / BuildUp, edges2[1] / BuildUp};
+            List<int> lY = new List<int>() { edges1[0] % BuildUp, edges1[1] % BuildUp, edges2[0] % BuildUp, edges2[1] % BuildUp};
 
-            for (int i = lstartPoint; i <= rstartPoint; i++)
+            int xMax = lX.Max();
+            int xMin = lX.Min();
+            int yMax = lY.Max();
+            int yMin = lY.Min();
+
+            for (int i = xMin; i < xMax; i++)
             {
-                int xcur = _section[i]/BuildUp;
-                int ycur = _section[i]%BuildUp;
-
-                int xLimit = xcur + stepDistX;
-                int yLimit = ycur + stepDistY;
-
-                while ((ycur < yLimit) && (xcur < xLimit))
+                for (int j = yMin; j < yMax; j++)
                 {
-                    _visited[ycur, xcur] = true;
-                    ycur += yd;
-                    xcur += xd;
+                    _visited[j, i] = true;
                 }
             }
         }
@@ -282,13 +279,13 @@ namespace CUDAFingerprinting.RidgeLine
                 angle += ((int) direction)*Math.PI + (_diffAngle ? Math.PI : 0);
                 while (angle > Math.PI*2) angle -=Math.PI*2;
                 var edges = FindEdges();
-                Paint(edges[0], edges[1], angle, (int) (_step*Math.Cos(angle) + 0.5), (int) (_step*Math.Sin(angle) + 0.5));
 
-                startPoint = MakeStep(_section[(edges[0] + edges[1]) / 2], direction);
+                startPoint = MakeStep((edges[0] + edges[1]) / 2, direction);
                 if (startPoint < 0) return null;
                 NewSection(startPoint);
                 if (_section[_wings] == -1) return null;
                 minutiaType = CheckStopCriteria();
+                Paint(edges, FindEdges());
             } while (minutiaType == MinutiaTypes.NotMinutia);
             xcur = startPoint / BuildUp;
             ycur = startPoint % BuildUp;
