@@ -2,6 +2,7 @@
 #include "device_launch_parameters.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "constsmacros.h"
 #include "ImageLoading.cuh"
 #include "ConvexHull.cuh"
 
@@ -29,7 +30,7 @@ void setFirstPoint(Point* points, int pointsLength)
 	}
 
 	firstPoint = points[0];
-	
+
 	for (int i = 0; i < pointsLength; i++)
 	{
 		if (points[i].x < firstPoint.x)
@@ -82,23 +83,22 @@ void getConvexHull(Point* points, int pointsLength, Point* hull, int *hullLength
 }
 
 // [end] Convex hull itself
-
-
-// [start] Convex hull field filling
+// Convex hull field filling
 
 // Algorithm for any convex area (and even for some not convex)
-bool isPointInsideHull(Point point, Point* hull, int hullLength)
+__device__ __host__ bool isPointInsideHull(Point point, Point* hull, int hullLength)
 {
 	int n = hullLength;
 
-	if (n < 2)
+	if (n < 2) // Exception case
 	{
-		printf("isPointInsideHull invalid input: less than 2 points; exiting\n");
-		exit(EXIT_FAILURE);
+		return false;
 	}
 
 	// If point is outside the segment (n - 1, 0, 1), it's always outside the hull
-	if (rotate(hull[0], hull[1], point) < 0 || rotate(hull[0], hull[n - 1], point) > 0)
+	float a = rotate(hull[0], hull[1], point);
+	float b = rotate(hull[0], hull[n - 1], point);
+	if (a < 0 || b > 0)
 	{
 		return false;
 	}
@@ -135,11 +135,25 @@ bool** getFieldFilling(int rows, int columns, Point* hull, int hullLength)
 		{
 			Point curPoint((float)i, (float)j);
 
-			field[i][j] = isPointInsideHull(curPoint, hull, hullLength) ? true : false;
+			field[i][j] = isPointInsideHull(curPoint, hull, hullLength);
 		}
 	}
 
 	return field;
+}
+
+
+__global__ void getFieldFillingParallel(int rows, int columns, Point* hull, int hullLength, bool* field, int pitch)
+{
+	int row = defaultRow();
+	int column = defaultColumn();
+
+	Point curPoint((float)row, (float)column);
+
+	if (row < rows && column < columns)
+	{
+		field[row * pitch + column] = isPointInsideHull(curPoint, hull, hullLength);
+	}
 }
 
 // [end] Convex hull field filling
