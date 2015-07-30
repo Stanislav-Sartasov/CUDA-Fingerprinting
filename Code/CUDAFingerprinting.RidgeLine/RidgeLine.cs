@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Drawing.Design;
 using System.Linq;
 using System.Text;
@@ -187,7 +188,7 @@ namespace CUDAFingerprinting.RidgeLine
                 }
             }
 
-            var res = new int[2] {_section[lPoint], _section[rPoint]};
+            var res = new int[3] {_section[lPoint], _section[rPoint], _section[(rPoint + lPoint) / 2]};
 
             return res;
         }
@@ -232,21 +233,27 @@ namespace CUDAFingerprinting.RidgeLine
             int yMax = lY.Max();
             int yMin = lY.Min();
 
-            for (int i = xMin; i < xMax; i++)
+            for (int i = xMin; i <= xMax; i++)
             {
-                for (int j = yMin; j < yMax; j++)
+                for (int j = yMin; j <= yMax; j++)
                 {
-                    _visited[j, i] = true;
+                    if(_image[j,i] < 30) _visited[j, i] = true;
                 }
             }
         }
 
-        private MinutiaTypes CheckStopCriteria(int threshold = 150)
+        private MinutiaTypes CheckStopCriteria(int threshold = 175)
         {
             int xcenter = _section[_wings] / BuildUp;
             int ycenter = _section[_wings] % BuildUp;
-            if (_visited[ycenter, xcenter]) 
-                return MinutiaTypes.Intersection; 
+            if (_visited[ycenter, xcenter])
+            {
+                MakeTestBmp(xcenter, ycenter);
+                return MinutiaTypes.Intersection;
+            }
+                
+
+            
 
             double mean = 0;
             for (int i = 0; i < _wings*2 + 1; i++)
@@ -256,11 +263,35 @@ namespace CUDAFingerprinting.RidgeLine
                 mean += _image[ycur, xcur];
             }
             mean /= (_wings*2 + 1);
-            if (mean > threshold) return MinutiaTypes.LineEnding;
-
-            
+            if (mean > threshold)
+            {
+                MakeTestBmp(xcenter, ycenter);
+                return MinutiaTypes.LineEnding;
+            }
 
             return MinutiaTypes.NotMinutia;
+        }
+
+        void MakeTestBmp(int x, int y)
+        {
+            int[,] image = new int[_visited.GetLength(0), _visited.GetLength(1)];
+
+            for (int i = 0; i < image.GetLength(1); i++)
+            {
+                for (int j = 0; j < image.GetLength(0); j++)
+                {
+                    if (_visited[j, i])
+                    {
+                        image[j, i] = 255;
+                    }
+                }
+            }
+
+            var bmp = ImageHelper.SaveArrayToBitmap(image);
+
+            bmp.SetPixel(x, 364 - y, Color.Red);
+
+            bmp.Save("Test1.bmp");
         }
 
         Minutia FollowLine(int startPoint, Directions direction)
@@ -280,7 +311,7 @@ namespace CUDAFingerprinting.RidgeLine
                 while (angle > Math.PI*2) angle -=Math.PI*2;
                 var edges = FindEdges();
 
-                startPoint = MakeStep((edges[0] + edges[1]) / 2, direction);
+                startPoint = MakeStep(edges[2], direction);
                 if (startPoint < 0) return null;
                 NewSection(startPoint);
                 if (_section[_wings] == -1) return null;
@@ -303,9 +334,9 @@ namespace CUDAFingerprinting.RidgeLine
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
 
-            if (_image[y, x] < colorThreshold)
+            if (_image[y, x] < colorThreshold && !_visited[y, x])
             {
-         //       _visited[y, x] = true;
+                _visited[y, x] = true;
 
                 var minutia1 = FollowLine(startPoint, Directions.Forward);
                 if (minutia1 != null)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,11 +15,11 @@ namespace CUDAFingerprinting.RidgeLine
             var bmp = Resources.SampleFinger4;
             var image = ImageHelper.LoadImageAsInt(bmp);
 
-            var detectingMinutias = new RidgeLine(image, 1, 3);
+            var detectingMinutias = new RidgeLine(image, 5, 3);
 
-            for (int i = 16; i < image.GetLength(1) - 16; i++)
+            for (int i = 0; i < image.GetLength(1); i++)
             {
-                for (int j = 16; j < image.GetLength(0) -16; j++)
+                for (int j = 0; j < image.GetLength(0); j++)
                 {
                     detectingMinutias.FindMinutiaLine(i * 1000 + j, 5.0, 50);
                 }
@@ -28,15 +29,27 @@ namespace CUDAFingerprinting.RidgeLine
                 //}
             }
 
+            List<Common.Minutia> MinutiaE = new List<Common.Minutia>();
+            List<Common.Minutia> MinutiaI = new List<Common.Minutia>();
+
             foreach (var minutia in detectingMinutias.GetMinutiaList())
             {
+                Common.Minutia temp = new Common.Minutia();
+                temp.X = minutia.X;
+                temp.Y = 364 - minutia.Y;
+                temp.Angle = minutia.Angle;
+
                 Console.WriteLine("x = {0}; y = {1}; Type = {2}; Angle = {3}", minutia.X, minutia.Y, minutia.Type, minutia.Angle);
+                if (minutia.Type == MinutiaTypes.LineEnding) MinutiaE.Add(temp);
+                if (minutia.Type == MinutiaTypes.Intersection) MinutiaI.Add(temp);
             }
 
-            MakeBmp(detectingMinutias._visited);
+            var bmpVis = new Bitmap(MakeBmp(detectingMinutias._visited));
+            bmpVis.Save("Vis.bmp");
+            ImageHelper.MarkMinutiae("Vis.bmp", MinutiaE, MinutiaI, "withMinutia.bmp");
         }
 
-        static void MakeBmp(bool[,] visited)
+        static Bitmap MakeBmp(bool[,] visited, string name = "visit.bmp")
         {
             int[,] image = new int[visited.GetLength(0),visited.GetLength(1)];
 
@@ -51,7 +64,7 @@ namespace CUDAFingerprinting.RidgeLine
                 }
             }
 
-            ImageHelper.SaveArray(image,"visit.bmp");
+            return ImageHelper.SaveArrayToBitmap(image);
         }
     }
 }
