@@ -66,7 +66,9 @@ namespace CUDAFingerprinting.ImageEnhancement
 
                             if (topArea != leftArea)
                             {
-                                Allies[leftArea] = topArea;
+                                int tAR = GetAreaRoot(topArea);
+                                int lAR = GetAreaRoot(leftArea);
+                                Allies[lAR < tAR ? tAR : lAR] = lAR < tAR ? lAR : tAR;
                             }
 
                             AreasSize[leftArea]++;
@@ -78,10 +80,8 @@ namespace CUDAFingerprinting.ImageEnhancement
                         if (topPixel == currentPixel)
                         {
                             int topArea = GetArea(Areas, x, y - 1, width, height);
-                            Allies[NumberOfAreas] = topArea;
-                            AreasSize[NumberOfAreas] = 1;
-                            Areas[(height - 1 - y) * width + x] = NumberOfAreas;
-                            NumberOfAreas++;
+                            AreasSize[topArea]++;
+                            Areas[(height - 1 - y) * width + x] = topArea;
                         }
                         else
                         {
@@ -173,5 +173,144 @@ namespace CUDAFingerprinting.ImageEnhancement
             }
             return result;
         }
+
+        public static int[] ResolveHolesAndIslands(int[] data,
+             int thresholdHoles,
+             int thresholdIslands,
+            int width, int height)
+        {
+            int[] result = (int[])data.Clone();
+            Preprocessing(data, width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (GetPixel(result, x, y, width, height) == BLACK &&
+                        GetAreaSize(
+                            GetArea(Areas, x, y, width, height)
+                        ) < thresholdIslands)
+                    {
+                        result[(height - 1 - y) * width + x] = WHITE;
+                    }
+                    else if (GetPixel(result, x, y, width, height) == WHITE &&
+                        GetAreaSize(
+                            GetArea(Areas, x, y, width, height)
+                        ) < thresholdHoles)
+                    {
+                        result[(height - 1 - y) * width + x] = BLACK;
+                    }
+                }
+            }
+            return result;
+        }
+        //JOKING :D (same algorithm, starting from an opposite corner)
+        /*
+        private static void PreprocessingJOKE(int[] data, int width, int height)
+        {
+            NumberOfAreas = 0;
+
+            Areas = new int[width * height];
+            AreasSize = new int[width * height];
+            Allies = new int[width * height];
+
+            Allies[0] = 0;
+            AreasSize[0] = 0;
+            Areas[0] = 0;
+
+            for (int y = height - 1; y >= 0; y--)
+            {
+                for (int x = width - 1; x >= 0; x--)
+                {
+                    int leftPixel = GetPixel(data, x + 1, y, width, height);
+                    int topPixel = GetPixel(data, x, y + 1, width, height);
+                    int currentPixel = GetPixel(data, x, y, width, height);
+
+                    if (leftPixel == topPixel)
+                    {
+                        if (topPixel != currentPixel)
+                        {
+                            Allies[NumberOfAreas] = NumberOfAreas;
+                            AreasSize[NumberOfAreas] = 1;
+                            Areas[(height - 1 - y) * width + x] = NumberOfAreas;
+                            NumberOfAreas++;
+                        }
+                        else
+                        {
+                            int leftArea = GetArea(Areas, x + 1, y, width, height);
+                            int topArea = GetArea(Areas, x, y + 1, width, height);
+
+                            if (topArea != leftArea)
+                            {
+                                int tAR = GetAreaRoot(topArea);
+                                int lAR = GetAreaRoot(leftArea);
+                                Allies[lAR < tAR ? tAR : lAR] = lAR < tAR ? lAR : tAR;
+                            }
+
+                            AreasSize[leftArea]++;
+                            Areas[(height - 1 - y) * width + x] = leftArea;
+                        }
+                    }
+                    else
+                    {
+                        if (topPixel == currentPixel)
+                        {
+                            int topArea = GetArea(Areas, x, y + 1, width, height);
+                            AreasSize[topArea]++;
+                            Areas[(height - 1 - y) * width + x] = topArea;
+                        }
+                        else
+                        {
+                            int leftArea = GetArea(Areas, x + 1, y, width, height);
+                            if (leftArea != -1)
+                            {
+                                AreasSize[leftArea]++;
+                                Areas[(height - 1 - y) * width + x] = leftArea;
+                            }
+                            else
+                            {
+                                Allies[NumberOfAreas] = NumberOfAreas;
+                                AreasSize[NumberOfAreas] = 1;
+                                Areas[(height - 1 - y) * width + x] = NumberOfAreas;
+                                NumberOfAreas++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public static int[] ResolveHolesAndIslandsJOKE(int[] data,
+             int thresholdHoles,
+             int thresholdIslands,
+            int width, int height)
+        {
+            int[] result = (int[])data.Clone();
+            PreprocessingJOKE(data, width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (GetPixel(result, x, y, width, height) == BLACK &&
+                        GetAreaSize(
+                            GetArea(Areas, x, y, width, height)
+                        ) < thresholdIslands)
+                    {
+                        result[(height - 1 - y) * width + x] = WHITE;
+                    }
+                    else if (GetPixel(result, x, y, width, height) == WHITE &&
+                        GetAreaSize(
+                            GetArea(Areas, x, y, width, height)
+                        ) < thresholdHoles)
+                    {
+                        result[(height - 1 - y) * width + x] = BLACK;
+                    }
+                }
+            }
+            return result;
+        }
+        */
     }
 }
