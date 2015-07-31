@@ -133,7 +133,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC.Tests
             GenerateTemplateDb(10000, 250, 255);
             WriteDbToFile(homeFolder + "\\mcc_cs_db.txt", homeFolder + "\\mcc_c_db.txt");
 
-            GenerateTemplateDb(32, 1, 255); // 1 cylinder for query (it necessary for algorithm to work)
+            GenerateTemplateDb(32, 1, 255); // 1 template for query (it necessary for algorithm to work)
             WriteDbToFile(homeFolder + "\\mcc_cs_query.txt", homeFolder + "\\mcc_c_query.txt");
         }
     }
