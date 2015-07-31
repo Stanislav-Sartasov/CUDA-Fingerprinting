@@ -16,10 +16,8 @@ unsigned int templateDbCountTest;
 
 unsigned long long index;
 
-void parseDb(char *path)
+void parseDb(char* path)
 {
-	index = 0;
-
 	FILE *file = fopen(path, "r");
 	if (!file)
 	{
@@ -27,7 +25,7 @@ void parseDb(char *path)
 		exit(EXIT_FAILURE);
 	}
 
-	char *line = new char[MAX_FILE_LINE_LENGTH];
+	char* line = new char[MAX_FILE_LINE_LENGTH];
 
 	fgets(line, MAX_FILE_LINE_LENGTH, file);
 
@@ -41,7 +39,6 @@ void parseDb(char *path)
 	for (unsigned int i = 0; i < templateDbCountTest; i++)
 	{
 		templateDbLengthsTest[i] = strtoul(curTemplateDbLength, NULL, 10);
-		index++;
 		dbLength += templateDbLengthsTest[i];
 		curTemplateDbLength = strtok(NULL, " ");
 	}
@@ -76,16 +73,16 @@ void parseDb(char *path)
 	fclose(file);
 }
 
-void parseQ(char *path)
+void parseQ(char* path)
 {
-	FILE* file = fopen(path, "r");
+	FILE *file = fopen(path, "r");
 	if (!file)
 	{
 		printf("Query open error\n");
 		exit(EXIT_FAILURE);
 	}
 
-	char *line = new char[MAX_FILE_LINE_LENGTH];
+	char* line = new char[MAX_FILE_LINE_LENGTH];
 
 	fgets(line, MAX_FILE_LINE_LENGTH, file); // Always 1 for query (number of templates)
 
@@ -135,7 +132,7 @@ int main()
 
 	clock_t start = clock();
 
-	float *similarities = processMCC(
+	float* similarities = processMCC(
 		q, qLength,
 		dbLength, templateDbCountTest);
 

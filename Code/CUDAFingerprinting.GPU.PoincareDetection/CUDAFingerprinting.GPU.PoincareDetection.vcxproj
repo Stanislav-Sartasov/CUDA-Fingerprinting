@@ -18,21 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="BinCorrelationHelper.cu" />
-    <CudaCompile Include="BinCylinderCorrelation.cu" />
-    <CudaCompile Include="BinTemplateCorrelation.cu" />
-    <CudaCompile Include="BinTemplateMassiveTest.cu" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="BinCorrelationHelper.cuh" />
-    <ClInclude Include="BinCylinderCorrelation.cuh" />
-    <ClInclude Include="BinTemplateCorrelation.cuh" />
-    <ClInclude Include="CylinderHelper.cuh" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3F634018-B841-428F-858E-082AE3EFC94F}</ProjectGuid>
-    <RootNamespace>CUDAFingerprinting_GPU_BinCylinderCorrelation</RootNamespace>
+    <ProjectGuid>{113B0094-49FF-4931-B647-2DA46B268E05}</ProjectGuid>
+    <RootNamespace>CUDAFingerprinting_GPU_PoincareDetection</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -80,13 +68,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.OrientationField;$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -105,7 +91,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <GPUDebugInfo>true</GPUDebugInfo>
+      <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\</Include>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <HostDebugInfo>false</HostDebugInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,9 +134,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
-    <CudaCompile>
-      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -173,6 +158,17 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj">
+      <Project>{ff7efcd3-be2a-43b4-af3e-91469400e6a8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.GPU.OrientationField\CUDAFingerprinting.GPU.OrientationField.vcxproj">
+      <Project>{4e1751eb-a79e-44c1-b6eb-9ae2badd91fb}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.targets" />
