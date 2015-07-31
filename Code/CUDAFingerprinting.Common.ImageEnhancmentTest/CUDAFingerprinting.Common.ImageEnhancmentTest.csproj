@@ -52,6 +52,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="EnhancmentTest.cs" />
+    <Compile Include="HolesAndIslandsResolverTest.cs" />
+    <Compile Include="MorphologicalOperatorsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -81,6 +83,25 @@
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageEnhancement.csproj">
+      <Project>{6b1354d8-3b37-4946-93c0-5fbc2ef11544}</Project>
+      <Name>CUDAFingerprinting.ImageEnhancement</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\f.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\erosion.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\skeleton.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\holes.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\islands.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\1_1.png" />
