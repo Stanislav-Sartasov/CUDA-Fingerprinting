@@ -15,7 +15,11 @@
 using namespace std;
 
 const int defaultBlockSize = 16;
-const int bigBlockSize = 48;
+
+extern "C"
+{
+	__declspec(dllexport) void Detect(float* orient, int width, int height, float* target);
+}
 
 __global__ void cudaSinCos (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> source)
 {
@@ -142,7 +146,7 @@ void Regularize (CUDAArray<float> source, CUDAArray <float> target)
 
 __device__ __inline__ float bufValue (CUDAArray<float> source, int row, int column)
 {
-	if (row - 3 >= 0 && row + 3 < source.Height && column - 3 >= 0 && column + 3 < source.Width)
+	if (row >= 0 && row < source.Height && column >= 0 && column < source.Width)
 	{
 		return source.At (row, column);
 	}
@@ -154,27 +158,27 @@ __device__ __inline__ float bufValue (CUDAArray<float> source, int row, int colu
 
 __device__ __inline__ float Sum (CUDAArray<float> source, int tX, int tY, int row, int column)
 {
-	__shared__ float buf[9][9];
+	__shared__ float buf[3 * defaultBlockSize][3 * defaultBlockSize];
 
-	/*for (int i = -1; i < 2; i++)
+	for (int i = -1; i < 2; i++)
 	{
 		for (int j = -1; j < 2; j++)
 		{
-			float val = bufValue(source, row + 3 * i, column + 3 * j);
-			buf[tX][tY] = val;
+			buf[defaultBlockSize + tY + defaultBlockSize * j][defaultBlockSize + tX + defaultBlockSize * i] =
+				bufValue(source, row + defaultBlockSize * i, column + defaultBlockSize * j);;
 		}
-	}*/
+	}
 
-	buf[tX][tY] = source.At(row, column);
+	//buf[tX][tY] = source.At(row, column);
 
 	__syncthreads();	
 	float sum = 0;
-	for ( int i = 0; i < 9; i++ )
+	for (int i = tX; i < tX + 2 * defaultBlockSize; i++)
 	{
-		for ( int j = 0; j < 9; j++ )
+		for (int j = tY; j < tY + 2 * defaultBlockSize; j++)
 		{
 			sum += buf[i][j];
-		}			
+		}
 	}
 	__syncthreads();
 
@@ -205,8 +209,8 @@ __global__ void cudaStrengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMap
 
 void Strengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> cMapAbs, CUDAArray<float> result)
 {
-	dim3 blockSize = dim3(9, 9);
-	dim3 gridSize = dim3(ceilMod(cMapReal.Width, 9), ceilMod(cMapReal.Height, 9));
+	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
+	dim3 gridSize = dim3(ceilMod(cMapReal.Width, defaultBlockSize), ceilMod(cMapReal.Height, defaultBlockSize));
 
 	cudaStrengthen <<< gridSize, blockSize >>> (cMapReal, cMapImaginary, cMapAbs, result);
 	cudaError_t error = cudaGetLastError ();
@@ -222,12 +226,12 @@ void SaveSegmentation (int width, int height, float* matrix)
 		newPic[i] = (int)(matrix[i] * 255);
 	}
 
-	saveBmp ("Result.jpg", newPic, width, height);
+	saveBmp ("Result.bmp", newPic, width, height);
 	
 	std::free (newPic);
 }
 
-void Detect (float* orient, int width, int height)
+void Detect (float* orient, int width, int height, float* target)
 {
 	CUDAArray<float> source = CUDAArray<float> (orient, width, height);
 	CUDAArray<float> result = CUDAArray<float> (width, height);
@@ -241,26 +245,23 @@ void Detect (float* orient, int width, int height)
 
 	Module(cMapReal, cMapImaginary, cMapAbs);
 
-	CUDAArray<float> V_rReal = CUDAArray<float> (width, height);
-	CUDAArray<float> V_rImaginary = CUDAArray<float> (width, height);
+	//CUDAArray<float> V_rReal = CUDAArray<float> (width, height);
+	//CUDAArray<float> V_rImaginary = CUDAArray<float> (width, height);
 
 	//Regularize ( V_rReal, cMapReal );
 	//Regularize ( V_rImaginary, cMapImaginary );
 
 	Strengthen (cMapReal, cMapImaginary, cMapAbs, result);
-	float* str = new float[width * height];
-	result.GetData (str);
-	SaveSegmentation (width, height, str);
-
-	std::free (str);
+	result.GetData (target);
+	SaveSegmentation (width, height, target);
 
 	source.Dispose();
 	result.Dispose();
 	cMapReal.Dispose();
 	cMapImaginary.Dispose();
 	cMapAbs.Dispose();
-	V_rReal.Dispose();
-	V_rImaginary.Dispose();
+	//V_rReal.Dispose();
+	//V_rImaginary.Dispose();
 }
 
 int main()
@@ -269,12 +270,6 @@ int main()
 
 	int width, height;
 	int* pic = loadBmp ("1_1.bmp", &width, &height);
-
-	/*float* fPic  = (float*) malloc (sizeof (float)*width*height);
-	for ( int i = 0; i < width * height; i++ )
-	{
-		fPic[i] = (float) pic[i];
-	}*/
 
 	float* orient = new float [width * height];
 
@@ -289,12 +284,12 @@ int main()
 		}
 	}
 
-	//OrientationFieldInPixels (orient, fPic, width, height);
+	float* target = new float[width * height];
 
-	Detect ( orient, width, height );
+	Detect ( orient, width, height, target );
 
 	std::free(pic);
-	//free (fPic);
+	std::free (target);
 	std::free (orient);
 
 	return 0;

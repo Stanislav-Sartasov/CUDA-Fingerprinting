@@ -41,7 +41,7 @@ namespace CUDAFingerprinting.GPU.Segmentation.Test
                 }
             }
 
-            ImageHelper.SaveArrayToBitmap(result).Save("Result.jpg");
+            ImageHelper.SaveArrayToBitmap(result).Save("Result.bmp");
         }
     }
 }
