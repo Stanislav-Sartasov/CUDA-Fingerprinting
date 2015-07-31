@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{81E31D06-FA43-4CE0-8DE8-590142AF4D1B}</ProjectGuid>
-    <RootNamespace>CUDAFingerprinting_GPU_SingularityRegionDetection</RootNamespace>
+    <ProjectGuid>{113B0094-49FF-4931-B647-2DA46B268E05}</ProjectGuid>
+    <RootNamespace>CUDAFingerprinting_GPU_PoincareDetection</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -68,7 +68,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(SolutionDir)CUDAFingerprinting.GPU.Common;$(SolutionDir)CUDAFingerprinting.GPU.OrientationField;$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.OrientationField;$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -89,8 +90,10 @@
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
-      <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(SolutionDir)CUDAFingerprinting.GPU.OrientationField\</Include>
-      <GPUDebugInfo>true</GPUDebugInfo>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\</Include>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <HostDebugInfo>false</HostDebugInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -159,11 +162,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
-      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj">
       <Project>{ff7efcd3-be2a-43b4-af3e-91469400e6a8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.GPU.OrientationField\CUDAFingerprinting.GPU.OrientationField.vcxproj">
+      <Project>{4e1751eb-a79e-44c1-b6eb-9ae2badd91fb}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

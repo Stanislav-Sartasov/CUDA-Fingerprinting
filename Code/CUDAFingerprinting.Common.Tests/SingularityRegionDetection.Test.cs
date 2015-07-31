@@ -25,14 +25,14 @@ namespace CUDAFingerprinting.Common.Tests
             int width = intBmp.GetLength(0);
             int height = intBmp.GetLength(1);
 
-            var dAr = field.Orientation;
+            var orient = field.Orientation;
 
             System.IO.StreamWriter file = new System.IO.StreamWriter(@"D:\Orientation.txt");
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
                 {
-                    file.Write((int)(dAr[i, j] * 10000));
+                    file.Write((int)(orient[i, j] * 10000));
                     file.Write(" ");
                 }
                 file.WriteLine();
@@ -42,13 +42,13 @@ namespace CUDAFingerprinting.Common.Tests
             {
                 for (int j = 0; j < height; j++)
                 {
-                    dAr[i, j] = (dAr[i, j] * 10000) / 10000;
+                    orient[i, j] = (orient[i, j] * 10000) / 10000;
                 }
             }
 
-            SingularityRegionDetection D = new SingularityRegionDetection(dAr);
+            SingularityRegionDetection D = new SingularityRegionDetection(orient);
 
-            double[,] Result = D.Detect(dAr);
+            double[,] Result = D.Detect(orient);
             double[,] revertedResult = new double[height, width];
             
             for (int i = 0; i < width; i++)
