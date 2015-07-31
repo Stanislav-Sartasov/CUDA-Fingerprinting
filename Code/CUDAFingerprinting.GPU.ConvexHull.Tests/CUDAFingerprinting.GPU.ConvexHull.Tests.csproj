@@ -60,6 +60,7 @@
   <ItemGroup>
     <Content Include="..\Debug\CUDAFingerprinting.GPU.ConvexHull.dll">
       <Link>CUDAFingerprinting.GPU.ConvexHull.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

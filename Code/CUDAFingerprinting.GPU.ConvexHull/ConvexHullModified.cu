@@ -15,6 +15,11 @@
 #define MAX_FILE_NAME_LENGTH 1000
 #define MAX_FILE_LINE_LENGTH 100
 
+int maxPointCount;
+int pointCount;
+int fieldWidth;
+int fieldHeight;
+
 #ifdef DEBUG
 #define cudaCheckError() {\
 	cudaError_t e = cudaGetLastError();\
@@ -36,7 +41,7 @@ Point* hull;
 // Is it possible to store this in constant memory? 
 // As for now it's not passed properly as a parameter 
 // (global var usage bad practice & impossible from another file)
-//__constant__ Point d_extendedHull[TEST_POINT_COUNT * 2];
+//__constant__ Point d_extendedHull[pointCount * 2];
 bool* extendedRoundedField;
 size_t pitch;
 bool* d_extendedRoundedField;
@@ -104,38 +109,39 @@ void getRoundFieldFilling(
 
 void printHullMathCoords(bool** field, char *filename)
 {
-	int* linearizedField = (int*)malloc(TEST_FIELD_HEIGHT * TEST_FIELD_WIDTH * sizeof(int));
-	for (int i = 0; i < TEST_FIELD_HEIGHT; i++)
+	int* linearizedField = (int*)malloc(fieldHeight * fieldWidth * sizeof(int));
+	for (int i = 0; i < fieldHeight; i++)
 	{
-		for (int j = 0; j < TEST_FIELD_WIDTH; j++)
+		for (int j = 0; j < fieldWidth; j++)
 		{
-			//linearizedField[i * TEST_FIELD_WIDTH + j] = field[i][j] == true ? 255 : 0;
+			//linearizedField[i * fieldWidth + j] = field[i][j] == true ? 255 : 0;
+
 			// BTW why is the pic gray (not black) if all the pixels are 0?
 			// AFAIK GPU ImageLoading doesn't reflect image upside down, 
 			// thus simple transpose doesn't suffice, vertical reflection needed
-			linearizedField[(TEST_FIELD_HEIGHT - 1 - j) * TEST_FIELD_WIDTH + i] = field[i][j] == true ? 255 : 0;
+			linearizedField[(fieldHeight - 1 - j) * fieldWidth + i] = field[i][j] == true ? 255 : 0;
 		}
 	}
 
-	saveBmp(filename, linearizedField, TEST_FIELD_WIDTH, TEST_FIELD_HEIGHT);
+	saveBmp(filename, linearizedField, fieldWidth, fieldHeight);
 
 	free(linearizedField);
 }
 
 void printHullMathCoords(bool* field, char *filename)
 {
-	int* intField = (int*)malloc(TEST_FIELD_HEIGHT * TEST_FIELD_WIDTH * sizeof(int));
+	int* intField = (int*)malloc(fieldHeight * fieldWidth * sizeof(int));
 
-	for (int i = 0; i < TEST_FIELD_HEIGHT * TEST_FIELD_WIDTH; i++)
+	for (int i = 0; i < fieldHeight * fieldWidth; i++)
 	{
 		//intField[i] = field[i] == true ? 255 : 0;
 		intField[
-			(TEST_FIELD_HEIGHT - 1 - (i % TEST_FIELD_WIDTH)) * TEST_FIELD_WIDTH + 
-			(i / TEST_FIELD_WIDTH)] = 
-			field[i] == true ? 255 : 0;
+			(fieldHeight - 1 - (i % fieldWidth)) * fieldWidth +
+				(i / fieldWidth)] =
+				field[i] == true ? 255 : 0;
 	}
 
-	saveBmp(filename, intField, TEST_FIELD_WIDTH, TEST_FIELD_HEIGHT);
+	saveBmp(filename, intField, fieldWidth, fieldHeight);
 
 	free(intField);
 }
@@ -154,70 +160,77 @@ void printHull(Point* hull, int hullLength)
 
 // [end] Printing hull code (file & console)
 
-void initConvexHull()
-{
-	hull = (Point*)malloc(TEST_POINT_COUNT * sizeof(Point)); // maximum hull length
+void initConvexHull(int givenFieldHeight, int givenFieldWidth, int givenMaxPointCount)
+{	
+	fieldHeight = givenFieldHeight;
+	fieldWidth = givenFieldWidth;
+	maxPointCount = givenMaxPointCount;
 
-	extendedRoundedField = (bool *)malloc(TEST_FIELD_HEIGHT * TEST_FIELD_WIDTH * sizeof(bool));
+	hull = (Point*)malloc(maxPointCount * sizeof(Point)); // maximum hull length
+
+	extendedRoundedField = (bool *)malloc(fieldHeight * fieldWidth * sizeof(bool));
 
 #ifndef NONPARALLEL
-	cudaMallocPitch((void**)&d_extendedRoundedField, &pitch, TEST_FIELD_WIDTH, TEST_FIELD_HEIGHT);
+	cudaMallocPitch((void**)&d_extendedRoundedField, &pitch, fieldWidth, fieldHeight);
 #endif
 }
 
-void processConvexHull(Point* points, float omega)
+bool* processConvexHull(Point* points, float omega, int actualPointCount)
 {
+	pointCount = actualPointCount;
+
 #ifndef NONPARALLEL
-	int maxExtendedHullLength = TEST_POINT_COUNT * 2;
+	int maxExtendedHullLength = pointCount * 2;
 	Point* d_extendedHull;
 	cudaMalloc((void **)&d_extendedHull, sizeof(Point)* maxExtendedHullLength);
 #endif
 
-	clock_t start = clock();
+	// TODO Switch to CUDA events & move to main()
+	//clock_t start = clock();
 
 	int hullLength; // var used to bound "actual" hull length
-	getConvexHull(points, TEST_POINT_COUNT, hull, &hullLength);
+	getConvexHull(points, pointCount, hull, &hullLength);
 
 	Point* extendedHull = extendHull(hull, hullLength, omega);
 	int extendedHullLength = hullLength * 2;
 
 #ifdef DEBUG
 	// TODO
-	// Change TEST_POINT_COUNT into smth else (extern maybe)
+	// Change pointCount into smth else (extern maybe)
 	// Modify printing such that hull & extended hull can be distinguished
 	printHull(hull, hullLength);
 	printHull(extendedHull, extendedHullLength);
 #endif
 
 #ifdef NONPARALLEL
-	bool** field = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, hull, hullLength);
-	bool** extendedField = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, extendedHull, extendedHullLength);
+	bool** field = getFieldFilling(fieldHeight, fieldWidth, hull, hullLength);
+	bool** extendedField = getFieldFilling(fieldHeight, fieldWidth, extendedHull, extendedHullLength);
 	// For now nonparallel version without rounded field (due to not matching signatures),
 	// legacy code, somewhat how it should look like
 	//bool** extendedRoundedField = getRoundFieldFilling(
-	//	TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, omega, hull, hullLength, extendedHull, extendedHullLength);
+	//	fieldHeight, fieldWidth, omega, hull, hullLength, extendedHull, extendedHullLength);
 #else
 	cudaMemcpy(d_extendedHull, extendedHull, sizeof(Point)* extendedHullLength, cudaMemcpyHostToDevice);
 	//cudaMemcpyToSymbol(d_extendedHull, extendedHull, sizeof(Point)* extendedHullLength);
 	cudaCheckError();
 
-	dim3 gridDim = dim3(ceilMod(TEST_FIELD_WIDTH, BLOCK_DIM), ceilMod(TEST_FIELD_WIDTH, BLOCK_DIM));
+	dim3 gridDim = dim3(ceilMod(fieldWidth, BLOCK_DIM), ceilMod(fieldWidth, BLOCK_DIM));
 	dim3 blockDim = dim3(BLOCK_DIM, BLOCK_DIM);
 	getFieldFillingParallel << < gridDim, blockDim >> > (
-		TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, d_extendedHull, extendedHullLength, d_extendedRoundedField, pitch);
+		fieldHeight, fieldWidth, d_extendedHull, extendedHullLength, d_extendedRoundedField, pitch);
 	cudaDeviceSynchronize();
 	cudaCheckError();
 
 	cudaMemcpy2D(
-		extendedRoundedField, TEST_FIELD_WIDTH * sizeof(bool), d_extendedRoundedField, pitch,
-		TEST_FIELD_WIDTH, TEST_FIELD_HEIGHT, cudaMemcpyDeviceToHost);
+		extendedRoundedField, fieldWidth * sizeof(bool), d_extendedRoundedField, pitch,
+		fieldWidth, fieldHeight, cudaMemcpyDeviceToHost);
 	cudaDeviceSynchronize();
 	cudaCheckError();
 
 #ifdef DEBUG
 #ifndef NONPARALLEL
 	// Still getting parallel in order not to perform additional cudaMemcpy, just for debug
-	bool** field = getFieldFilling(TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, hull, hullLength);
+	bool** field = getFieldFilling(fieldHeight, fieldWidth, hull, hullLength);
 	printHullMathCoords(field, "ConvexHull.jpg");
 	free(field);
 
@@ -226,11 +239,11 @@ void processConvexHull(Point* points, float omega)
 #endif
 
 	getRoundFieldFilling(
-		TEST_FIELD_HEIGHT, TEST_FIELD_WIDTH, omega, hull, hullLength, extendedHull, extendedHullLength, extendedRoundedField);
+		fieldHeight, fieldWidth, omega, hull, hullLength, extendedHull, extendedHullLength, extendedRoundedField);
 #endif
 
-	clock_t end = clock();
-	printf("TIME: %ld\n", end - start);
+	//clock_t end = clock();
+	//printf("TIME: %ld\n", end - start);
 
 #ifdef DEBUG
 #ifdef NONPARALLEL
@@ -250,6 +263,10 @@ void processConvexHull(Point* points, float omega)
 #else
 	cudaFree(d_extendedHull);
 #endif
+
+	return extendedRoundedField;
+	//bool* res = (bool*)malloc(fieldHeight * fieldWidth * sizeof(bool));
+	//return res;
 }
 
 void terminateConvexHull()
@@ -267,7 +284,8 @@ void terminateConvexHull()
 // x, y
 // x, y
 // ...
-void parsePoints(char* path, Point** points)
+// Could be generated at random.org/integer-sets/
+int parsePoints(char* path, Point** points)
 {
 	FILE *file = fopen(path, "r");
 	if (!file)
@@ -279,7 +297,7 @@ void parsePoints(char* path, Point** points)
 	char* line = new char[MAX_FILE_LINE_LENGTH];
 
 	fgets(line, MAX_FILE_LINE_LENGTH, file);
-	int pointCount = strtoul(line, NULL, 10);
+	pointCount = strtoul(line, NULL, 10);
 
 	*points = (Point*)malloc(pointCount * sizeof(Point));
 
@@ -294,6 +312,8 @@ void parsePoints(char* path, Point** points)
 
 		(*points)[i] = Point(x, y);
 	}
+
+	return pointCount;
 }
 
 
@@ -301,12 +321,12 @@ int main()
 {
 	char pathPointDb[MAX_FILE_NAME_LENGTH] = "C:\\Users\\resaglow\\convex_hull_db.txt";
 	Point* points = nullptr;
-	parsePoints(pathPointDb, &points);
+	int actualPointCount = parsePoints(pathPointDb, &points);
 
 	float omega = 40;
 
-	initConvexHull();
-	processConvexHull(points, omega);
+	initConvexHull(1100, 1100, 500);
+	processConvexHull(points, omega, actualPointCount);
 	terminateConvexHull();
 
 	return 0;

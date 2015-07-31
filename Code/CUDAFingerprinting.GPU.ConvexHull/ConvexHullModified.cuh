@@ -5,20 +5,13 @@
 
 extern "C"
 {
-	__declspec(dllexport) Point* extendHull(Point* hull, int hullLength, float omega);
-
-	__declspec(dllexport) bool** getRoundFieldFilling(
-		int rows, int columns, float omega, Point* hull, int hullLength, Point* extendedHull, int extendedHullLength);
-
-	// This could be not tested (image saved in test using C# saver, 
-	__declspec(dllexport) void printHullMathCoords(bool* field, char *filename);
+	__declspec(dllexport) void initConvexHull(int givenFieldHeight, int givenFieldWidth, int givenMaxPointCount);
+	__declspec(dllexport) bool* processConvexHull(Point* points, float omega, int actualPointCount);
+	__declspec(dllexport) void terminateConvexHull();
 }
 
-Point* extendHull(Point* hull, int hullLength, float omega);
-
-bool** getRoundFieldFilling(
-	int rows, int columns, float omega, Point* hull, int hullLength, Point* extendedHull, int extendedHullLength);
-
-void printHullMathCoords(bool* field, char *filename);
+void initConvexHull(int givenFieldHeight, int givenFieldWidth, int givenMaxPointCount);
+bool* processConvexHull(Point* points, float omega, int actualPointCount);
+void terminateConvexHull();
 
 #endif CUDAFINGERPRINTING_CONVEXHULLMODIFIED

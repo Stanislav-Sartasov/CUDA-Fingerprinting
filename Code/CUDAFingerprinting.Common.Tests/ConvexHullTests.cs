@@ -25,6 +25,12 @@ namespace CUDAFingerprinting.Common.ConvexHull.Tests
 
         public static List<PointF> globalHullMassive;
 
+        // input file should be in format:
+        // <num of points>
+        // x, y
+        // x, y
+        // ...
+        // Could be generated at random.org/integer-sets/
         public static void ParsePoints(string path)
         {
             using (var file = new StreamReader(path))

@@ -10,22 +10,29 @@ namespace CUDAFingerprinting.GPU.ConvexHull.Tests
 {
     public struct Point
     {
-        float X;
-        float Y;
+        public float X;
+        public float Y;
     }
 
+    // For now fails due to last Marshal.Copy (how to handle C boolean arrays?)
     [TestClass]
     public class ConvexHullTest
     {
-        [DllImport("CUDAFingerprinting.GPU.ConvexHull.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "extendHull")]
-        public static extern IntPtr extendHull(IntPtr hull, int hullLength, float omega);
+        [DllImport("CUDAFingerprinting.GPU.ConvexHull.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "initConvexHull")]
+        public static extern void initConvexHull(int givenFieldHeight, int givenFieldWidth, int givenMaxPointCount);
 
-        [DllImport("CUDAFingerprinting.GPU.ConvexHull.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "getRoundFieldFilling")]
-        public static extern IntPtr extendHull(
-            int rows, int columns, float omega, IntPtr hull, int hullLength, IntPtr extendedHull, int extendedHullLength);
+        [DllImport("CUDAFingerprinting.GPU.ConvexHull.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "processConvexHull")]
+        public static extern IntPtr processConvexHull(IntPtr points, float omega, int actualPointCount);
 
-        [DllImport("CUDAFingerprinting.GPU.ConvexHull.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "getRoundFieldFilling")]
-        public static extern void printHullMathCoords(IntPtr field, IntPtr filename);
+        [DllImport("CUDAFingerprinting.GPU.ConvexHull.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "terminateConvexHull")]
+        public static extern void terminateConvexHull();
+
+        public static int testFieldHeight = 1100;
+        public static int testFieldWidth = 1100;
+
+        public static int testMaxPointCount = 1100;
+
+        public static float testOmega = 40;
 
         [TestMethod]
         public void TestConvexHullExtendedRoundedMassive()
@@ -33,11 +40,38 @@ namespace CUDAFingerprinting.GPU.ConvexHull.Tests
             string homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             ConvexHullTests.ParsePoints(homeFolder + "\\convex_hull_db.txt");
 
-            int cylinderSize = Marshal.SizeOf(typeof(Point));
+            int pointSize = Marshal.SizeOf(typeof(Point));
 
-            List<PointF> hull = Common.ConvexHull.ConvexHull.GetConvexHull(ConvexHullTests.globalHullMassive);
+            IntPtr pointsUnmanaged = Marshal.AllocHGlobal(ConvexHullTests.globalHullMassive.Count * pointSize);
+            IntPtr curHullPtr = new IntPtr(pointsUnmanaged.ToInt32()); // No idea why not just " = db", copypasted from SO
 
-            List<PointF> extendedHull = Common.ConvexHull.ConvexHullModified.ExtendHull(hull, ConvexHullTests.omega);            
+            for (int i = 0; i < ConvexHullTests.globalHullMassive.Count; i++)
+            {
+                Point curPoint = new Point();
+                curPoint.X = ConvexHullTests.globalHullMassive[i].X;
+                curPoint.Y = ConvexHullTests.globalHullMassive[i].Y;
+
+                Marshal.StructureToPtr(curPoint, curHullPtr, false);
+                curHullPtr = new IntPtr(curHullPtr.ToInt32() + Marshal.SizeOf(typeof(Point)));
+            }
+
+            initConvexHull(testFieldHeight, testFieldWidth, testMaxPointCount);
+            IntPtr fieldPtr = processConvexHull(pointsUnmanaged, testOmega, ConvexHullTests.globalHullMassive.Count);
+            //Console.WriteLine(fieldPtr);
+
+            byte[] field = new byte[testFieldHeight * testFieldWidth];
+
+            Marshal.Copy(fieldPtr, field, 0, testFieldHeight * testFieldWidth);
+
+            int[,] intField = new int[testFieldHeight, testFieldWidth];
+            for (int i = 0; i < testFieldHeight * testFieldWidth; i++)
+            {
+                intField[i % testFieldWidth, i / testFieldWidth] = field[i] != 0 ? 255 : 0;
+            }
+
+            Common.ImageHelper.SaveArray(intField, "TestFieldFillingExtendedRounded.jpg");
+
+            terminateConvexHull();
         }
     }
 }
