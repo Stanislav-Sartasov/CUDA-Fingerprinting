@@ -88,14 +88,20 @@ __global__ void cudaRegularize (CUDAArray<float> source, CUDAArray<float> target
 	int row = defaultRow();
 	int column = defaultColumn();
 
-	if (row < source.Height && column < source.Width)
+	if (row >= 8 && row < source.Height && column >= 8 && column < source.Width)
 	{
 		int tX = threadIdx.x;
 		int tY = threadIdx.y;
 
 		__shared__ float buf[defaultBlockSize][defaultBlockSize];
 		__shared__ float linBuf[defaultBlockSize];
-		buf[tX][tY] = source.At(row, column);
+		for (int i = -1; i < 2; i++)
+		{
+			for (int j = -1; j < 2; j++)
+			{
+				buf[tX + 8 * i][tY + 8 * j] = source.At(row + 8 * i, column + 8 * j);
+			}
+		}			
 
 		__syncthreads();
 		if (tX == 0)
@@ -136,7 +142,7 @@ void Regularize (CUDAArray<float> source, CUDAArray <float> target)
 
 __device__ __inline__ float bufValue (CUDAArray<float> source, int row, int column)
 {
-	if ( ( row - 16 >= 0 ) && ( row + 16 < source.Height ) && ( column - 16 >= 0 ) && ( column + 16 < source.Width ) )
+	if (row - 3 >= 0 && row + 3 < source.Height && column - 3 >= 0 && column + 3 < source.Width)
 	{
 		return source.At (row, column);
 	}
@@ -148,17 +154,24 @@ __device__ __inline__ float bufValue (CUDAArray<float> source, int row, int colu
 
 __device__ __inline__ float Sum (CUDAArray<float> source, int tX, int tY, int row, int column)
 {
-	__shared__ float buf[bigBlockSize][bigBlockSize];
+	__shared__ float buf[9][9];
 
-	for ( int i = -1; i < 2; i++ )
-		for ( int j = -1; j < 2; j++ )
-			buf[tX + 16 * i][tY + 16 * j] = bufValue (source, row + 16 * i, column + 16 * j);
+	/*for (int i = -1; i < 2; i++)
+	{
+		for (int j = -1; j < 2; j++)
+		{
+			float val = bufValue(source, row + 3 * i, column + 3 * j);
+			buf[tX][tY] = val;
+		}
+	}*/
+
+	buf[tX][tY] = source.At(row, column);
 
 	__syncthreads();	
 	float sum = 0;
-	for ( int i = tX - 16; i < tX + 16; i++ )
+	for ( int i = 0; i < 9; i++ )
 	{
-		for ( int j = tY - 16; j < tY + 16; j++ )
+		for ( int j = 0; j < 9; j++ )
 		{
 			sum += buf[i][j];
 		}			
@@ -192,8 +205,8 @@ __global__ void cudaStrengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMap
 
 void Strengthen (CUDAArray<float> cMapReal, CUDAArray<float> cMapImaginary, CUDAArray<float> cMapAbs, CUDAArray<float> result)
 {
-	dim3 blockSize = dim3(defaultBlockSize, defaultBlockSize);
-	dim3 gridSize = dim3(ceilMod(cMapReal.Width, defaultBlockSize), ceilMod(cMapReal.Height, defaultBlockSize));
+	dim3 blockSize = dim3(9, 9);
+	dim3 gridSize = dim3(ceilMod(cMapReal.Width, 9), ceilMod(cMapReal.Height, 9));
 
 	cudaStrengthen <<< gridSize, blockSize >>> (cMapReal, cMapImaginary, cMapAbs, result);
 	cudaError_t error = cudaGetLastError ();
@@ -204,14 +217,14 @@ void SaveSegmentation (int width, int height, float* matrix)
 	int* newPic = (int*) malloc (sizeof (int)*width*height);
 	int capacity = width * height;
 
-	for ( int i = 0; i < capacity; ++i )
+	for ( int i = 0; i < capacity; i++ )
 	{
 		newPic[i] = (int)(matrix[i] * 255);
 	}
 
 	saveBmp ("Result.jpg", newPic, width, height);
 	
-	free (newPic);
+	std::free (newPic);
 }
 
 void Detect (float* orient, int width, int height)
@@ -223,53 +236,23 @@ void Detect (float* orient, int width, int height)
 	CUDAArray<float> cMapImaginary = CUDAArray<float> (width, height);
 	CUDAArray<float> cMapAbs = CUDAArray<float> (width, height);
 
-	float* ptr1 = (float*)malloc(sizeof(float)*width*height);
-	float* ptr2 = (float*)malloc(sizeof(float)*width*height);
-	cMapImaginary.GetData(ptr2);
 	SinCos (cMapReal, cMapImaginary, source);
 	cudaError_t error = cudaGetLastError();
-	cMapReal.GetData (ptr1);
-	cMapImaginary.GetData(ptr2);
 
-	ofstream sin ("gpuSin.doc");
-	for ( int i = 0; i < width; i++ )
-	{
-		sin << i << "] ";
-		for ( int j = 0; j < height; j++ )
-		{
-			sin << j << ") " << ptr1[i*width + j] << " ";
-		}
-		sin << endl;
-	}
-	sin.close();
-
-	ofstream cos("gpuCos.doc");
-	for (int i = 0; i < width; i++)
-	{
-		cos << i << "] ";
-		for
-			(int j = 0; j < height; j++)
-		{
-			cos << "(" << j << ")" << ptr2[i * width + j] << " ";
-		}
-		cos << endl;
-	}
-	cos.close();
-
-	Module (cMapReal, cMapImaginary, cMapAbs);
+	Module(cMapReal, cMapImaginary, cMapAbs);
 
 	CUDAArray<float> V_rReal = CUDAArray<float> (width, height);
 	CUDAArray<float> V_rImaginary = CUDAArray<float> (width, height);
 
-	Regularize ( V_rReal, cMapReal );
-	Regularize ( V_rImaginary, cMapImaginary );
+	//Regularize ( V_rReal, cMapReal );
+	//Regularize ( V_rImaginary, cMapImaginary );
 
 	Strengthen (cMapReal, cMapImaginary, cMapAbs, result);
 	float* str = new float[width * height];
 	result.GetData (str);
 	SaveSegmentation (width, height, str);
 
-	free (str);
+	std::free (str);
 
 	source.Dispose();
 	result.Dispose();
@@ -297,12 +280,12 @@ int main()
 
 	ifstream fin ("Orientation.txt");
 	float value = 0;
-	for ( int i = 0; i < width; i++ )
+	for ( int i = 0; i < height; i++ )
 	{
-		for ( int j = 0; j < height; j++ )
+		for ( int j = 0; j < width; j++ )
 		{
 			fin >> value;
-			orient[i + j * width] = value / 10000;
+			orient[j + i * width] = value / 10000;
 		}
 	}
 
@@ -310,9 +293,9 @@ int main()
 
 	Detect ( orient, width, height );
 
-	free(pic);
+	std::free(pic);
 	//free (fPic);
-	free (orient);
+	std::free (orient);
 
 	return 0;
 }
