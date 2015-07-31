@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CUDAFingerprinting.TemplateMatching.MCC.Tests;
 using CUDAFingerprinting.TemplateMatching.MCC;
+using CUDAFingerprinting.TemplateMatching.MCC.Tests;
 using System.Runtime.InteropServices;
 
 namespace CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests
@@ -51,7 +51,7 @@ namespace CUDAFingerprinting.GPU.BinCylinderCorrelation.Tests
             int cylinderSize = Marshal.SizeOf(typeof(CylinderC));
 
             IntPtr db = Marshal.AllocHGlobal(BinTemplateSimilarityTests.contiguousCylinders.Length * cylinderSize);
-            IntPtr curDbPtr = new IntPtr(db.ToInt32());
+            IntPtr curDbPtr = new IntPtr(db.ToInt32()); // No idea why not just " = db", copypasted from SO
             for (int i = 0; i < BinTemplateSimilarityTests.contiguousCylinders.Length; i++)
             {
                 CylinderC curDbCylinder = new CylinderC();

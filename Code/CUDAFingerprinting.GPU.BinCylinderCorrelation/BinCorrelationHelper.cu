@@ -42,15 +42,6 @@ void printCUDAArray2D(CUDAArray<unsigned int> arr)
 	printf("[end] Print CUDAArray 2D\n");
 }
 
-__device__ __inline__ void cudaArrayBitwiseAndDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, unsigned int *result)
-{
-	int row = (defaultRow()) % fst->Height;
-	int column = (defaultColumn()) % fst->Width;
-	
-	unsigned int newValue = fst->At(row, column) & snd->At(row, column);
-	result[row * fst->Width + column] = newValue;
-}
-
 __global__ void cudaArrayBitwiseAndGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
 {
 	if (fst.Width > (defaultColumn()) && fst.Height > (defaultRow())) {
@@ -70,23 +61,12 @@ CUDAArray<unsigned int> BitwiseAndArray(CUDAArray<unsigned int> fst, CUDAArray<u
 	return *result;
 }
 
-
-__device__ __inline__ void cudaArrayBitwiseXorDevice(CUDAArray<unsigned int> *fst, CUDAArray<unsigned int> *snd, unsigned int *result)
-{
-	int row = (defaultRow()) % fst->Height;
-	int column = (defaultColumn()) % fst->Width;
-
-	unsigned int newValue = fst->At(row, column) ^ snd->At(row, column);
-	result[row * fst->Width + column] = newValue;
-}
-
 __global__ void cudaArrayBitwiseXorGlobal(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd, CUDAArray<unsigned int> result)
 {
 	if (fst.Width > (defaultColumn()) && fst.Height > (defaultRow())) {
 		cudaArrayBitwiseXorDevice(&fst, &snd, result.cudaPtr);
 	}
 }
-
 
 CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<unsigned int> snd)
 {
@@ -100,18 +80,6 @@ CUDAArray<unsigned int> BitwiseXorArray(CUDAArray<unsigned int> fst, CUDAArray<u
 	//printCUDAArray1D(*result);
 
 	return *result;
-}
-
-__device__ __inline__ void cudaArrayWordNormDevice(unsigned int *arr, unsigned int arrHeight, unsigned int arrWidth, unsigned int* sum)
-{
-	int row = (defaultRow()) % arrHeight;
-	int column = (defaultColumn()) % arrWidth;
-
-	unsigned int x = arr[row * arrWidth + column];
-
-	x = __popc(x);
-
-	atomicAdd(sum, x);
 }
 
 __global__ void cudaArrayWordNormGlobal(CUDAArray<unsigned int> arr, unsigned int* sum)

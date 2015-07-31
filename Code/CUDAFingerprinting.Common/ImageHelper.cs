@@ -199,7 +199,7 @@ namespace CUDAFingerprinting.Common
             {
                 value = Math.Abs(value);
                 // todo: make a proper normalization
-                if(applyNormalization)
+                if (applyNormalization)
                     value = (value < 0) ? 0 : (value > 255 ? 255 : value);
                 // note: notice the flipping
                 lock(bmp)bmp.SetPixel(column, y-1-row, Color.FromArgb(value, value, value));
