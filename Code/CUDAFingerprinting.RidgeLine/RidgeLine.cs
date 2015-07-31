@@ -61,7 +61,7 @@ namespace CUDAFingerprinting.RidgeLine
             Minutias = new List<Minutia>();
         }
 
-        private void NewSection(int mid)
+        private void NewSection(int mid) 
         {
             int i = mid/BuildUp;
             int j = mid%BuildUp;
@@ -100,7 +100,7 @@ namespace CUDAFingerprinting.RidgeLine
             }
         } 
 
-        private int[] FindEdges()
+        private int[] FindEdges() 
         {
             int lPoint = _wings;
             int rPoint = _wings;
@@ -193,28 +193,34 @@ namespace CUDAFingerprinting.RidgeLine
             return res;
         }
 
-        private int MakeStep(int startPoint, Directions direction)
+        private int MakeStep(int startPoint, double ang, Directions direction)
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
 
 
-            double angle = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
+            double angle = ang + ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
             while (angle > Math.PI*2) angle -=Math.PI*2;
-            double angCheck = _orientation.GetOrientation(x, y);
-            x += (int) (_step*Math.Cos(angle) + 0.5);
-            y += (int) (_step*Math.Sin(angle) + 0.5);
+            //if (angCheck < 0) angCheck += Math.PI;
+
+            double dx = x + _step*Math.Cos(angle);
+            double dy = y + _step*Math.Sin(angle);
+
+            x = (int) (dx >= 0 ? dx + 0.5 : dx - 0.5);
+            y = (int) (dy >= 0 ? dy + 0.5 : dy - 0.5);
 
             if (x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0))
             {
                 return -1;
             }
 
-            double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
-            double ang2check = _orientation.GetOrientation(x, y);
-            while (angle2 > Math.PI * 2) angle2 -= Math.PI * 2;
+            //double angle2 = _orientation.GetOrientation(x, y) + ((int)direction) * Math.PI + Math.PI * 2;
+            double ang2Check = _orientation.GetOrientation(x, y);
+            //if (ang2Check < 0) ang2Check += Math.PI;
+            //while (angle2 > Math.PI * 2) angle2 -= Math.PI * 2;
             //if (Math.Abs(angle - angle2) > _pi4)
-            if (Math.Abs(angCheck - ang2check) > Math.PI / 2.0)
+            //Math.Abs(angCheck - ang2Check) > 0.5
+            if ((ang * ang2Check < 0) ? (ang > 1.4) || (ang2Check > 1.4) : Math.Abs(ang - ang2Check) > 0.5)
             {
                 _diffAngle = !_diffAngle;
             }
@@ -237,7 +243,7 @@ namespace CUDAFingerprinting.RidgeLine
             {
                 for (int j = yMin; j <= yMax; j++)
                 {
-                    if(_image[j,i] < 30) _visited[j, i] = true;
+                    if(_image[j,i] < 10) _visited[j, i] = true;
                 }
             }
         }
@@ -252,9 +258,6 @@ namespace CUDAFingerprinting.RidgeLine
                 return MinutiaTypes.Intersection;
             }
                 
-
-            
-
             double mean = 0;
             for (int i = 0; i < _wings*2 + 1; i++)
             {
@@ -294,6 +297,24 @@ namespace CUDAFingerprinting.RidgeLine
             bmp.Save("Test1.bmp");
         }
 
+        bool LookAround(int i, int j)
+        {
+            bool res = false;
+
+            for (int x = -1; x < 2; x++)
+            {
+                for (int y = -1; y < 2; y++)
+                {
+                    if (x + i >= 0 && y + j >= 0 && x + i < _image.GetLength(1) && y + j < _image.GetLength(0))
+                    {
+                        res = res | (_visited[y + j, x + i] && (_image[y+j,x+i] < 10));
+                    }
+                }
+            }
+
+            return res;
+        }
+
         Minutia FollowLine(int startPoint, Directions direction)
         {
             NewSection(startPoint);
@@ -307,11 +328,14 @@ namespace CUDAFingerprinting.RidgeLine
                 ycur = startPoint % BuildUp;
 
                 angle = _orientation.GetOrientation(xcur, ycur);
-                angle += ((int) direction)*Math.PI + (_diffAngle ? Math.PI : 0);
-                while (angle > Math.PI*2) angle -=Math.PI*2;
+                
                 var edges = FindEdges();
 
-                startPoint = MakeStep(edges[2], direction);
+                startPoint = MakeStep(edges[2], angle, direction);
+
+                angle += ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0);
+                while (angle > Math.PI * 2) angle -= Math.PI * 2;
+
                 if (startPoint < 0) return null;
                 NewSection(startPoint);
                 if (_section[_wings] == -1) return null;
@@ -329,49 +353,57 @@ namespace CUDAFingerprinting.RidgeLine
             return Minutias;
         }
 
-        public void FindMinutiaLine(int startPoint, double duplicateDelta, int colorThreshold = 30)
+        public void FindMinutiaLine(int startPoint, double duplicateDelta, int colorThreshold = 10)
         {
             int x = startPoint/BuildUp;
             int y = startPoint%BuildUp;
 
-            if (_image[y, x] < colorThreshold && !_visited[y, x])
+            bool look = LookAround(x, y);
+
+            if (_image[y, x] < colorThreshold && !_visited[y, x] && !look)
             {
                 _visited[y, x] = true;
 
                 var minutia1 = FollowLine(startPoint, Directions.Forward);
                 if (minutia1 != null)
                 {
-                if (minutia1.Type == MinutiaTypes.LineEnding)//WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
+                    if (minutia1.Type == MinutiaTypes.LineEnding)
+                        //WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
                     {
-                    if (IsDuplicate(minutia1, duplicateDelta))
-                        CheckAndDeleteFalseMinutia(minutia1, duplicateDelta);
-                    else
-                        Minutias.Add(minutia1);
+                        if (IsDuplicate(minutia1, duplicateDelta))
+                            CheckAndDeleteFalseMinutia(minutia1, duplicateDelta);
+                        else
+                            Minutias.Add(minutia1);
                     }
-                else
-                {
-                    if (!IsDuplicate(minutia1, duplicateDelta))
-                        Minutias.Add(minutia1);
-                }
+                    else
+                    {
+                        if (!IsDuplicate(minutia1, duplicateDelta))
+                            Minutias.Add(minutia1);
+                    }
                 }
                 _diffAngle = false;
 
                 var minutia2 = FollowLine(startPoint, Directions.Back);
                 if (minutia2 != null)
                 {
-                if (minutia2.Type == MinutiaTypes.LineEnding)//WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
-                {
-                    if (IsDuplicate(minutia2, duplicateDelta))
-                        CheckAndDeleteFalseMinutia(minutia2, duplicateDelta);
+                    if (minutia2.Type == MinutiaTypes.LineEnding)
+                        //WRONG: there would be no minutia if we arrive to the vicinity of this point even amount of times.
+                    {
+                        if (IsDuplicate(minutia2, duplicateDelta))
+                            CheckAndDeleteFalseMinutia(minutia2, duplicateDelta);
+                        else
+                            Minutias.Add(minutia2);
+                    }
                     else
-                        Minutias.Add(minutia2);
+                    {
+                        if (!IsDuplicate(minutia2, duplicateDelta))
+                            Minutias.Add(minutia2);
+                    }
                 }
-                else
-                {
-                    if (!IsDuplicate(minutia2, duplicateDelta))
-                        Minutias.Add(minutia2);
-                }
-        }
+            }
+            else
+            {
+                _visited[y, x] = look;
             }
 
             _diffAngle = false;

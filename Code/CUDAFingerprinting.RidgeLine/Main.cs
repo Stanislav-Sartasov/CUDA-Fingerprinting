@@ -15,13 +15,13 @@ namespace CUDAFingerprinting.RidgeLine
             var bmp = Resources.SampleFinger4;
             var image = ImageHelper.LoadImageAsInt(bmp);
 
-            var detectingMinutias = new RidgeLine(image, 5, 3);
+            var detectingMinutias = new RidgeLine(image, 4, 4);  //(image, step, size_wings)
 
             for (int i = 0; i < image.GetLength(1); i++)
             {
                 for (int j = 0; j < image.GetLength(0); j++)
                 {
-                    detectingMinutias.FindMinutiaLine(i * 1000 + j, 5.0, 50);
+                    detectingMinutias.FindMinutiaLine(i * 1000 + j, 5.0, 50);  
                 }
                 //if (i%10 == 0)
                 //{
@@ -29,8 +29,8 @@ namespace CUDAFingerprinting.RidgeLine
                 //}
             }
 
-            List<Common.Minutia> MinutiaE = new List<Common.Minutia>();
-            List<Common.Minutia> MinutiaI = new List<Common.Minutia>();
+            List<Common.Minutia> MinutiaE = new List<Common.Minutia>();  //Create List<EndingLine>
+            List<Common.Minutia> MinutiaI = new List<Common.Minutia>();  //Create List<Intersection>
 
             foreach (var minutia in detectingMinutias.GetMinutiaList())
             {
