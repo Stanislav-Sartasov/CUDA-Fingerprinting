@@ -1,4 +1,4 @@
-﻿using System;
+﻿using CUDAFingerprinting.ImageProcessing.ImageThinning;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 using System.IO;

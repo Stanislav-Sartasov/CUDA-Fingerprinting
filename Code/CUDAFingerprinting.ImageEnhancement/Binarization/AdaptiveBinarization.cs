@@ -1,7 +1,7 @@
 ﻿using System;
-using CUDAFingerprinting.Common;
+using CUDAFingerprinting.Common.OrientationField;
 
-namespace CUDAFingerprinting.FeatureExtraction
+namespace CUDAFingerprinting.ImageProcessing.Binarization
 {
     public struct Point
     {

@@ -1,8 +1,9 @@
 ﻿using CUDAFingerprinting.Common;
-using CUDAFingerprinting.Common.GaborFilter;
+using CUDAFingerprinting.Common.OrientationField;
+using CUDAFingerprinting.ImageProcessing.GaborEnhancement;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace ImageEnhancmentTest
+namespace CUDAFingerprinting.ImageProcessing.Tests
 {
     [TestClass]
     public class EnhancmentTest

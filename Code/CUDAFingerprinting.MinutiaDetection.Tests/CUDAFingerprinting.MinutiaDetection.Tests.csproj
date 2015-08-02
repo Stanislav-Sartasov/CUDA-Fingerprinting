@@ -51,7 +51,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="MinutiaDetectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -72,10 +71,6 @@
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.MinutiaDetection\CUDAFingerprinting.MinutiaDetection.csproj">
-      <Project>{29bd2034-69dc-4ac2-a98c-d9626fba2f4b}</Project>
-      <Name>CUDAFingerprinting.MinutiaDetection</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

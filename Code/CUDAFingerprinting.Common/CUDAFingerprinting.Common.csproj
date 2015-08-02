@@ -57,6 +57,7 @@
     <Compile Include="KernelHelper.cs" />
     <Compile Include="LocalRidgeFrequency.cs" />
     <Compile Include="Minutia.cs" />
+    <Compile Include="MorphologicalOperators.cs" />
     <Compile Include="Normalization.cs" />
     <Compile Include="OrientationField\OrientationField.cs" />
     <Compile Include="OrientationField\OrientationFieldExtensions.cs" />

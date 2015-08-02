@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -29,7 +29,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="AdaptiveBinarizationTest.cs" />
     <Compile Include="ImageBinarizationTest.cs" />
+    <Compile Include="MinutiaDetectionTest.cs" />
     <Compile Include="PoincareDetectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -78,8 +79,8 @@
     <None Include="Resources\1_1.bmp" />
     <None Include="Resources\1_2.bmp" />
     <Content Include="Resources\1.bmp" />
+    <None Include="Resources\17150140AFTER.bmp" />
     <Content Include="Resources\1test.bmp" />
-    <Content Include="Resources\1testest.bmp" />
     <Content Include="Resources\2_6.bmp" />
     <None Include="Resources\connectedness.bmp" />
     <None Include="Resources\connectedness2.bmp" />
@@ -93,6 +94,7 @@
     <Content Include="Resources\2_6Test.bmp" />
     <Content Include="Resources\44_8.bmp" />
     <Content Include="Resources\binarizated1.bmp" />
+    <None Include="Resources\small1.bmp" />
     <Content Include="Resources\test.bmp" />
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +107,10 @@
     <ProjectReference Include="..\CUDAFingerprinting.FeatureExtraction\CUDAFingerprinting.FeatureExtraction.csproj">
       <Project>{004c8b66-4bfc-4337-b4ad-12e125189051}</Project>
       <Name>CUDAFingerprinting.FeatureExtraction</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageProcessing.csproj">
+      <Project>{6B1354D8-3B37-4946-93C0-5FBC2EF11544}</Project>
+      <Name>CUDAFingerprinting.ImageProcessing</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

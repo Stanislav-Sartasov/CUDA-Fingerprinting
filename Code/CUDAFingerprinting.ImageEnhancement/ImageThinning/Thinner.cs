@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CUDAFingerprinting.FeatureExtraction
+namespace CUDAFingerprinting.ImageProcessing.ImageThinning
 {
     public static class Thinner
     {

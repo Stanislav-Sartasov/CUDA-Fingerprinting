@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace CUDAFingerprinting.Common.ComplexFilters
+namespace CUDAFingerprinting.Common
 {
     // TODO: revise the code with the works of Nilsson, Bigun et al.
     public class SymmetryHelper

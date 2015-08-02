@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CUDAFingerprinting.Common.GaborFilter
+namespace CUDAFingerprinting.ImageProcessing.GaborEnhancement
 {
     public class ImageEnhancement
     {
@@ -18,7 +18,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
 
             var gabor = new GaborFilter(angleNum, filterSize);
 
-            double[] frequencies = GaborFilter.FrequencyMatrix;
+            double[] frequencies = ImageProcessing.GaborEnhancement.GaborFilter.FrequencyMatrix;
             int center = filterSize / 2; //filter is always a square.
             int upperCenter = (filterSize & 1) == 0 ? center - 1 : center;
 
@@ -37,7 +37,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
 
                     double diff = Double.MaxValue;
                     int freq = 0;
-                    for (int freqInd = 0; freqInd < GaborFilter.FrequencyCount; freqInd++)
+                    for (int freqInd = 0; freqInd < ImageProcessing.GaborEnhancement.GaborFilter.FrequencyCount; freqInd++)
                         if (Math.Abs(frequencies[freqInd] - frequencyMatrix[i, j]) < diff)
                         {
                             freq = freqInd;

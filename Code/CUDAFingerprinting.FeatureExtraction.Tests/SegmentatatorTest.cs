@@ -1,8 +1,6 @@
-﻿using System;
+﻿using CUDAFingerprinting.ImageProcessing.Segmentation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CUDAFingerprinting.FeatureExtraction;
 using System.Drawing;
-using System.IO;
 
 namespace CUDAFingerprinting.FeatureExtraction.Tests
 {

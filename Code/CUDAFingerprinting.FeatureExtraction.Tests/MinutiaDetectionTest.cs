@@ -1,10 +1,11 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CUDAFingerprinting.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using CUDAFingerprinting.Common;
+using CUDAFingerprinting.Common.OrientationField;
+using CUDAFingerprinting.FeatureExtraction.Minutiae;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CUDAFingerprinting.MinutiaDetection.Tests
+namespace CUDAFingerprinting.FeatureExtraction.Tests
 {
     [TestClass]
     public class MinutiaDetectionTest

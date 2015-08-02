@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Collections.Generic;
+using CUDAFingerprinting.Common.OrientationField;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common;
 using System.Linq;
@@ -18,8 +19,8 @@ namespace CUDAFingerprinting.Common.Tests
         {
             var height = 7;
             var width = 6;
-            int[,] dummy = new int[OrientationField.DefaultSize * height, OrientationField.DefaultSize * width];
-            var field = new OrientationField(dummy);
+            int[,] dummy = new int[OrientationField.OrientationField.DefaultSize * height, OrientationField.OrientationField.DefaultSize * width];
+            var field = new OrientationField.OrientationField(dummy);
 
             for(int column=0;column<width;column++)
             {
@@ -41,7 +42,7 @@ namespace CUDAFingerprinting.Common.Tests
             var image = Resources.SampleFinger;
             var bytes = ImageHelper.LoadImageAsInt(Resources.SampleFinger);
 
-			OrientationField field = new OrientationField(bytes);
+			OrientationField.OrientationField field = new OrientationField.OrientationField(bytes);
 
             field.SaveAboveToFile(image, Path.GetTempPath() + Guid.NewGuid() + ".bmp", true);
 

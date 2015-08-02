@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CUDAFingerprinting.Common.GaborFilter
+namespace CUDAFingerprinting.ImageProcessing.GaborEnhancement
 {
     internal class GaborFilter
     {
-        public Filter[,] Filters;
+        public ImageProcessing.GaborEnhancement.Filter[,] Filters;
         //public int Count;
         public const int FrequencyCount = 4;
         public static double[] FrequencyMatrix = 
@@ -22,7 +18,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
         public GaborFilter(int angleCount, int size)
         {
             var bAngle = Math.PI / angleCount;
-            Filters = new Filter[angleCount, FrequencyCount];
+            Filters = new ImageProcessing.GaborEnhancement.Filter[angleCount, FrequencyCount];
 
             //for (int i = 0; i < FrequencyCount; i++)
             //{
@@ -32,7 +28,7 @@ namespace CUDAFingerprinting.Common.GaborFilter
             {
                 for (int j = 0; j < FrequencyCount; j++)
                 {
-                    Filters[i, j] = new Filter(size, bAngle*i, FrequencyMatrix[j]);
+                    Filters[i, j] = new ImageProcessing.GaborEnhancement.Filter(size, bAngle*i, FrequencyMatrix[j]);
                 }
             }
         }

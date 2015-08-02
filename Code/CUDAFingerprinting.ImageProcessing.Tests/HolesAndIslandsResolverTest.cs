@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CUDAFingerprinting.Common;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Diagnostics;
-using CUDAFingerprinting.ImageEnhancement;
+using CUDAFingerprinting.Common;
+using CUDAFingerprinting.ImageProcessing.Postprocessing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace ImageEnhancmentTest
+namespace CUDAFingerprinting.ImageProcessing.Tests
 {
     [TestClass]
     public class HolesAndIslandsResolverTest

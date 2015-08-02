@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace CUDAFingerprinting.FeatureExtraction
+namespace CUDAFingerprinting.ImageProcessing.Binarization
 {
     public static class ImageBinarization
     {

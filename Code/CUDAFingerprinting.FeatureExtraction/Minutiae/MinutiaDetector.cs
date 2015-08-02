@@ -1,8 +1,9 @@
 ﻿using System;
-using CUDAFingerprinting.Common;
 using System.Collections.Generic;
+using CUDAFingerprinting.Common;
+using CUDAFingerprinting.Common.OrientationField;
 
-namespace CUDAFingerprinting.MinutiaDetection
+namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
     public static class MinutiaDetector
     {

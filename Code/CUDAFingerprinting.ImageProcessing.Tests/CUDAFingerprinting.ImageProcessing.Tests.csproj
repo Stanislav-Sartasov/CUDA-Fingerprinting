@@ -6,8 +6,8 @@
     <ProjectGuid>{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ImageEnhancmentTest</RootNamespace>
-    <AssemblyName>ImageEnhancmentTest</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.ImageProcessing.Tests</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.ImageProcessing.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -29,7 +29,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -72,17 +72,13 @@
     <None Include="Resources\22_1.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CUDAFingerprinting.Common.GaborFilter\CUDAFingerprinting.Common.GaborFilter.csproj">
-      <Project>{a99e6530-46cc-42a8-b53d-898b8275f77d}</Project>
-      <Name>CUDAFingerprinting.Common.GaborFilter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageEnhancement.csproj">
+    <ProjectReference Include="..\CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageProcessing.csproj">
       <Project>{6b1354d8-3b37-4946-93c0-5fbc2ef11544}</Project>
-      <Name>CUDAFingerprinting.ImageEnhancement</Name>
+      <Name>CUDAFingerprinting.ImageProcessing</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
