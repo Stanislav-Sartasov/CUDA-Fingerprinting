@@ -6,7 +6,7 @@ namespace CUDAFingerprinting.Common.OrientationField
 {
     public static class OrientationFieldExtensions
     {
-        public static void SaveToFile(this Common.OrientationField.OrientationField field, string name, bool openFileAfterSaving = false)
+        public static void SaveToFile(this OrientationField field, string name, bool openFileAfterSaving = false)
         {
             var bmp = SaveToBitmap(field);
             bmp.Save(name, ImageHelper.GetImageFormatFromExtension(name));
@@ -14,7 +14,12 @@ namespace CUDAFingerprinting.Common.OrientationField
                 Process.Start(name);
         }
 
-        public static Bitmap SaveToBitmap(this Common.OrientationField.OrientationField field)
+        public static void SaveToFile(this OrientationField field)
+        {
+            SaveToFile(field, ImageHelper.GetTemporaryImageFileName(), true);
+        }
+
+        public static Bitmap SaveToBitmap(this OrientationField field)
         {
             using (var bmp = new Bitmap(field.Blocks.GetLength(1) * field.BlockSize, field.Blocks.GetLength(0) * field.BlockSize))
             {
@@ -111,12 +116,18 @@ namespace CUDAFingerprinting.Common.OrientationField
             return bmp;
         }
 
-        public static void SaveAboveToFile(this Common.OrientationField.OrientationField field, Bitmap undercoat, string name, bool openFileAfterSaving = false)
+        public static void SaveAboveToFile(this OrientationField field, Bitmap undercoat, string name, bool openFileAfterSaving = false)
         {
             var bmp = SaveAboveToBitmap(field, undercoat);
             bmp.Save(name, ImageHelper.GetImageFormatFromExtension(name));
             if (openFileAfterSaving)
                 Process.Start(name);
+        }
+
+        // a shorter method to be used in tests
+        public static void SaveAboveToFile(this OrientationField field, Bitmap undercoat)
+        {
+            SaveAboveToFile(field, undercoat, ImageHelper.GetTemporaryImageFileName(), true);
         }
 
 
@@ -127,5 +138,11 @@ namespace CUDAFingerprinting.Common.OrientationField
 			if (openFileAfterSaving)
 				Process.Start(name);
 		}
+
+        // a shorter method to be used in tests
+        public static void SaveAboveToFile(this PixelwiseOrientationField field, Bitmap undercoat)
+        {
+            SaveAboveToFile(field, undercoat, ImageHelper.GetTemporaryImageFileName(), true);
+        }
     }
 }

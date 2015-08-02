@@ -230,5 +230,10 @@ namespace CUDAFingerprinting.Common
                 default: throw new NotSupportedException();
             }
         }
+
+        public static string GetTemporaryImageFileName()
+        {
+            return Path.GetTempPath() + Guid.NewGuid() + ".bmp";
+        }
     }
 }

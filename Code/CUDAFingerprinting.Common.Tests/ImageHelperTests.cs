@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Drawing;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CUDAFingerprinting.Common.Tests
 {
@@ -19,7 +15,7 @@ namespace CUDAFingerprinting.Common.Tests
             {
                 for (int y = 0; y < bmp.Height; y++)
                 {
-                    if ((double)bmp.GetPixel(x, y).R != array[bmp.Height - 1 - y, x])
+                    if (bmp.GetPixel(x, y).R != array[bmp.Height - 1 - y, x])
                         Assert.Fail("Pixel is malformed at ({0}, {1})", x, y);
                 }
             }

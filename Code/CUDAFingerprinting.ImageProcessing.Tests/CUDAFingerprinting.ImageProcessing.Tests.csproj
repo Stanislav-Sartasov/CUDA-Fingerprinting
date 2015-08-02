@@ -78,7 +78,7 @@
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.ImageProcessing\CUDAFingerprinting.ImageProcessing.csproj">
-      <Project>{6b1354d8-3b37-4946-93c0-5fbc2ef11544}</Project>
+      <Project>{6B1354D8-3B37-4946-93C0-5FBC2EF11544}</Project>
       <Name>CUDAFingerprinting.ImageProcessing</Name>
     </ProjectReference>
   </ItemGroup>
