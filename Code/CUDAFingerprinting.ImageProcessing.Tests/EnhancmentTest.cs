@@ -12,7 +12,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ImageEnhancmentTest()
         {
             var bmp = Resources.SampleFinger;
-            double[,] imgDoubles = ImageHelper.LoadImage(bmp);
+            double[,] imgDoubles = ImageHelper.LoadImage<double>(bmp);
 
             imgDoubles.DoNormalization(100, 100);
 

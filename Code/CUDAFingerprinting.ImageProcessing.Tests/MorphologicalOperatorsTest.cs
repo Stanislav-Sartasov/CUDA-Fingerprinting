@@ -31,7 +31,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ErosionTest()
         {
             var bmp = Resources.f;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);
@@ -56,7 +56,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void DilationTest()
         {
             var bmp = Resources.f;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);
@@ -81,7 +81,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void OpeningTest()
         {
             var bmp = Resources.f;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);
@@ -106,7 +106,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ClosingTest()
         {
             var bmp = Resources.f;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);
@@ -131,7 +131,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ComposeTest()
         {
             var bmp = Resources.f;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);

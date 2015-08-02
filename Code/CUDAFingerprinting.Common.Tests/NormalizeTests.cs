@@ -10,7 +10,7 @@ namespace CUDAFingerprinting.Common.Tests
         public void TestNormalization()
         {
             var bmp   = Resources.SampleFinger3;
-            var array = ImageHelper.LoadImage(bmp);
+            var array = ImageHelper.LoadImage<double>(bmp);
 
             array = array.DoNormalization(100, 1000);
 

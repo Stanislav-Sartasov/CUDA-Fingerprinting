@@ -12,9 +12,9 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
         [TestMethod]
         public void AdaptiveBinarizationTestMethod()
         {
-            int[,] arrayI = ImageHelper.LoadImageAsInt(Resources._1test);
+            int[,] arrayI = ImageHelper.LoadImage<int>(Resources._1test);
             var arr = AdaptiveBinarization.AdaptiveBinarize(arrayI);
-            ImageHelper.SaveArrayToBitmap(arr).Save(Path.GetTempPath() + Guid.NewGuid() + ".bmp");
+            ImageHelper.SaveArrayAndOpen(arr);
         }
     }
 }

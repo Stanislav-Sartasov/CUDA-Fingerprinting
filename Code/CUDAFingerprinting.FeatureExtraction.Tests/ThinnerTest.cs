@@ -42,7 +42,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
 
         public void TestThin(Bitmap bmp)
         {
-            var bmpBefore = Binarization(ImageHelper.LoadImage(bmp), bmp.Height, bmp.Width);
+            var bmpBefore = Binarization(ImageHelper.LoadImage<double>(bmp), bmp.Height, bmp.Width);
             /* open binarized source picture
             var newPic1 = ImageHelper.SaveArrayToBitmap(bmpBefore);
             var name1 = Path.GetTempPath() + bmp.GetHashCode().ToString() + "BEFORE.bmp";

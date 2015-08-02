@@ -14,13 +14,13 @@ namespace CUDAFingerprinting.Common.Tests
         [TestMethod]
         public void TestConvolutionForEvenSizedFilters()
         {
-            var img = ImageHelper.LoadImage(Resources.SampleFinger);
+            var img = ImageHelper.LoadImage<double>(Resources.SampleFinger);
 
             var kernel = KernelHelper.MakeKernel((x, y) => 1, 4);
 
             var result = ConvolutionHelper.Convolve(img, kernel);
 
-            ImageHelper.SaveArrayAndOpen(result, Path.GetTempPath() + Guid.NewGuid() + ".bmp");
+            ImageHelper.SaveArrayAndOpen(result);
         }
     }
 }

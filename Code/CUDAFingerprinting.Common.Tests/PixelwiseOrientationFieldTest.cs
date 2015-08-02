@@ -11,7 +11,7 @@ namespace CUDAFingerprinting.Common.Tests
 		public void PixelwiseOrientationTest()
 		{
 			var image = Resources.SampleFinger;
-			var bytes = ImageHelper.LoadImageAsInt(Resources.SampleFinger);
+			var bytes = ImageHelper.LoadImage<int>(Resources.SampleFinger);
 
 			PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
 			

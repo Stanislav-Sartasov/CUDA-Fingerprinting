@@ -16,7 +16,7 @@ namespace CUDAFingerprinting.ImageProcessing.Segmentation
         public  Segmentator(Bitmap picture)
         {
             matrix = new float[picture.Width, picture.Height];
-            pic = ImageHelper.LoadImage(picture);
+            pic = ImageHelper.LoadImage<double>(picture);
             width = picture.Width;
             height = picture.Height;
         }

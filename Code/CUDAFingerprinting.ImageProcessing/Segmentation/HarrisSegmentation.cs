@@ -13,7 +13,7 @@ namespace CUDAFingerprinting.ImageProcessing.Segmentation
 
         public HarrisSegmentation(Bitmap picture)
         {
-            pic = ImageHelper.LoadImage(picture);
+            pic = ImageHelper.LoadImage<double>(picture);
             width = picture.Width;
             height = picture.Height;
         }

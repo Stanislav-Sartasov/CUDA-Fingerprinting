@@ -33,7 +33,7 @@ namespace CUDAFingerprinting.Common.Tests
 		public void CompleteVisualizationTest()
 		{
             var image = Resources.SampleFinger;
-            var bytes = ImageHelper.LoadImageAsInt(Resources.SampleFinger);
+            var bytes = ImageHelper.LoadImage<int>(Resources.SampleFinger);
 
 			var field = new OrientationField.OrientationField(bytes);
 

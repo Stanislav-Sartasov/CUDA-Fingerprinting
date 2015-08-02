@@ -39,7 +39,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ResolveHolesTest()
         {
             var bmp = Resources.holes;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);
@@ -60,7 +60,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ResolveIslandsTest()
         {
             var bmp = Resources.islands;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);
@@ -81,7 +81,7 @@ namespace CUDAFingerprinting.ImageProcessing.Tests
         public void ResolveHolesAndIslandsTest()
         {
             var bmp = Resources.SampleFinger;
-            var img = ImageHelper.LoadImageAsInt(bmp);
+            var img = ImageHelper.LoadImage<int>(bmp);
 
             int h = img.GetLength(0);
             int w = img.GetLength(1);

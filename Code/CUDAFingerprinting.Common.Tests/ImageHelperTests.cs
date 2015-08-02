@@ -9,7 +9,7 @@ namespace CUDAFingerprinting.Common.Tests
         public void TestImageLoadAndSave()
         {
             var bmp = Resources.SampleFinger;
-            var array = ImageHelper.LoadImage(bmp);
+            var array = ImageHelper.LoadImage<float>(bmp);
 
             for (int x = 0; x < bmp.Width; x++)
             {

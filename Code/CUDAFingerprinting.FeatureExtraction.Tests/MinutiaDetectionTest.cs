@@ -14,7 +14,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
         public void MinutiaDetectorBasicTest()
         {
             var image = Resources.skeleton;
-            var bytes = ImageHelper.LoadImageAsInt(image);
+            var bytes = ImageHelper.LoadImage<int>(image);
             PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
 
             List<Minutia> minutias = MinutiaDetector.GetMinutias(bytes, field);
