@@ -9,7 +9,6 @@ namespace CUDAFingerprinting.Common
 {
     public static class ImageHelper
     {
-        [Obsolete]
         public static void MarkMinutiae(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
@@ -33,13 +32,11 @@ namespace CUDAFingerprinting.Common
             bmp2.Save(path, ImageFormat.Png);   
         }
 
-        [Obsolete]
         public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae, string path)
         {
             MarkMinutiae(new Bitmap(sourcePath), minutiae, path);
         }
 
-        [Obsolete]
         public static void MarkMinutiaeWithDirections(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
@@ -52,7 +49,6 @@ namespace CUDAFingerprinting.Common
             }
             var gfx = Graphics.FromImage(bmp2);
 
-            int fl = 1;
             foreach (var pt in minutiae)
             {
                 //minutia direction
@@ -75,42 +71,9 @@ namespace CUDAFingerprinting.Common
             bmp2.Save(path, ImageFormat.Png);
         }
 
-        [Obsolete]
         public static void MarkMinutiaeWithDirections(string sourcePath, List<Minutia> minutiae, string path)
         {
             MarkMinutiaeWithDirections(new Bitmap(sourcePath), minutiae, path);
-        }
-
-        [Obsolete]
-        public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae, List<Minutia> minutiae2, string path)
-        {
-            var bmp = new Bitmap(sourcePath);
-            var bmp2 = new Bitmap(bmp.Width, bmp.Height);
-            for (int x = 0; x < bmp2.Width; x++)
-            {
-                for (int y = 0; y < bmp2.Height; y++)
-                {
-                    bmp2.SetPixel(x, y, bmp.GetPixel(x, y));
-                }
-            }
-            var gfx = Graphics.FromImage(bmp2);
-
-            foreach (var pt in minutiae)
-            {
-                gfx.DrawEllipse(Pens.Red, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.FillEllipse(Brushes.Red, pt.X - 2, pt.Y - 2, 5, 5);
-            }
-
-            foreach (var pt in minutiae2)
-            {
-                gfx.DrawEllipse(Pens.Blue, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.FillEllipse(Brushes.Blue, pt.X - 2, pt.Y - 2, 5, 5);
-            }
-
-            gfx.Save();
-
-            bmp2.Save(path, ImageFormat.Png);
-
         }
 
         // IMPORTANT NOTE: The image is stored with (0,0) being top left angle

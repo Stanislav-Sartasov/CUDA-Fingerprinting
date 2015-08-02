@@ -30,10 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUDAFingerprinting.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\obj\Debug\CUDAFingerprinting.Common.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -53,7 +49,10 @@
     <Compile Include="Thinner.cs" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
+      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
+      <Name>CUDAFingerprinting.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

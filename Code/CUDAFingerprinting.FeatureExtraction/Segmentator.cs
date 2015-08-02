@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using CUDAFingerprinting.Common;
 
-namespace CUDAFingerprinting.FetureExtraction
+namespace CUDAFingerprinting.FeatureExtraction
 {
     public class Segmentator
     {

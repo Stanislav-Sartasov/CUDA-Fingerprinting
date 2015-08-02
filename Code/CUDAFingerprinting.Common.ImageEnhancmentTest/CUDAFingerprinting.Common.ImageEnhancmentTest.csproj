@@ -76,10 +76,6 @@
       <Project>{a99e6530-46cc-42a8-b53d-898b8275f77d}</Project>
       <Name>CUDAFingerprinting.Common.GaborFilter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.Common.OrientationField\CUDAFingerprinting.Common.OrientationField.csproj">
-      <Project>{5eec4bd2-e1b0-4794-948a-45732cd41f99}</Project>
-      <Name>CUDAFingerprinting.Common.OrientationField</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>

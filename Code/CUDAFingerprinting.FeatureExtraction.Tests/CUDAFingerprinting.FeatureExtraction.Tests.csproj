@@ -39,9 +39,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\obj\Debug\CUDAFingerprinting.Common.dll</HintPath>
     </Reference>
-    <Reference Include="CUDAFingerprinting.FeatureExtraction">
-      <HintPath>..\CUDAFingerprinting.FeatureExtraction\obj\Debug\CUDAFingerprinting.FeatureExtraction.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
@@ -103,6 +100,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.FeatureExtraction\CUDAFingerprinting.FeatureExtraction.csproj">
+      <Project>{004c8b66-4bfc-4337-b4ad-12e125189051}</Project>
+      <Name>CUDAFingerprinting.FeatureExtraction</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
