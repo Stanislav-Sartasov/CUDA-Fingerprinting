@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.FeatureExtraction", "CUDAFingerprinting.FeatureExtraction\CUDAFingerprinting.FeatureExtraction.csproj", "{004C8B66-4BFC-4337-B4AD-12E125189051}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.ImageProcessing", "CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageProcessing.csproj", "{6B1354D8-3B37-4946-93C0-5FBC2EF11544}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.ImageProcessing", "CUDAFingerprinting.ImageProcessing\CUDAFingerprinting.ImageProcessing.csproj", "{6B1354D8-3B37-4946-93C0-5FBC2EF11544}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.TemplateMatching", "CUDAFingerprinting.TemplateMatching\CUDAFingerprinting.TemplateMatching.csproj", "{9DCDBFA8-D0FB-4F13-B903-C6A82F024297}"
 EndProject

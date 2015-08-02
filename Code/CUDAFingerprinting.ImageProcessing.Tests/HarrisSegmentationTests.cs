@@ -1,10 +1,7 @@
-﻿using System;
+﻿using CUDAFingerprinting.ImageProcessing.Segmentation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Drawing;
-using CUDAFingerprinting.Common;
-using System.IO;
 
-namespace CUDAFingerprinting.Common.HarrisSegmentation.Test
+namespace CUDAFingerprinting.ImageProcessing.Tests
 {
     [TestClass]
     public class HarrisSegmentationTests
@@ -12,7 +9,7 @@ namespace CUDAFingerprinting.Common.HarrisSegmentation.Test
         [TestMethod]
         public void HarrisSegmentationTest()
         {
-            var image = Properties.Resources._52_8;
+            var image = Resources.SampleFinger;
             HarrisSegmentation M = new HarrisSegmentation(image);
 
             double[,] matrix = M.GaussFilter();

@@ -4,35 +4,30 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A99E6530-46CC-42A8-B53D-898B8275F77D}</ProjectGuid>
+    <ProjectGuid>{6B1354D8-3B37-4946-93C0-5FBC2EF11544}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CUDAFingerprinting.Common.GaborFilter</RootNamespace>
-    <AssemblyName>CUDAFingerprinting.Common.GaborFilter</AssemblyName>
+    <RootNamespace>CUDAFingerprinting.ImageProcessing</RootNamespace>
+    <AssemblyName>CUDAFingerprinting.ImageProcessing</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -45,40 +40,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Main.cs" />
+    <Compile Include="Binarization\AdaptiveBinarization.cs" />
+    <Compile Include="Binarization\ImageBinarization.cs" />
+    <Compile Include="GaborEnhancement\Filter.cs" />
+    <Compile Include="GaborEnhancement\GaborFilter.cs" />
+    <Compile Include="GaborEnhancement\ImageEnhancement.cs" />
+    <Compile Include="ImageThinning\Thinner.cs" />
+    <Compile Include="Postprocessing\HolesAndIslandsResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
+    <Compile Include="Segmentation\HarrisSegmentation.cs" />
+    <Compile Include="Segmentation\Segmentator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
-      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
+      <Project>{6FD094CC-0F63-47BD-A377-F054AE615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\1_1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\002.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\16_3.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\15_8.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

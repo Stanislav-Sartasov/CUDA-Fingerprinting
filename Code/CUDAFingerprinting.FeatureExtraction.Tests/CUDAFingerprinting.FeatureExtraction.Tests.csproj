@@ -108,7 +108,7 @@
       <Project>{004c8b66-4bfc-4337-b4ad-12e125189051}</Project>
       <Name>CUDAFingerprinting.FeatureExtraction</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.ImageEnhancement\CUDAFingerprinting.ImageProcessing.csproj">
+    <ProjectReference Include="..\CUDAFingerprinting.ImageProcessing\CUDAFingerprinting.ImageProcessing.csproj">
       <Project>{6B1354D8-3B37-4946-93C0-5FBC2EF11544}</Project>
       <Name>CUDAFingerprinting.ImageProcessing</Name>
     </ProjectReference>
