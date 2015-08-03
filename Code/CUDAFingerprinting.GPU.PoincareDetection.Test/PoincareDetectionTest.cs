@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
+using CUDAFingerprinting.Common.OrientationField;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CUDAFingerprinting.GPU.PoincareDetection.Test
@@ -17,7 +18,7 @@ namespace CUDAFingerprinting.GPU.PoincareDetection.Test
         public void PoincareDetectionTestMethod()
         {
 
-            var img = ImageHelper.LoadImageAsInt(Resource1._44_8);
+            var img = ImageHelper.LoadImage<int>(Resource1._44_8);
             int imgWidth = img.GetLength(0), imgHeight = img.GetLength(1);
 
             PixelwiseOrientationField img2 = new PixelwiseOrientationField(img, 16);

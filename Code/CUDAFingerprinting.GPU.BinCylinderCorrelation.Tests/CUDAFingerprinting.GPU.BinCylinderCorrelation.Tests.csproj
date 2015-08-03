@@ -38,9 +38,6 @@
     <Reference Include="CUDAFingerprinting.TemplateMatching">
       <HintPath>..\bin\Debug\CUDAFingerprinting.TemplateMatching.dll</HintPath>
     </Reference>
-    <Reference Include="CUDAFingerprinting.TemplateMatching.Tests">
-      <HintPath>..\CUDAFingerprinting.TemplateMatching.Tests\bin\Debug\CUDAFingerprinting.TemplateMatching.Tests.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -65,6 +62,12 @@
       <Link>CUDAFingerprinting.GPU.BinCylinderCorrelation.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.TemplateMatching.Tests\CUDAFingerprinting.TemplateMatching.Tests.csproj">
+      <Project>{68B2AF01-67F4-4DF1-AD22-E379F1B0540B}</Project>
+      <Name>CUDAFingerprinting.TemplateMatching.Tests</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

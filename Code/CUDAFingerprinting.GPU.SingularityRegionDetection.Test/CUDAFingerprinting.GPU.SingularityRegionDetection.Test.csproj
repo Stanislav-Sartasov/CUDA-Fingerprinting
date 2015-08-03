@@ -75,7 +75,8 @@
     <None Include="Resources\1_1.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CUDAFingerprinting.GPU.SingularityRegionDetection.dll">
+    <Content Include="..\Debug\CUDAFingerprinting.GPU.SingularityRegionDetection.dll">
+      <Link>CUDAFingerprinting.GPU.SingularityRegionDetection.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

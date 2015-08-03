@@ -1,4 +1,5 @@
 ﻿using System;
+using CUDAFingerprinting.Common.OrientationField;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
@@ -14,7 +15,7 @@ namespace CUDAFingerprinting.GPU.SingularityRegionDetection.Test
         [TestMethod]
         public void SingularityRegionDetectionTest()
         {
-            var intBmp = ImageHelper.LoadImageAsInt(Properties.Resources._1_1);
+            var intBmp = ImageHelper.LoadImage<int>(Properties.Resources._1_1);
             int width = intBmp.GetLength(0);
             int height = intBmp.GetLength(1);
 

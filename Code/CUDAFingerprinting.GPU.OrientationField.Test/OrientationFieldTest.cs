@@ -19,7 +19,7 @@ namespace CUDAFingerprinting.GPU.OrientationField.Test
 		{
 
 			var image = Resources._1;
-			var bytes = ImageHelper.LoadImageAsInt(Resources._1);
+			var bytes = ImageHelper.LoadImage<int>(Resources._1);
 			int height = bytes.GetUpperBound(0) + 1;
 			int width = bytes.GetUpperBound(1) + 1;
 			float[] sourceBytes = new float[height* width];

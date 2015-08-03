@@ -14,7 +14,7 @@ namespace CUDAFingerprinting.GPU.ImageBinarization.CUDATest
         [TestMethod]
         public void BinarizationTest()
         {
-            int[,] image = ImageHelper.LoadImageAsInt(Resources._2_6);
+            int[,] image = ImageHelper.LoadImage<int>(Resources._2_6);
             int width = image.GetLength(0);
             int height = image.GetLength(1);
             int[,] dist = new int[width, height];

@@ -14,7 +14,7 @@ namespace CUDAFingerprinting.GPU.Segmentation.Test
         [TestMethod]
         public void SegmentationTest()
         {
-            float [,] fPic = ImageHelper.LoadImageToFloats(Properties.Resources._1_8);
+            float [,] fPic = ImageHelper.LoadImage<float>(Properties.Resources._1_8);
             int width = fPic.GetLength(0);
             int height = fPic.GetLength(1);
 

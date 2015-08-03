@@ -35,9 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUDAFingerprinting.Common.Tests">
-      <HintPath>..\CUDAFingerprinting.Common.Tests\bin\Debug\CUDAFingerprinting.Common.Tests.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
@@ -64,6 +61,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.Common.Tests\CUDAFingerprinting.Common.Tests.csproj">
+      <Project>{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}</Project>
+      <Name>CUDAFingerprinting.Common.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>

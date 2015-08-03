@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using CUDAFingerprinting.Common.OrientationField;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common;
 using System.IO;
@@ -38,7 +39,7 @@ namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
         public void MinutiaDetectorBasicTest()
         {
             var image = Resources.skeleton;
-            var bytes = ImageHelper.LoadImageAsInt(image);
+            var bytes = ImageHelper.LoadImage<int>(image);
             PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
 
             int minutiaSize = Marshal.SizeOf(typeof(Minutia));
