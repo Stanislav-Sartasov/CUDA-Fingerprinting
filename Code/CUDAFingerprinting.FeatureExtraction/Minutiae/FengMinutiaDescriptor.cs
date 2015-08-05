@@ -25,18 +25,25 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             }
             return desc;
         }
-        public static float MinutiaCompare(Minutia[] desc1, Minutia point1, Minutia[] desc2, Minutia point2, float radius)
+
+        private static Tuple<int, int> CountMatchings(Minutia[] desc1, Minutia[] desc2)
         {
+            int m, M;
             int i, j;
             float eps = 0.1F;
-            Minutia[] tempdesc = Transformate(desc1, point1, point2);
             for (i = 0; i < desc1.Length; i++)
             {
                 for (j = 0; j < desc2.Length; i++)
                 {
-                        
+
                 }
             }
+        }
+
+        public static float MinutiaCompare(Minutia[] desc1, Minutia point1, Minutia[] desc2, Minutia point2, float radius)
+        {
+            Minutia[] tempdesc = Transformate(desc1, point1, point2);
+
 
                     return 0.0F;          
         }
