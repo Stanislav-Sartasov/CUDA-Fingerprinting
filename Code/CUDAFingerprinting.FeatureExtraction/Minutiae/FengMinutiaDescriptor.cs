@@ -9,9 +9,11 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
     class FengMinutiaDescriptor
     {
-        private unsafe static void Transformate(Minutia[] desc, Minutia point1, Minutia point2)
+        private unsafe static Minutia[] Transformate(Minutia[] desc_, Minutia point1, Minutia point2)
         {
             int i;
+            Minutia[] desc = new Minutia[desc_.Length];
+            Array.Copy(desc_, desc, desc.Length);
             float angle = point2.Angle - point1.Angle;
             for(i = 0; i < desc.Length; i++)
             {
@@ -21,17 +23,18 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                             (desc[i].Y - point1.Y) * (int)Math.Cos(angle) + point2.Y;
                 desc[i].Angle -= angle;
             }
+            return desc;
         }
         public static float MinutiaCompare(Minutia[] desc1, Minutia point1, Minutia[] desc2, Minutia point2, float radius)
         {
             int i, j;
-            float eps = 0.1;
-            Minutia[] desc_;
+            float eps = 0.1F;
+            Minutia[] tempdesc = Transformate(desc1, point1, point2);
             for (i = 0; i < desc1.Length; i++)
             {
                 for (j = 0; j < desc2.Length; i++)
                 {
-                    
+                        
                 }
             }
 
