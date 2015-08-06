@@ -37,7 +37,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < desc1.Length; i++)
             {
                 isExist = false;
-
+                //sort desc2 and binary search is better solution
                 for (j = 0; j < desc2.Length; j++)
                 {
                     if ((desc1[i].X == desc2[j].X) && (desc1[i].Y == desc2[j].Y)
