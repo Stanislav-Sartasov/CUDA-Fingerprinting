@@ -54,8 +54,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((Math.Abs(desc1.Minutias[i].X - desc2.Minutias[j].X) +
-                        Math.Abs(desc1.Minutias[i].Y - desc2.Minutias[j].Y) < magicConstant * radius * radius) ||
+                    if ((Math.Abs(desc1.Minutias[i].X - desc2.Center.X) +
+                        Math.Abs(desc1.Minutias[i].Y - desc2.Center.Y) < magicConstant * radius * radius) ||
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width 
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
