@@ -44,16 +44,20 @@
     <Compile Include="Minutiae\MinutiaDetector.cs" />
     <Compile Include="SingularPoints\PoincareDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TemplateCreate\Cylinder3D.cs" />
+    <Compile Include="TemplateCreate\TemplateCreator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.TemplateMatching\CUDAFingerprinting.TemplateMatching.csproj">
+      <Project>{9dcdbfa8-d0fb-4f13-b903-c6a82f024297}</Project>
+      <Name>CUDAFingerprinting.TemplateMatching</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
