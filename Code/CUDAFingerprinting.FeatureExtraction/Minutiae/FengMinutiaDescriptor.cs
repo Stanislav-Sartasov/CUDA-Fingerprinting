@@ -9,7 +9,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
     class FengMinutiaDescriptor
     {
-        private unsafe static Minutia[] Transformate(Minutia[] desc_, Minutia point1, Minutia point2)
+        private static Minutia[] Transformate(Minutia[] desc_, Minutia point1, Minutia point2)
         {
             int i;
             Minutia[] desc = new Minutia[desc_.Length];
@@ -32,7 +32,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             int i, j;
             float eps = 0.1F;
             bool isExist;
-            float magicConstant = 0.64F; //= 0.8 * 0.8  0.8 is magic constant too!
+            float magicConstant = 0.64F; //= 0.8 * 0.8;  0.8 is a magic constant too!(from Feng book)
 
             for (i = 0; i < desc1.Length; i++)
             {
