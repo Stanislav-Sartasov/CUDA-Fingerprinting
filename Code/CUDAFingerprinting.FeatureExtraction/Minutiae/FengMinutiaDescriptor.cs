@@ -55,7 +55,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 else
                 {
                     if ((Math.Abs(desc1[i].X - desc2[j].X) +
-                        Math.Abs(desc1[i].Y - desc2[j].Y) < magicConstant * radius * radius) &&
+                        Math.Abs(desc1[i].Y - desc2[j].Y) < magicConstant * radius * radius) ||
                         (desc1[i].X >= 0 && desc1[i].Y < width && desc1[i].Y >= 0 && desc1[i].Y < height))
                     {
                         ++M;
@@ -68,10 +68,15 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 
         public static float MinutiaCompare(Minutia[] desc1, Minutia point1, Minutia[] desc2, Minutia point2, float radius, int height, int width)
         {
-            Minutia[] tempdesc = Transformate(desc1, point1, point2);
-
-
-            return 0.0F;
+            Minutia[] tempdesc;
+            Tuple<int, int> mM1, mM2;
+            float s;
+            tempdesc = Transformate(desc1, point1, point2);
+            mM1 = CountMatchings(tempdesc, desc2, radius, height, width);
+            tempdesc = Transformate(desc1, point2, point1);
+            mM2 = CountMatchings(tempdesc, desc1, radius, height, width);
+            s = (mM1.Item1 + 1) * (mM2.Item1 + 1) / ((mM1.Item2 + 1) * (mM2.Item2 + 1));
+            return s;
         }
     }
 }

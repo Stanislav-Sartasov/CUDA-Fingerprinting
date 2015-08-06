@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Minutiae\FengMinutiaDescriptor.cs" />
     <Compile Include="Minutiae\MinutiaDetector.cs" />
     <Compile Include="SingularPoints\PoincareDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
