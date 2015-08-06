@@ -54,9 +54,10 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((Math.Abs(desc1[i].X - desc2[j].X) +
-                        Math.Abs(desc1[i].Y - desc2[j].Y) < magicConstant * radius * radius) ||
-                        (desc1[i].X >= 0 && desc1[i].Y < width && desc1[i].Y >= 0 && desc1[i].Y < height))
+                    if ((Math.Abs(desc1.Minutias[i].X - desc2.Center.X) +
+                        Math.Abs(desc1.Minutias[i].Y - desc2.Center.Y) < magicConstant * radius * radius) ||
+                        (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width 
+                        && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
                         ++M;
                     }
@@ -77,6 +78,22 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             mM2 = CountMatchings(tempdesc, desc1, radius, height, width);
             s = (mM1.Item1 + 1) * (mM2.Item1 + 1) / ((mM1.Item2 + 1) * (mM2.Item2 + 1));
             return s;
+        }
+
+        public static float[,] DescriptorsCompare(Descriptor[] descs1, Descriptor[] descs2, float radius, int height, int width)
+        {
+            float[,] res = new float[descs1.Length, descs2.Length];
+            int i, j;
+
+            for (i = 0; i < descs1.Length; ++i)
+            {
+                for (j = 0; j < descs2.Length; ++j)
+                {
+                    res[i, j] = MinutiaCompare(descs1[i], descs2[j], radius, height, width);
+                }
+            }
+
+            return res;
         }
     }
 }
