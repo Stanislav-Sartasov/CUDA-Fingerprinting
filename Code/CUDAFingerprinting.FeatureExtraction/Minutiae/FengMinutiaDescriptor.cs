@@ -79,5 +79,21 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             s = (mM1.Item1 + 1) * (mM2.Item1 + 1) / ((mM1.Item2 + 1) * (mM2.Item2 + 1));
             return s;
         }
+
+        public static float[,] DescriptorsCompare(Descriptor[] descs1, Descriptor[] descs2, float radius, int height, int width)
+        {
+            float[,] res = new float[descs1.Length, descs2.Length];
+            int i, j;
+
+            for (i = 0; i < descs1.Length; ++i)
+            {
+                for (j = 0; j < descs2.Length; ++j)
+                {
+                    res[i, j] = MinutiaCompare(descs1[i], descs2[j], radius, height, width);
+                }
+            }
+
+            return res;
+        }
     }
 }
