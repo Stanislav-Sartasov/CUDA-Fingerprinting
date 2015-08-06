@@ -36,29 +36,29 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 
             for (i = 0; i < desc1.Length; i++)
             {
-                for (j = 0; j < desc2.Length; i++)
-                {
-                    isExist = false;
+                isExist = false;
 
+                for (j = 0; j < desc2.Length; j++)
+                {
                     if ((desc1[i].X == desc2[j].X) && (desc1[i].Y == desc2[j].Y)
-                        && (Math.Abs(desc1[i].Angle - desc2[j].Angle) < eps))
+                        && (Math.Abs(desc1[i].Angle - desc2[j].Angle) <= eps))
                     {
                         isExist = true;
                     }
+                }
 
-                    if (isExist)
+                if (isExist)
+                {
+                    ++m;
+                    ++M;
+                }
+                else
+                {
+                    if ((Math.Abs(desc1[i].X - desc2[j].X) +
+                        Math.Abs(desc1[i].Y - desc2[j].Y) < magicConstant * radius * radius) &&
+                        (desc1[i].X >= 0 && desc1[i].Y < width && desc1[i].Y >= 0 && desc1[i].Y < height))
                     {
-                        ++m;
                         ++M;
-                    }
-                    else
-                    {
-                        if ((Math.Abs(desc1[i].X - desc2[j].X) +
-                            Math.Abs(desc1[i].Y - desc2[j].Y) < magicConstant * radius * radius) &&
-                            (desc1[i].X > 0 && desc1[i].Y < width && desc1[i].Y > 0 && desc1[i].Y < height))
-                        {
-                            ++M;
-                        }
                     }
                 }
             }
