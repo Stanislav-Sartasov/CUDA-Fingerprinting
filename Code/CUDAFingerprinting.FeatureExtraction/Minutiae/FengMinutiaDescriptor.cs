@@ -12,17 +12,22 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
         private static Descriptor Transformate(Descriptor desc_, Minutia center)
         {
             int i;
-            Descriptor desc = desc_;
+            Descriptor desc = new Descriptor();
+            Minutia[] mins = new Minutia[desc_.Minutias.Length];
+            Array.Copy(desc_.Minutias, mins, desc_.Minutias.Length);
+            desc.Minutias = mins;
+            desc.Center = desc_.Center;
 
             float angle = center.Angle - desc.Center.Angle;
             for (i = 0; i < desc.Minutias.Length; i++)
             {
-                desc.Minutias[i].X = (desc.Minutias[i].X - desc.Center.X) * (int)Math.Cos(angle) +
-                            (desc.Minutias[i].Y - desc.Center.Y) * (int)Math.Sin(angle) + center.X;
-                desc.Minutias[i].Y = -(desc.Minutias[i].X - desc.Center.X) * (int)Math.Sin(angle) +
-                            (desc.Minutias[i].Y - desc.Center.Y) * (int)Math.Cos(angle) + center.Y;
-                desc.Minutias[i].Angle -= angle;
+                desc.Minutias[i].X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) -
+                            (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
+                desc.Minutias[i].Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
+                            (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
+                desc.Minutias[i].Angle += angle;
             }
+            
             return desc;
         }
 
@@ -54,8 +59,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((Math.Abs(desc1.Minutias[i].X - desc2.Center.X) +
-                        Math.Abs(desc1.Minutias[i].Y - desc2.Center.Y) < magicConstant * radius * radius) ||
+                    if ((Math.Pow(desc1.Minutias[i].X - desc2.Center.X, 2) +
+                        Math.Pow(desc1.Minutias[i].Y - desc2.Center.Y, 2) < magicConstant * radius * radius) ||
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
@@ -76,7 +81,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             mM1 = CountMatchings(tempdesc, desc2, radius, height, width);
             tempdesc = Transformate(desc2, desc1.Center);
             mM2 = CountMatchings(tempdesc, desc1, radius, height, width);
-            s = (mM1.Item1 + 1) * (mM2.Item1 + 1) / ((mM1.Item2 + 1) * (mM2.Item2 + 1));
+            s = (float)((mM1.Item1 + 1) * (mM2.Item1 + 1)) / (float)((mM1.Item2 + 1) * (mM2.Item2 + 1));
             return s;
         }
 

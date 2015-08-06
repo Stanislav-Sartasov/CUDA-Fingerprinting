@@ -14,6 +14,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
         {
             int i;
             float s;
+            float eps = 0.05F;
+            float check = 1.0F;
             float radius = 10.0F;
             int height = 20;
             int width = 20;
@@ -31,13 +33,15 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             {
                 ms1[i].X =1 + i + desc1.Center.X;
                 ms1[i].Y =1 + i + desc1.Center.Y;
+                ms1[i].Angle = 0.5F * (float)Math.PI;
                 ms2[i].X =-1 - i + desc2.Center.X;
                 ms2[i].Y =-1 - i + desc2.Center.Y;
+                ms2[i].Angle = 1.5F * (float)Math.PI;
             }
             desc1.Minutias = ms1;
             desc2.Minutias = ms2;
             s = FengMinutiaDescriptor.MinutiaCompare(desc1, desc2, radius, height, width);
-            Assert.AreEqual(s, 1.0F);
+            Assert.IsTrue(Math.Abs(s - check) < eps);
         }
     }
 }
