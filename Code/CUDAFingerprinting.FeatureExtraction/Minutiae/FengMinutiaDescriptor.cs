@@ -7,7 +7,7 @@ using CUDAFingerprinting.Common;
 
 namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
-    class FengMinutiaDescriptor
+    public class FengMinutiaDescriptor
     {
         private static Descriptor Transformate(Descriptor desc_, Minutia center)
         {
