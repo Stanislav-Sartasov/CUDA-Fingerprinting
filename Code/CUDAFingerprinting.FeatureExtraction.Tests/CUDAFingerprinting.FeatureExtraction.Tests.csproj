@@ -56,6 +56,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AdaptiveBinarizationTest.cs" />
+    <Compile Include="FengMinutiaDescriptorTest.cs" />
     <Compile Include="ImageBinarizationTest.cs" />
     <Compile Include="MinutiaDetectionTest.cs" />
     <Compile Include="PoincareDetectionTest.cs" />
