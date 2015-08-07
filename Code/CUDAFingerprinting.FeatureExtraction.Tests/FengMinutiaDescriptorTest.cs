@@ -16,7 +16,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             float s;
             float eps = 0.05F;
             float check = 1.0F;
-            float radius = 10.0F;
+            int radius = 10;
             int height = 20;
             int width = 20;
             const int line = 5;

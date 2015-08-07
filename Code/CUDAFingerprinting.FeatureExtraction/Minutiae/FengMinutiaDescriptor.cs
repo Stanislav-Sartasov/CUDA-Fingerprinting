@@ -31,7 +31,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return desc;
         }
 
-        private static Tuple<int, int> CountMatchings(Descriptor desc1, Descriptor desc2, float radius, int height, int width)
+        private static Tuple<int, int> CountMatchings(Descriptor desc1, Descriptor desc2, int radius, int height, int width)
         {
             int m = 0, M = 0;
             int i, j;
@@ -72,7 +72,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return Tuple.Create(m, M);
         }
 
-        public static float MinutiaCompare(Descriptor desc1, Descriptor desc2, float radius, int height, int width)
+        public static float MinutiaCompare(Descriptor desc1, Descriptor desc2, int radius, int height, int width)
         {
             Descriptor tempdesc;
             Tuple<int, int> mM1, mM2;
@@ -85,7 +85,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return s;
         }
 
-        public static float[,] DescriptorsCompare(Descriptor[] descs1, Descriptor[] descs2, float radius, int height, int width)
+        public static float[,] DescriptorsCompare(Descriptor[] descs1, Descriptor[] descs2, int radius, int height, int width)
         {
             float[,] res = new float[descs1.Length, descs2.Length];
             int i, j;
