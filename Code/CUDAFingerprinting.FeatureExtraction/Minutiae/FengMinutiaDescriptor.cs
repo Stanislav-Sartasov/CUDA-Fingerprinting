@@ -37,7 +37,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             int i, j;
             float eps = 0.1F;
             bool isExist;
-            float magicConstant = 0.64F; //= 0.8 * 0.8;  0.8 is a magic constant too!(from Feng book)
+            float fengConstant = 0.64F; //= 0.8 * 0.8;  0.8 is a magic constant!(from Feng book)
 
             for (i = 0; i < desc1.Minutias.Length; i++)
             {
@@ -60,7 +60,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 else
                 {
                     if ((Math.Pow(desc1.Minutias[i].X - desc2.Center.X, 2) +
-                        Math.Pow(desc1.Minutias[i].Y - desc2.Center.Y, 2) < magicConstant * radius * radius) ||
+                        Math.Pow(desc1.Minutias[i].Y - desc2.Center.Y, 2) < fengConstant * radius * radius) ||
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
