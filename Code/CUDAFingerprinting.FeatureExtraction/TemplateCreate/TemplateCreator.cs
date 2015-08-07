@@ -9,18 +9,19 @@ using CUDAFingerprinting.TemplateMatching.MCC;
 
 namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
 {
-    class TemplateCreator
+    internal class TemplateCreator
     {
-        private const byte Radius = 70;
-        private const byte BaseCuboid = 16;
-        private const byte HeightCuboid = 6;
-        private const uint NumberCell = BaseCuboid * BaseCuboid * HeightCuboid;
-        private const double BaseCell = (2.0d * Radius) / BaseCuboid;
-        private const double HeightCell = (2 * Math.PI) / HeightCuboid;
-        private const double SigmaLocation = 28.0d / 3;
-        private const double SigmaDirection = 2 * Math.PI / 9;
-        private const double SigmoidParametrPsi = 0.01;
-        private const byte Omega = 50;
+        public const byte Radius = 70;
+        public const byte BaseCuboid = 16;
+        public const byte HeightCuboid = 6;
+        public const uint NumberCell = BaseCuboid * BaseCuboid * HeightCuboid;
+        public const double BaseCell = (2.0d * Radius) / BaseCuboid;
+        public const double HeightCell = (2 * Math.PI) / HeightCuboid;
+        public const double SigmaLocation = 28.0d / 3;
+        public const double SigmaDirection = 2 * Math.PI / 9;
+        public const double SigmoidParametrPsi = 0.01;
+        public const byte Omega = 50;
+        public const byte MinNumberMinutiae = 2;
 
         private readonly List<PointF> _convexHull;
         private readonly List<Minutia> _minutiaeList;
@@ -29,7 +30,7 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
         {
             _minutiaeList = minutiaeList;
             var pointList = _minutiaeList.Select(x => new PointF(x.X, x.Y)).ToList();
-            _convexHull = Common.ConvexHull.ConvexHullModified.ExtendHull(pointList, Omega);
+            _convexHull = ConvexHullModified.ExtendHull(pointList, Omega);
         }
 
         private double AngleHeight(int k)
@@ -48,12 +49,13 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                     (minutia.Y + BaseCell *
                      (-Math.Sin(minutia.Angle) * (i - (BaseCuboid + 1) / 2.0d) +
                       Math.Cos(minutia.Angle) * (j - (BaseCuboid + 1) / 2.0d)))
-                    );
+                );
         }
 
         private double GaussianLocation(Minutia minutia, PointF point)
         {
-            return Gaussian.Gaussian1D(VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y), point), SigmaLocation);
+            return Gaussian.Gaussian1D(VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y), point),
+                SigmaLocation);
         }
 
         private double GaussianDirection(Minutia middleMinutia, Minutia minutia, double anglePoint)
@@ -79,7 +81,9 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             // Save the sign of x
             int sign = 1;
             if (x < 0)
+            {
                 sign = -1;
+            }
             x = Math.Abs(x);
 
             // A&S formula 7.1.26
@@ -112,20 +116,108 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                 );
         }
 
-        private double Sum(PointF point, double anglePoint,  List<Minutia> neighborhood, Minutia middleMinutia)
+        private double Sum(PointF point, double anglePoint, List<Minutia> neighborhood, Minutia middleMinutia)
         {
             double Sum = 0;
             foreach (var minutia in neighborhood)
             {
-                Sum += GaussianLocation(minutia, point)*GaussianDirection(middleMinutia, minutia, anglePoint);
+                Sum += GaussianLocation(minutia, point) * GaussianDirection(middleMinutia, minutia, anglePoint);
             }
             return Sum;
         }
+
+        private byte StepFunction(double value)
+        {
+            return (byte)(value > SigmoidParametrPsi ? 1 : 0);
+        }
+
+        public Template CreateTemplate()
+        {
+            List<Cylinder> listCylinders = new List<Cylinder>();
+            foreach (var middleMinutia in _minutiaeList)
+            {
+                int count = GetCountMinutia(middleMinutia);
+                if (count >= MinNumberMinutiae)
+                {
+                    Cylinder[] cylinders = CreateCylinders(middleMinutia);
+                    listCylinders.Add(cylinders[0]);
+                    listCylinders.Add(cylinders[1]);
+                }
+            }
+            uint maxCount = GetMaxCount(listCylinders);
+            for (int i = 1; i < listCylinders.Count; i += 2)
+            {
+                if (!(CylinderHelper.GetOneBitsCount(listCylinders[i].Values) < 0.75 * maxCount))
+                {
+                    continue;
+                }
+                listCylinders.RemoveAt(i - 1);
+                listCylinders.RemoveAt(i);
+            }
+            return new Template(listCylinders.ToArray());
+        }
+
+        private int GetCountMinutia(Minutia middleMinutia)
+        {
+            int sum = 0;
+            foreach (var minutia in _minutiaeList)
+            {
+                if (VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y),
+                    new PointF(middleMinutia.X, middleMinutia.Y)) <= Radius + 3 * SigmaLocation &&
+                    EqualsMinutae(minutia, middleMinutia))
+                {
+                    sum++;
+                }
+            }
+            return sum;
+        }
+
+        private uint GetMaxCount(List<Cylinder> listCylinders)
+        {
+            uint maxCount = 0;
+            for (int i = 1; i < listCylinders.Count; i += 2)
+            {
+                uint count = CylinderHelper.GetOneBitsCount(listCylinders[i].Values);
+                maxCount = count > maxCount ? count : maxCount;
+            }
+            return maxCount;
+        }
+
+        private Cylinder[] CreateCylinders(Minutia minutia)
+        {
+            Cylinder3D value = new Cylinder3D();
+            Cylinder3D mask = new Cylinder3D();
+
+            for (int i = 1; i <= BaseCuboid; i++)
+            {
+                for (int j = 1; j <= BaseCuboid; j++)
+                {
+                    if (IsValidPoint(GetPoint(i, j, minutia), minutia))
+                    {
+                        for (int k = 1; k <= HeightCuboid; k++)
+                        {
+                            mask.SetValue(i, j, k, 1);
+                            value.SetValue(i, j, k, StepFunction(Sum(
+                                GetPoint(i, j, minutia),
+                                AngleHeight(k),
+                                GetNeighborhood(GetPoint(i, j, minutia), minutia),
+                                minutia
+                                )));
+                        }
+                    }
+                }
+            }
+            return new[]
+            {
+                new Cylinder(value.Cylinder, minutia.Angle, CylinderHelper.CalculateCylinderNorm(value.Cylinder)), 
+                new Cylinder(mask.Cylinder, minutia.Angle, CylinderHelper.CalculateCylinderNorm(mask.Cylinder))
+            };
+        }
+
         private bool IsValidPoint(PointF point, Minutia middleMinutia)
         {
             return VectorHelper.PointDistance(new PointF(middleMinutia.X, middleMinutia.Y), point) < Radius &&
                    FieldFiller.IsPointInsideHull(point, _convexHull);
         }
-
     }
 }
