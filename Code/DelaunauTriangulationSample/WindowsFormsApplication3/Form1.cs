@@ -20,13 +20,14 @@ namespace WindowsFormsApplication3
 
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (points == null)
-            {
-                points = new List<Point>();
-                g.Clear(Color.White);
-            }
             if (e.Button == MouseButtons.Left)
             {
+                if (points == null)
+                {
+                    points = new List<Point>();
+                    g.Clear(Color.White);
+                }
+
                 Point mbToAdd = new Point(e.X, Size.Height - e.Y);
                 if (!points.Contains(mbToAdd))
                     points.Add(mbToAdd);
@@ -34,7 +35,20 @@ namespace WindowsFormsApplication3
             }
             else
             {
-                Triangulation tb = new Triangulation(points, g, Size.Height, 100);
+                if (points == null)
+                {
+                    g.Clear(Color.White);
+                    Random rnd = new Random();
+                    points = new List<Point>();
+                    for (int i = 0; i < Count.Value; i++)
+                    {
+                        Point tmp = new Point(rnd.Next(Size.Width-200) + 30 ,rnd.Next(Size.Height-100)+50);
+                        if (!points.Contains(tmp))
+                            points.Add(tmp);
+                        g.DrawEllipse(new Pen(Color.Goldenrod), (int)tmp.X - 1, Size.Height - (int)tmp.Y + 1, 3, 3);
+                    }
+                }
+                Triangulation tb = new Triangulation(points, g, Size.Height, Delay.Value);
                 points = null;
             }
         }
@@ -772,12 +786,12 @@ namespace WindowsFormsApplication3
                 {
                     Triangle now = copyTriangles[i];
 
-                    if (firstChanged || secondChanged || thirdChanged)
-                    {
-                        g.Clear(Color.White);
-                        foreach (Triangle t in copyTriangles)
-                            t.Paint(g, new Pen(Color.Violet, 2), size);
-                    }
+                    //if (firstChanged || secondChanged || thirdChanged)
+                    //{
+                    //    g.Clear(Color.White);
+                    //    foreach (Triangle t in copyTriangles)
+                    //        t.Paint(g, new Pen(Color.Violet, 2), size);
+                    //}
                     
                     firstChanged = false;
                     thirdChanged = false;
@@ -785,36 +799,33 @@ namespace WindowsFormsApplication3
 
                     Triangle tleft = getNearest(now, true, false, false, copyTriangles, g, size, delay);
                     if (tleft != null)
-                        firstChanged = UpdateTriangles(now, tleft, now.a, copyTriangles, g, new Pen(Color.Gold, 3), size);
+                        firstChanged = UpdateTriangles(now, tleft, now.a, copyTriangles, g, new Pen(Color.Gold, 3), size, delay);
 
                     if (firstChanged)
                     {
                         i--;
                         triangleChanged = true;
-                        Thread.Sleep(delay);
                         continue;
                     }
 
                     tleft = getNearest(now, false, true, false, copyTriangles, g, size, delay);
                     if (tleft != null)
-                        secondChanged = UpdateTriangles(now, tleft, now.b, copyTriangles, g, new Pen(Color.Gold, 3), size);
+                        secondChanged = UpdateTriangles(now, tleft, now.b, copyTriangles, g, new Pen(Color.Gold, 3), size, delay);
 
                     if (secondChanged)
                     {
                         triangleChanged = true;
                         i--;
-                        Thread.Sleep(delay);
                         continue;
                     }
                                         
                     tleft = getNearest(now, false, false, true, copyTriangles, g, size, delay);
                     if (tleft != null)
-                        thirdChanged = UpdateTriangles(now, tleft, now.c, copyTriangles, g, new Pen(Color.Gold, 3), size);
+                        thirdChanged = UpdateTriangles(now, tleft, now.c, copyTriangles, g, new Pen(Color.Gold, 3), size, delay);
                     if (thirdChanged)
                     {
                         i--;
                         triangleChanged = true;
-                        Thread.Sleep(delay);
                         continue;
                     }
                 }
@@ -846,7 +857,7 @@ namespace WindowsFormsApplication3
             }
             return null;
         }
-        private bool UpdateTriangles(Triangle tRight, Triangle tLeft, Section commonSection, List<Triangle> tmpResult, Graphics g, Pen p, int size)
+        private bool UpdateTriangles(Triangle tRight, Triangle tLeft, Section commonSection, List<Triangle> tmpResult, Graphics g, Pen p, int size, int delay)
         {
             Point leftExcessPoint = Triangulation.getExcessPoint(tLeft, commonSection);
             Point rightExcessPoint = Triangulation.getExcessPoint(tRight, commonSection);
@@ -866,8 +877,12 @@ namespace WindowsFormsApplication3
                 tmpResult.Add(new Triangle(leftExcessPoint, down, rightExcessPoint));
                 tmpResult.Add(new Triangle(rightExcessPoint, up, leftExcessPoint));
 
-                g.DrawLine(p, (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
-
+                g.DrawLine(new Pen(Color.White, 2), (int)commonSection.A.X, size - (int)commonSection.A.Y,
+                    (int)commonSection.B.X, size - (int)commonSection.B.Y);
+                g.DrawLine(new Pen(Color.DarkOrange,3), (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
+                Thread.Sleep(delay);
+                g.DrawLine(new Pen(Color.White, 3), (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
+                g.DrawLine(new Pen(Color.Green, 2), (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
                 return true;
             }
             return false;
