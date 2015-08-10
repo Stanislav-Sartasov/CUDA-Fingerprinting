@@ -23,7 +23,7 @@ namespace test
     {
         static void Main(string[] args)
         {
-            double[,] imgDoubles = ImageHelper.LoadImage<double>("d://1_2.bmp");
+            double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//62_1.bmp");
             double[,] a = CreatTemplateTest(imgDoubles);
            // ImageHelper.SaveArrayToBitmap(CreatTemplateTest(a)).Save("d://hglf23.bmp");
             
@@ -32,7 +32,7 @@ namespace test
             List<Minutia> minutias = MinutiaDetector.GetMinutias(bytes, field);
             TemplateCreator creator = new TemplateCreator(minutias);
 
-            imgDoubles = ImageHelper.LoadImage<double>("d://1_1.bmp");
+            imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//62_3.bmp");
             a = CreatTemplateTest(imgDoubles);
             bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
             field = new PixelwiseOrientationField(bytes, 16);
@@ -40,7 +40,7 @@ namespace test
             List<Minutia> minutiae2 = MinutiaDetector.GetMinutias(bytes, field);
             TemplateCreator creator2 = new TemplateCreator(minutiae2);
             Template[] t = {creator.CreateTemplate()};
-            Console.WriteLine(BinTemplateSimilarity.GetTemplateSimilarity(creator2.CreateTemplate(), t)[0]);
+            Console.WriteLine(BinTemplateSimilarity.GetTemplateSimilarityWithMask(creator2.CreateTemplate(), t)[0]);
             Console.ReadKey();
             // seg.SaveSegmentation(seg.MakeBitmap(seg.Segmentate()),"d://123.bmp");
         }

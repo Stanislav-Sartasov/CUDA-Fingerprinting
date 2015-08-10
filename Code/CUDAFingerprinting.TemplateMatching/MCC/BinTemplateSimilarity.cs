@@ -20,7 +20,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
             }
         }
 
-        public static int npParamMin = 11, npParamMax = 13;
+        public static int npParamMin = 11, npParamMax = 12;
         public static double npParamMu = 30;
         public static double npParamTau = 2.0 / 5.0;
 
@@ -36,7 +36,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
             return npParamMin + (int)(Math.Round((npParamMax - npParamMin) / denom));
         }
 
-        public static double[] GetTemplateSimilarity(Template query, Template[] db)
+        public static double[] GetTemplateSimilarityWithMask(Template query, Template[] db)
         {
             double[] similarityRates = new double[db.Length];
 
@@ -51,28 +51,40 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
                     buckets[j] = 0;
                 }
 
-                foreach (Cylinder queryCylinder in query.Cylinders)
+                for (int countI = 0; countI < query.Cylinders.Length; countI += 2)
                 {
-                    foreach (Cylinder cylinderDb in templateDb.Cylinders)
+                    for (int countJ = 0; countJ < templateDb.Cylinders.Length; countJ += 2)
                     {
-                        if (CylinderHelper.GetAngleDiff(queryCylinder.Angle, cylinderDb.Angle) < angleThreshold
-                            && queryCylinder.Norm + cylinderDb.Norm != 0)
+                        if (CylinderHelper.GetAngleDiff(query.Cylinders[countI].Angle, templateDb.Cylinders[countJ].Angle) <= angleThreshold)
                         {
-                            uint[] givenXOR = queryCylinder.Values.Zip(cylinderDb.Values, (first, second) => first ^ second).ToArray();
+                            uint[] common =
+                                query.Cylinders[countI + 1].Values.Zip(templateDb.Cylinders[countJ + 1].Values,
+                                    (first, second) => first & second).ToArray();
+                            uint[] firstAndSecond = query.Cylinders[countI].Values.Zip(common,
+                                    (first, second) => first & second).ToArray();
+                            uint[] secondAndFirst = templateDb.Cylinders[countJ].Values.Zip(common,
+                                    (first, second) => first & second).ToArray();
+                            double givenFristNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(firstAndSecond));
+                            double givenSecondNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(secondAndFirst));
+                            
+                            uint[] givenXOR = firstAndSecond.Zip(secondAndFirst, (first, second) => first ^ second).ToArray();
+
                             double givenXORNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(givenXOR)); // Bitwise version
                             //double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid version
 
-                            uint bucketIndex = (uint)Math.Floor(givenXORNorm / (queryCylinder.Norm + cylinderDb.Norm) * bucketsCount);
+
+                            uint bucketIndex = (uint)Math.Floor(givenXORNorm / (givenFristNorm + givenSecondNorm) * bucketsCount);
                             if (bucketIndex == bucketsCount)
                             {
                                 bucketIndex--;
                             }
                             buckets[bucketIndex]++;
+                            
                         }
                     }
                 }
 
-                int numPairs = ComputeNumPairs(templateDb.Cylinders.Length, query.Cylinders.Length);
+                int numPairs = ComputeNumPairs(templateDb.Cylinders.Length/2, query.Cylinders.Length/2);
 
                 int sum = 0, t = numPairs, i = 0;
                 while (i < bucketsCount && t > 0)

@@ -12,8 +12,8 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
     public class TemplateCreator
     {
         public const byte Radius = 70;
-        public const byte BaseCuboid = 16;
-        public const byte HeightCuboid = 6;
+        public const byte BaseCuboid = 8;
+        public const byte HeightCuboid = 5;
         public const uint NumberCell = BaseCuboid * BaseCuboid * HeightCuboid;
         public const double BaseCell = (2.0d * Radius) / BaseCuboid;
         public const double HeightCell = (2 * Math.PI) / HeightCuboid;
@@ -99,7 +99,7 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             foreach (var minutia in _minutiaeList)
             {
                 if (VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y), point) < 3 * SigmaLocation &&
-                    EqualsMinutae(minutia, middleMinutia))
+                    !EqualsMinutae(minutia, middleMinutia))
                 {
                     neighborhood.Add(minutia);
                 }
@@ -151,8 +151,9 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                 {
                     continue;
                 }
-                listCylinders.RemoveAt(i - 1);
                 listCylinders.RemoveAt(i);
+                listCylinders.RemoveAt(i - 1);
+                i -= 2;
             }
             return new Template(listCylinders.ToArray());
         }
@@ -203,15 +204,16 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                                 AngleHeight(k),
                                 GetNeighborhood(GetPoint(i, j, minutia), minutia),
                                 minutia
-                                )));
+                                )
+                            ));
                         }
                     }
                 }
             }
             return new[]
             {
-                new Cylinder(value.Cylinder, minutia.Angle, CylinderHelper.CalculateCylinderNorm(value.Cylinder)), 
-                new Cylinder(mask.Cylinder, minutia.Angle, CylinderHelper.CalculateCylinderNorm(mask.Cylinder))
+                new Cylinder(value.Cylinder, minutia.Angle, Math.Sqrt(CylinderHelper.GetOneBitsCount(value.Cylinder))), 
+                new Cylinder(mask.Cylinder, minutia.Angle, Math.Sqrt(CylinderHelper.GetOneBitsCount(mask.Cylinder)))
             };
         }
 
