@@ -7,9 +7,9 @@ using CUDAFingerprinting.Common;
 
 namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
-    class DescriptorBuilder
+    public class DescriptorBuilder
     {
-        private float leng(Minutia p1, Minutia p2)
+        private static float leng(Minutia p1, Minutia p2)
         {
             float length;
             length = (float)(Math.Pow(p1.X - p2.X, 2.0) +
@@ -17,21 +17,24 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return length;
         }
 
-        public List<Descriptor> BuildDescriptors(List<Minutia> list, int radius)
+        public static List<Descriptor> BuildDescriptors(List<Minutia> list, int radius)
         {
             List<Descriptor> desc = new List<Descriptor>();
             int i, j;
             float length;
             for (i = 0; i < list.Count; i++)
             {
+                Descriptor d = new Descriptor();
                 for (j = i + 1; j < list.Count; j++)
                 {
+                    d.Center = list[i];
                     length = leng(list[i], list[j]);
                     if (length <= radius)
                     {
-                        desc[i].Minutias.Add(list[j]);
+                        d.Minutias.Add(list[j]);
                     }
                 }
+                desc.Add(d);
             }
             return desc;
         }
