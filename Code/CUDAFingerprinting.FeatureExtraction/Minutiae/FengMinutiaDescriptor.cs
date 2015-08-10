@@ -13,19 +13,22 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
         {
             int i;
             Descriptor desc = new Descriptor();
-            Minutia[] mins = new Minutia[desc_.Minutias.Length];
-            Array.Copy(desc_.Minutias, mins, desc_.Minutias.Length);
-            desc.Minutias = mins;
+            
+            desc.Minutias = desc_.Minutias.ToList(); 
             desc.Center = desc_.Center;
 
             float angle = center.Angle - desc.Center.Angle;
-            for (i = 0; i < desc.Minutias.Length; i++)
+            for (i = 0; i < desc.Minutias.Count; i++)
             {
-                desc.Minutias[i].X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) -
+                var min = desc.Minutias[i];
+
+                min.X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) -
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
-                desc.Minutias[i].Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
+                min.Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
-                desc.Minutias[i].Angle += angle;
+                min.Angle += angle;
+
+                desc.Minutias[i] = min;
             }
             
             return desc;
@@ -39,11 +42,11 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             bool isExist;
             float fengConstant = 0.64F; //= 0.8 * 0.8;  0.8 is a magic constant!(from Feng book)
 
-            for (i = 0; i < desc1.Minutias.Length; i++)
+            for (i = 0; i < desc1.Minutias.Count; i++)
             {
                 isExist = false;
                 //sort desc2 and binary search is better solution
-                for (j = 0; j < desc2.Minutias.Length; j++)
+                for (j = 0; j < desc2.Minutias.Count; j++)
                 {
                     if ((desc1.Minutias[i].X == desc2.Minutias[j].X) && (desc1.Minutias[i].Y == desc2.Minutias[j].Y)
                         && (Math.Abs(desc1.Minutias[i].Angle - desc2.Minutias[j].Angle) < eps))
@@ -85,14 +88,14 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return s;
         }
 
-        public static float[,] DescriptorsCompare(Descriptor[] descs1, Descriptor[] descs2, int radius, int height, int width)
+        public static float[,] DescriptorsCompare(List<Descriptor> descs1, List<Descriptor> descs2, int radius, int height, int width)
         {
-            float[,] res = new float[descs1.Length, descs2.Length];
+            float[,] res = new float[descs1.Count, descs2.Count];
             int i, j;
 
-            for (i = 0; i < descs1.Length; ++i)
+            for (i = 0; i < descs1.Count; ++i)
             {
-                for (j = 0; j < descs2.Length; ++j)
+                for (j = 0; j < descs2.Count; ++j)
                 {
                     res[i, j] = MinutiaCompare(descs1[i], descs2[j], radius, height, width);
                 }
