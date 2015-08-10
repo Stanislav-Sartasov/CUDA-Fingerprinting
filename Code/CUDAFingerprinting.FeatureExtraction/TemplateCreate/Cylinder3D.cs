@@ -20,6 +20,11 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             Cylinder[Linearization(i, j, k) / 32] |= ((uint)value << Linearization(i, j, k) % 32);
         }
 
+        public byte GetValue(int i, int j, int k)
+        {
+            return (byte)((Cylinder[Linearization(i, j, k) / 32] & ((uint)1 << Linearization(i, j, k) % 32)) >> Linearization(i, j, k) % 32);
+        }
+
         private int Linearization(int i, int j, int k)
         {
             return (k - 1) * TemplateCreator.BaseCuboid * TemplateCreator.BaseCuboid +

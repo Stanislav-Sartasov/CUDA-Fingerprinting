@@ -9,7 +9,7 @@ using CUDAFingerprinting.TemplateMatching.MCC;
 
 namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
 {
-    internal class TemplateCreator
+    public class TemplateCreator
     {
         public const byte Radius = 70;
         public const byte BaseCuboid = 16;
@@ -99,7 +99,7 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             foreach (var minutia in _minutiaeList)
             {
                 if (VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y), point) < 3 * SigmaLocation &&
-                    EqualsMinutae(minutia, middleMinutia)) ;
+                    EqualsMinutae(minutia, middleMinutia))
                 {
                     neighborhood.Add(minutia);
                 }
@@ -110,25 +110,25 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
         private bool EqualsMinutae(Minutia firstMinutia, Minutia secondMinutia)
         {
             return (
-                firstMinutia.X.Equals(secondMinutia.X) &&
-                firstMinutia.Y.Equals(secondMinutia.Y) &&
-                firstMinutia.Angle.Equals(secondMinutia.Angle)
+                firstMinutia.X == secondMinutia.X &&
+                firstMinutia.Y == secondMinutia.Y &&
+                Math.Abs(firstMinutia.Angle - secondMinutia.Angle) < double.Epsilon
                 );
         }
 
         private double Sum(PointF point, double anglePoint, List<Minutia> neighborhood, Minutia middleMinutia)
         {
-            double Sum = 0;
+            double sum = 0;
             foreach (var minutia in neighborhood)
             {
-                Sum += GaussianLocation(minutia, point) * GaussianDirection(middleMinutia, minutia, anglePoint);
+                sum += GaussianLocation(minutia, point) * GaussianDirection(middleMinutia, minutia, anglePoint);
             }
-            return Sum;
+            return sum;
         }
 
         private byte StepFunction(double value)
         {
-            return (byte)(value > SigmoidParametrPsi ? 1 : 0);
+            return (byte)(value >= SigmoidParametrPsi ? 1 : 0);
         }
 
         public Template CreateTemplate()
@@ -162,9 +162,10 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             int sum = 0;
             foreach (var minutia in _minutiaeList)
             {
-                if (VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y),
+                if (VectorHelper.PointDistance(
+                    new PointF(minutia.X, minutia.Y),
                     new PointF(middleMinutia.X, middleMinutia.Y)) <= Radius + 3 * SigmaLocation &&
-                    EqualsMinutae(minutia, middleMinutia))
+                    !EqualsMinutae(minutia, middleMinutia))
                 {
                     sum++;
                 }
