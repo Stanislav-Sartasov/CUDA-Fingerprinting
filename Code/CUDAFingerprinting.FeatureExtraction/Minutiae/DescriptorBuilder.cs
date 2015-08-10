@@ -25,13 +25,16 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < list.Count; i++)
             {
                 Descriptor d = new Descriptor();
-                for (j = i + 1; j < list.Count; j++)
+                for (j = 0; j < list.Count; j++)
                 {
-                    d.Center = list[i];
-                    length = leng(list[i], list[j]);
-                    if (length <= radius)
+                    if (i != j)
                     {
-                        d.Minutias.Add(list[j]);
+                        d.Center = list[i];
+                        length = leng(list[i], list[j]);
+                        if (length <= radius)
+                        {
+                            d.Minutias.Add(list[j]);
+                        }
                     }
                 }
                 desc.Add(d);
