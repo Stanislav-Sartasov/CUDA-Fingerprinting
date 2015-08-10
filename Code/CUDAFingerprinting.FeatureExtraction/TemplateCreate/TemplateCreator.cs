@@ -99,7 +99,7 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             foreach (var minutia in _minutiaeList)
             {
                 if (VectorHelper.PointDistance(new PointF(minutia.X, minutia.Y), point) < 3 * SigmaLocation &&
-                    EqualsMinutae(minutia, middleMinutia))
+                    !EqualsMinutae(minutia, middleMinutia))
                 {
                     neighborhood.Add(minutia);
                 }
@@ -147,12 +147,12 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             uint maxCount = GetMaxCount(listCylinders);
             for (int i = 1; i < listCylinders.Count; i += 2)
             {
-                if (!(CylinderHelper.GetOneBitsCount(listCylinders[i].Values) < 0.75 * maxCount))
+                if (CylinderHelper.GetOneBitsCount(listCylinders[i].Values) >= 0.75 * maxCount)
                 {
                     continue;
                 }
-                listCylinders.RemoveAt(i - 1);
-                listCylinders.RemoveAt(i);
+                listCylinders.RemoveAt(i--);
+                listCylinders.RemoveAt(i--);
             }
             return new Template(listCylinders.ToArray());
         }
@@ -210,8 +210,8 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             }
             return new[]
             {
-                new Cylinder(value.Cylinder, minutia.Angle, CylinderHelper.CalculateCylinderNorm(value.Cylinder)), 
-                new Cylinder(mask.Cylinder, minutia.Angle, CylinderHelper.CalculateCylinderNorm(mask.Cylinder))
+                new Cylinder(value.Cylinder, minutia.Angle, Math.Sqrt(CylinderHelper.GetOneBitsCount(value.Cylinder))), 
+                new Cylinder(mask.Cylinder, minutia.Angle, Math.Sqrt(CylinderHelper.GetOneBitsCount(mask.Cylinder)))
             };
         }
 
