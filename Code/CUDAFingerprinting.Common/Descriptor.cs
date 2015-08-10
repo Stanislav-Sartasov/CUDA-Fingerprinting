@@ -14,4 +14,3 @@ namespace CUDAFingerprinting.Common
         }
     };
 }
-
