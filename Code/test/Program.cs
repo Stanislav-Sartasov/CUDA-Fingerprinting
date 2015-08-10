@@ -23,7 +23,7 @@ namespace test
     {
         static void Main(string[] args)
         {
-            double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//62_1.bmp");
+            double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//62_1.bmp");
             double[,] a = CreatTemplateTest(imgDoubles);
            // ImageHelper.SaveArrayToBitmap(CreatTemplateTest(a)).Save("d://hglf23.bmp");
             
@@ -39,8 +39,11 @@ namespace test
             
             List<Minutia> minutiae2 = MinutiaDetector.GetMinutias(bytes, field);
             TemplateCreator creator2 = new TemplateCreator(minutiae2);
-            Template[] t = {creator.CreateTemplate()};
-            Console.WriteLine(BinTemplateSimilarity.GetTemplateSimilarityWithMask(creator2.CreateTemplate(), t)[0]);
+            Template[] t = {creator.CreateTemplate(),creator2.CreateTemplate()};
+            foreach (var res in BinTemplateSimilarity.GetTemplateSimilarity(t[0], t))
+            {
+                Console.WriteLine(res);
+            }
             Console.ReadKey();
             // seg.SaveSegmentation(seg.MakeBitmap(seg.Segmentate()),"d://123.bmp");
         }

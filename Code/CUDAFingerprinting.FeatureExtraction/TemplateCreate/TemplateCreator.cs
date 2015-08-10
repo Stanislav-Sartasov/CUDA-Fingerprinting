@@ -147,13 +147,12 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             uint maxCount = GetMaxCount(listCylinders);
             for (int i = 1; i < listCylinders.Count; i += 2)
             {
-                if (!(CylinderHelper.GetOneBitsCount(listCylinders[i].Values) < 0.75 * maxCount))
+                if (CylinderHelper.GetOneBitsCount(listCylinders[i].Values) >= 0.75 * maxCount)
                 {
                     continue;
                 }
-                listCylinders.RemoveAt(i);
-                listCylinders.RemoveAt(i - 1);
-                i -= 2;
+                listCylinders.RemoveAt(i--);
+                listCylinders.RemoveAt(i--);
             }
             return new Template(listCylinders.ToArray());
         }
