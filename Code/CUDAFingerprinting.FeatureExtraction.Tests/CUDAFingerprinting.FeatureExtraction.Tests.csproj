@@ -96,6 +96,12 @@
     <Content Include="Resources\44_8.bmp" />
     <Content Include="Resources\binarizated1.bmp" />
     <None Include="Resources\small1.bmp" />
+    <Content Include="Resources\minutia1_1.bmp" />
+    <Content Include="Resources\minutia1_1.txt" />
+    <Content Include="Resources\minutia2_2.bmp" />
+    <Content Include="Resources\minutia2_2.txt" />
+    <Content Include="Resources\minutia2_6.bmp" />
+    <Content Include="Resources\minutia2_6.txt" />
     <Content Include="Resources\test.bmp" />
   </ItemGroup>
   <ItemGroup>

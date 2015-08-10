@@ -9,8 +9,8 @@ namespace CUDAFingerprinting.Common
         public Minutia Center;
         public Descriptor(List<Minutia> m, Minutia c)
         {
-            this.Minutias = m;
-            this.Center = c;
+            Minutias = m;
+            Center = c;
         }
     };
 }
