@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
+using System.Linq;
+using System.Diagnostics;
 
-namespace WindowsFormsApplication3
+namespace DelaunauTriangulation
 {
     public partial class MainForm : Form
     {
+        private static Pen defaultPointPen = new Pen(Color.Red, 2);
+        private static Pen defaultLinePen = new Pen(Color.Green, 1);
+        private static Pen defaultNewLintPen = new Pen(Color.Gold, 1);
         private List<Point> points = null;
         private Graphics g = null;
 
@@ -15,10 +20,14 @@ namespace WindowsFormsApplication3
         {
             InitializeComponent();
             g = this.CreateGraphics();
-            MessageBox.Show("Для задания точек - кликайте левой кнопкой мыши.\nЗатем правой - для построения триангулции.");
+
+            DelayVolume.Text = Delay.Value.ToString();
+            CountVolume.Text = Count.Value.ToString();
+
+            MessageBox.Show("Для задания точек - кликайте левой кнопкой мыши.\nЗатем правой - для построения триангуляции.");
         }
 
-        private void Form1_MouseClick(object sender, MouseEventArgs e)
+        private void MainForm_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -45,15 +54,15 @@ namespace WindowsFormsApplication3
                         Point tmp = new Point(rnd.Next(Size.Width-200) + 30 ,rnd.Next(Size.Height-100)+50);
                         if (!points.Contains(tmp))
                             points.Add(tmp);
-                        g.DrawEllipse(new Pen(Color.Goldenrod), (int)tmp.X - 1, Size.Height - (int)tmp.Y + 1, 3, 3);
+                        g.DrawEllipse(defaultPointPen, (int)tmp.X - 1, Size.Height - (int)tmp.Y + 1, 3, 3);
                     }
                 }
-                Triangulation tb = new Triangulation(points, g, Size.Height, Delay.Value);
+                Triangulation tb = new Triangulation(points, g, defaultLinePen, defaultPointPen, defaultNewLintPen, Size.Height, Delay.Value);
                 points = null;
             }
         }
 
-        private void Form1_ResizeEnd(object sender, EventArgs e)
+        private void MainForm_ResizeEnd(object sender, EventArgs e)
         {
             points = null;
             g = this.CreateGraphics();
@@ -65,6 +74,16 @@ namespace WindowsFormsApplication3
             points = null;
             g = this.CreateGraphics();
             g.Clear(Color.White);
+        }
+
+        private void Count_Scroll(object sender, EventArgs e)
+        {
+            CountVolume.Text = Count.Value.ToString();
+        }
+
+        private void Delay_Scroll(object sender, EventArgs e)
+        {
+            DelayVolume.Text = Delay.Value.ToString();
         }
     }
 
@@ -101,8 +120,10 @@ namespace WindowsFormsApplication3
             return Math.Sqrt((x - point.x) * (x - point.x) + (y - point.y) * (y - point.y));
         }
 
-        public Point getNearestPointFrom(ICollection<Point> points)
+        public Point getNearestPointFRhom(ICollection<Point> points)
         {
+            var nearestPoint = 
+                points.Select(x => new { Point = x, Distance = getDistance(x) }).Where(x => x.Distance != 0).OrderBy(x => x.Distance).Select(x => x.Point).FirstOrDefault();
             double nearestDistance = -1;
             Point result = null;
             foreach (Point point in points)
@@ -148,6 +169,11 @@ namespace WindowsFormsApplication3
             y /= points.Count;
 
             return new Point(x, y);
+        }
+
+        public void Paint(Graphics g, Pen p, int formHeight) 
+        {
+            g.DrawEllipse(p, (int)x - 1, formHeight - (int)y + 1, 3, 3);
         }
     }
 
@@ -262,7 +288,7 @@ namespace WindowsFormsApplication3
 
         public override string ToString()
         {
-            return "Vector from: " + start + " to " + end;
+            return "Vector fRhom: " + start + " to " + end;
         }
     }
 
@@ -314,7 +340,7 @@ namespace WindowsFormsApplication3
             this.right = right;
         }
 
-        public static Section getFrom(List<Section> sections, Vector vec)
+        public static Section getFRhom(List<Section> sections, Vector vec)
         {
             foreach (Section section in sections)
             {
@@ -441,10 +467,13 @@ namespace WindowsFormsApplication3
             return null;
         }
 
-        public void Paint(Graphics g, Pen p, int size) {
-            g.DrawLine(new Pen(Color.DarkOliveGreen, 2), (int)A.X, size - (int)A.Y, (int)B.X, size - (int)B.Y);
-            g.DrawLine(new Pen(Color.DarkOliveGreen, 2), (int)B.X, size - (int)B.Y, (int)C.X, size - (int)C.Y);
-            g.DrawLine(new Pen(Color.DarkOliveGreen, 2), (int)C.X, size - (int)C.Y, (int)A.X, size - (int)A.Y);
+        public void Paint(Graphics g, Pen linePen, Pen pointPen, int formHeight) {
+            g.DrawLine(linePen, (int)A.X, formHeight - (int)A.Y, (int)B.X, formHeight - (int)B.Y);
+            g.DrawLine(linePen, (int)B.X, formHeight - (int)B.Y, (int)C.X, formHeight - (int)C.Y);
+            g.DrawLine(linePen, (int)C.X, formHeight - (int)C.Y, (int)A.X, formHeight - (int)A.Y);
+            A.Paint(g, pointPen, formHeight);
+            B.Paint(g, pointPen, formHeight);
+            C.Paint(g, pointPen, formHeight);
         }
     }
 
@@ -472,9 +501,13 @@ namespace WindowsFormsApplication3
 
         private double countAngle()
         {
-            double t1 = Math.Acos(cosPhi);
-            double t2 = - t1;
+            //вернет угол [-pi;pi]
+            
+            //вычисляем арккосинусы
+            double t1 = Math.Acos(cosPhi);                              
+            double t2 = - t1;                                           
 
+            //вычисляем арксинусы
             double t3 = Math.Asin(sinPhi);
             double t4;
             if (t3 > 0)
@@ -488,7 +521,7 @@ namespace WindowsFormsApplication3
                 return t4;
         }
 
-        public double Ro
+        public double Rho
         {
             get;
             set;
@@ -497,26 +530,27 @@ namespace WindowsFormsApplication3
         public PolarPoint(Point pole, Point thisPoint)
         {
             this.pole = pole;
-            Ro = pole.getDistance(thisPoint);
-            cosPhi = (thisPoint.X - pole.X) / Ro;
-            sinPhi = (thisPoint.Y - pole.Y) / Ro;
+            Rho = pole.getDistance(thisPoint);
+            cosPhi = (thisPoint.X - pole.X) / Rho;
+            sinPhi = (thisPoint.Y - pole.Y) / Rho;
             angle = countAngle();
         }
 
         public Point toDecart()
         {
-            return new Point(pole.X + Ro * cosPhi, pole.Y + Ro * sinPhi);
+            return new Point(pole.X + Rho * cosPhi, pole.Y + Rho * sinPhi);
         }
 
         public override bool Equals(object obj)
         {
             if (obj == null)
                 return false;
+            
             if (obj.GetType() != this.GetType())
                 return false;
 
             PolarPoint polPoint = (PolarPoint)obj;
-            if (polPoint.pole.Equals(pole) && polPoint.Ro == Ro && polPoint.cosPhi == cosPhi && polPoint.sinPhi == sinPhi)
+            if (polPoint.pole.Equals(pole) && polPoint.Rho == Rho && polPoint.cosPhi == cosPhi && polPoint.sinPhi == sinPhi)
                 return true;
             else
                 return false;
@@ -526,9 +560,9 @@ namespace WindowsFormsApplication3
         {
             if (angle > other.angle)
                 return 1;
-            if (angle == other.angle && Ro > other.Ro)
+            if (angle == other.angle && Rho > other.Rho)
                 return 1;
-            if (angle == other.angle && Ro == other.Ro)
+            if (angle == other.angle && Rho == other.Rho)
                 return 0;
             return -1;
         }
@@ -545,189 +579,14 @@ namespace WindowsFormsApplication3
         }
         private List<Vector> shell;
 
-        //without color
-        public Triangulation(List<Point> collection) {
-            points = new List<Point>(collection);                       //сделали копию, на всякий пожарный
-            triangles = new List<Triangle>();                           //список треугольников
-            shell = new List<Vector>();                                 //список векторов из границы
-
-            Point massCenter = Point.getMassCenter(points);             //получили центр масс
-            Point basePoint = massCenter.getNearestPointFrom(points);   //получили ближайшую к нему точку
-            points.Remove(basePoint);                                   //убираем её из списка вершин
-
-            List<PolarPoint> polarCoordinates = new List<PolarPoint>(); //переходим к полярным координатам
-            foreach (Point point in points)                             //для каждой точки находим новые координаты
-                polarCoordinates.Add(new PolarPoint(basePoint, point)); //полюс - basePoint
-            polarCoordinates.Sort();                                    //сортировка, угол в приоритете
-
-            points.Clear();                                             //больше этот список нам не пригодится
-            foreach (PolarPoint polPoint in polarCoordinates)           //записываем в него координаты точек в
-                points.Add(polPoint.toDecart());                        //отсортированном порядке
-
-            for (int i = 0; i < points.Count - 1; i++)                  //ну а теперь нужно до каждой точки протянуть вектор
-            {                                                           //справа и слева от него будут треугольники, а
-                shell.Add(new Vector(points[i], points[i + 1]));        //соседнии точки образуют границу
-                triangles.Add(new Triangle(points[i + 1], basePoint, points[i]));
-            }
-
-            if (new Vector(basePoint, points[points.Count - 1]).getVectorMultiplication(new Vector(basePoint, points[0])) > 0)
-            {
-                shell.Add(new Vector(points[points.Count - 1], points[0]));
-                triangles.Add(new Triangle(points[0], basePoint, points[points.Count - 1]));
-            }
-            else
-            {
-                shell.Insert(0, new Vector(basePoint, points[0]));
-                shell.Add(new Vector(points[points.Count - 1], basePoint));
-            }
-
-            updateShell();
-            upToDelanay();
-        }
-
-        private void updateShell()
-        {
-            bool shellChanged = true;
-            while (shellChanged)
-            {
-                shellChanged = false;
-                for (int i = 0; i < shell.Count - 1; i++)
-                {
-                    if (shell[i].getVectorMultiplication(shell[i + 1]) < 0)
-                    {
-                        Triangle t = new Triangle(shell[i].Start, shell[i].End, shell[i + 1].End);
-                        triangles.Add(t);
-
-                        shell[i] = new Vector(shell[i].Start, shell[i + 1].End);
-                        shell.RemoveAt(i + 1);
-
-                        shellChanged = true;
-                    }
-                }
-
-                if (shell[shell.Count - 1].getVectorMultiplication(shell[0]) < 0)
-                {
-                    Triangle t = new Triangle(shell[shell.Count - 1].Start,  shell[0].End, shell[shell.Count - 1].End);
-                    triangles.Add(t);
-                    
-                    shell[shell.Count - 1] = new Vector(shell[shell.Count - 1].Start, shell[0].End);
-                    shell.RemoveAt(0);
-
-                    shellChanged = true;
-                }
-            }
-        }
-        private void upToDelanay() {
-            List<Triangle> copyTriangles = new List<Triangle>(triangles);
-
-            bool triangleChanged = true;
-            while (triangleChanged)
-            {
-                triangleChanged = false;
-                for (int i = 0; i < copyTriangles.Count; i++)
-                {
-                    Triangle now = copyTriangles[i];
-
-                    bool firstChanged = false;
-
-                    Triangle tleft = getNearest(now, true, false, false, copyTriangles);
-                    if (tleft != null)
-                        firstChanged = UpdateTriangles(now, tleft, now.a, copyTriangles);
-
-                    if (firstChanged)
-                    {
-                        i--;
-                        triangleChanged = true;
-                        continue;
-                    }
-
-                    bool secondChanged = false;
-                    tleft = getNearest(now, false, true, false, copyTriangles);
-                    if (tleft != null)
-                        secondChanged = UpdateTriangles(now, tleft, now.b, copyTriangles);
-
-                    if (secondChanged)
-                    {
-                        triangleChanged = true;
-                        i--;
-                        continue;
-                    }
-
-                    bool thirdChanged = false;
-                    tleft = getNearest(now, false, false, true, copyTriangles);
-                    if (tleft != null)
-                        thirdChanged = UpdateTriangles(now, tleft, now.c, copyTriangles);
-                    if (thirdChanged)
-                    {
-                        i--;
-                        triangleChanged = true;
-                        continue;
-                    }
-                }
-            }
-            triangles = copyTriangles;
-        }
-        private Triangle getNearest(Triangle destination, bool a, bool b, bool c, List<Triangle> list)
-        {
-            foreach (Triangle t in list)
-            {
-                if (t.Equals(destination))
-                    continue;
-                if (a && (destination.a.Equals(t.a) || destination.a.Equals(t.b) || destination.a.Equals(t.c)))
-                    return t;
-                if (b && (destination.b.Equals(t.a) || destination.b.Equals(t.b) || destination.b.Equals(t.c)))
-                    return t;
-                if (c && (destination.c.Equals(t.a) || destination.c.Equals(t.b) || destination.c.Equals(t.c)))
-                    return t;
-            }
-            return null;
-        }
-        private bool UpdateTriangles(Triangle tRight, Triangle tLeft, Section commonSection, List<Triangle> tmpResult)
-        {
-            Point leftExcessPoint = Triangulation.getExcessPoint(tLeft, commonSection);
-            Point rightExcessPoint = Triangulation.getExcessPoint(tRight, commonSection);
-
-            if (commonSection.countAnglesSum(leftExcessPoint) + commonSection.countAnglesSum(rightExcessPoint) < 180)
-            {
-                Point up = commonSection.A;
-                Point down = commonSection.B;
-                if (new Vector(down, rightExcessPoint).getVectorMultiplication(new Vector(down, leftExcessPoint)) < 0)
-                {
-                    up = commonSection.B;
-                    down = commonSection.A;
-                }
-
-                tmpResult.Remove(tLeft);
-                tmpResult.Remove(tRight);
-                tmpResult.Add(new Triangle(leftExcessPoint, down, rightExcessPoint));
-                tmpResult.Add(new Triangle(rightExcessPoint, up, leftExcessPoint));
-
-                return true;
-            }
-            return false;
-        }   
-        private static Point getExcessPoint(Triangle t, Section s)
-        {
-            Point excessPoint;
-            if (!t.A.Equals(s.A) && !t.A.Equals(s.B))
-                excessPoint = t.A;
-            else
-                if (!t.B.Equals(s.A) && !t.B.Equals(s.B))
-                    excessPoint = t.B;
-                else
-                    excessPoint = t.C;
-            return excessPoint;
-        }
-
-       
-        public Triangulation(List<Point> collection, Graphics g, int size, int delay)
+        public Triangulation(IEnumerable<Point> collection, Graphics g = null, Pen linePen = null, Pen pointPen = null, Pen newLinePen = null, int size = 0, int delay = 0)
         {
             points = new List<Point>(collection);                       //сделали копию, на всякий пожарный
             triangles = new List<Triangle>();                           //список треугольников
             shell = new List<Vector>();                                 //список векторов из границы
 
             Point massCenter = Point.getMassCenter(points);             //получили центр масс
-            Point basePoint = massCenter.getNearestPointFrom(points);   //получили ближайшую к нему точку
+            Point basePoint = massCenter.getNearestPointFRhom(points);   //получили ближайшую к нему точку
             points.Remove(basePoint);                                   //убираем её из списка вершин
 
             List<PolarPoint> polarCoordinates = new List<PolarPoint>(); //переходим к полярным координатам
@@ -760,17 +619,53 @@ namespace WindowsFormsApplication3
             }
 
             updateShell();
-            foreach (Triangle triangle in triangles)
-                triangle.Paint(g, new Pen(Color.YellowGreen, 2), size);
+            if (g != null)
+                foreach (Triangle triangle in triangles)
+                    triangle.Paint(g, linePen, pointPen, size);
             MessageBox.Show("Триангуляция построена!\nПреобразуем её к триангуляции Делоне.");
 
-            upToDelanay(g, size, delay);
-            foreach (Triangle triangle in triangles)
-                triangle.Paint(g, new Pen(Color.Chartreuse, 3), size);
-            
+            upToDelanay(g, linePen, pointPen, newLinePen, size, delay);
+            if (g != null)
+                foreach (Triangle triangle in triangles)
+                    triangle.Paint(g, linePen, pointPen, size);
+
             MessageBox.Show("Готово!");
         }
-        public void upToDelanay(Graphics g, int size, int delay)
+        
+        private void updateShell()
+        {
+            bool shellChanged = true;
+            while (shellChanged)
+            {
+                shellChanged = false;
+                for (int i = 0; i < shell.Count - 1; i++)
+                {
+                    if (shell[i].getVectorMultiplication(shell[i + 1]) < 0)
+                    {
+                        Triangle t = new Triangle(shell[i].Start, shell[i].End, shell[i + 1].End);
+                        triangles.Add(t);
+
+                        shell[i] = new Vector(shell[i].Start, shell[i + 1].End);
+                        shell.RemoveAt(i + 1);
+
+                        shellChanged = true;
+                    }
+                }
+
+                if (shell[shell.Count - 1].getVectorMultiplication(shell[0]) < 0)
+                {
+                    Triangle t = new Triangle(shell[shell.Count - 1].Start,  shell[0].End, shell[shell.Count - 1].End);
+                    triangles.Add(t);
+                    
+                    shell[shell.Count - 1] = new Vector(shell[shell.Count - 1].Start, shell[0].End);
+                    shell.RemoveAt(0);
+
+                    shellChanged = true;
+                }
+            }
+        }
+        
+        public void upToDelanay(Graphics g = null, Pen linePen = null, Pen pointPen = null, Pen newLinePen = null, int size = 0, int delay = 0)
         {
             List<Triangle> copyTriangles = new List<Triangle>(triangles);
 
@@ -786,45 +681,35 @@ namespace WindowsFormsApplication3
                 {
                     Triangle now = copyTriangles[i];
 
-                    //if (firstChanged || secondChanged || thirdChanged)
-                    //{
-                    //    g.Clear(Color.White);
-                    //    foreach (Triangle t in copyTriangles)
-                    //        t.Paint(g, new Pen(Color.Violet, 2), size);
-                    //}
-                    
                     firstChanged = false;
                     thirdChanged = false;
                     secondChanged = false;
 
-                    Triangle tleft = getNearest(now, true, false, false, copyTriangles, g, size, delay);
+                    Triangle tleft = getNearest(now, true, false, false, copyTriangles);
                     if (tleft != null)
-                        firstChanged = UpdateTriangles(now, tleft, now.a, copyTriangles, g, new Pen(Color.Gold, 3), size, delay);
+                        firstChanged = UpdateTriangles(now, tleft, now.a, copyTriangles, g, linePen, pointPen, newLinePen, size, delay);
 
                     if (firstChanged)
                     {
-                        i--;
                         triangleChanged = true;
                         continue;
                     }
 
-                    tleft = getNearest(now, false, true, false, copyTriangles, g, size, delay);
+                    tleft = getNearest(now, false, true, false, copyTriangles);
                     if (tleft != null)
-                        secondChanged = UpdateTriangles(now, tleft, now.b, copyTriangles, g, new Pen(Color.Gold, 3), size, delay);
+                        secondChanged = UpdateTriangles(now, tleft, now.b, copyTriangles, g, linePen, pointPen, newLinePen, size, delay);
 
                     if (secondChanged)
                     {
                         triangleChanged = true;
-                        i--;
                         continue;
                     }
-                                        
-                    tleft = getNearest(now, false, false, true, copyTriangles, g, size, delay);
+
+                    tleft = getNearest(now, false, false, true, copyTriangles);
                     if (tleft != null)
-                        thirdChanged = UpdateTriangles(now, tleft, now.c, copyTriangles, g, new Pen(Color.Gold, 3), size, delay);
+                        thirdChanged = UpdateTriangles(now, tleft, now.c, copyTriangles, g, linePen, pointPen, newLinePen, size, delay);
                     if (thirdChanged)
                     {
-                        i--;
                         triangleChanged = true;
                         continue;
                     }
@@ -833,31 +718,38 @@ namespace WindowsFormsApplication3
 
             triangles = copyTriangles;
         }
-        private Triangle getNearest(Triangle destination, bool a, bool b, bool c, List<Triangle> list, Graphics g, int size, int delay) {
-            destination.Paint(g, new Pen(Color.Black, 2), size);
+        private Triangle getNearest(Triangle destination, bool a, bool b, bool c, List<Triangle> list)
+        {
 
-            foreach (Triangle t in list) {
+            foreach (Triangle t in list)
+            {
                 if (t.Equals(destination))
                     continue;
                 if (a && (destination.a.Equals(t.a) || destination.a.Equals(t.b) || destination.a.Equals(t.c)))
-                {
-                    t.Paint(g, new Pen(Color.Gray, 2), size);
                     return t;
-                }
+
                 if (b && (destination.b.Equals(t.a) || destination.b.Equals(t.b) || destination.b.Equals(t.c)))
-                {
-                    t.Paint(g, new Pen(Color.Blue, 2), size);
                     return t;
-                }
+
                 if (c && (destination.c.Equals(t.a) || destination.c.Equals(t.b) || destination.c.Equals(t.c)))
-                {
-                    t.Paint(g, new Pen(Color.Orange, 2), size);
                     return t;
-                }
+
             }
             return null;
         }
-        private bool UpdateTriangles(Triangle tRight, Triangle tLeft, Section commonSection, List<Triangle> tmpResult, Graphics g, Pen p, int size, int delay)
+        private static Point getExcessPoint(Triangle t, Section s)
+        {
+            Point excessPoint;
+            if (!t.A.Equals(s.A) && !t.A.Equals(s.B))
+                excessPoint = t.A;
+            else
+                if (!t.B.Equals(s.A) && !t.B.Equals(s.B))
+                    excessPoint = t.B;
+                else
+                    excessPoint = t.C;
+            return excessPoint;
+        }
+        private bool UpdateTriangles(Triangle tRight, Triangle tLeft, Section commonSection, List<Triangle> tmpResult, Graphics g = null, Pen linePen = null, Pen pointPen = null, Pen newLinePen = null, int formHeigth = 0, int delay = 0)
         {
             Point leftExcessPoint = Triangulation.getExcessPoint(tLeft, commonSection);
             Point rightExcessPoint = Triangulation.getExcessPoint(tRight, commonSection);
@@ -874,15 +766,25 @@ namespace WindowsFormsApplication3
 
                 tmpResult.Remove(tLeft);
                 tmpResult.Remove(tRight);
-                tmpResult.Add(new Triangle(leftExcessPoint, down, rightExcessPoint));
-                tmpResult.Add(new Triangle(rightExcessPoint, up, leftExcessPoint));
+                Triangle toAddFirst = new Triangle(leftExcessPoint, down, rightExcessPoint);
+                Triangle toAddSecond = new Triangle(rightExcessPoint, up, leftExcessPoint);
+                tmpResult.Add(toAddFirst);
+                tmpResult.Add(toAddSecond);
 
-                g.DrawLine(new Pen(Color.White, 2), (int)commonSection.A.X, size - (int)commonSection.A.Y,
-                    (int)commonSection.B.X, size - (int)commonSection.B.Y);
-                g.DrawLine(new Pen(Color.DarkOrange,3), (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
-                Thread.Sleep(delay);
-                g.DrawLine(new Pen(Color.White, 3), (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
-                g.DrawLine(new Pen(Color.Green, 2), (int)leftExcessPoint.X, size - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, size - (int)rightExcessPoint.Y);
+                if (g != null)
+                {
+                    g.DrawLine(new Pen(Color.White, 2), (int)commonSection.A.X, formHeigth - (int)commonSection.A.Y,
+                        (int)commonSection.B.X, formHeigth - (int)commonSection.B.Y);
+                    g.DrawLine(newLinePen, (int)leftExcessPoint.X, formHeigth - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, formHeigth - (int)rightExcessPoint.Y);
+                    
+                    Thread.Sleep(delay);
+
+                    g.DrawLine(new Pen(Color.White, 2), (int)leftExcessPoint.X, formHeigth - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, formHeigth - (int)rightExcessPoint.Y);
+                    g.DrawLine(linePen, (int)leftExcessPoint.X, formHeigth - (int)leftExcessPoint.Y, (int)rightExcessPoint.X, formHeigth - (int)rightExcessPoint.Y);
+
+                    toAddFirst.Paint(g, linePen, pointPen, formHeigth);
+                    toAddSecond.Paint(g, linePen, pointPen, formHeigth);
+                }
                 return true;
             }
             return false;
