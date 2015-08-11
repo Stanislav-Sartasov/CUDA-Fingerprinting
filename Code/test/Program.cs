@@ -23,27 +23,45 @@ namespace test
     {
         static void Main(string[] args)
         {
-            double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//62_1.bmp");
-            double[,] a = CreatTemplateTest(imgDoubles);
-           // ImageHelper.SaveArrayToBitmap(CreatTemplateTest(a)).Save("d://hglf23.bmp");
-            
-           int[,] bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
-            PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
-            List<Minutia> minutias = MinutiaDetector.GetMinutias(bytes, field);
-            TemplateCreator creator = new TemplateCreator(minutias);
-
-            imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//62_2.bmp");
-            a = CreatTemplateTest(imgDoubles);
-            bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
-            field = new PixelwiseOrientationField(bytes, 16);
-            
-            List<Minutia> minutiae2 = MinutiaDetector.GetMinutias(bytes, field);
-            TemplateCreator creator2 = new TemplateCreator(minutiae2);
-            Template[] t = {creator.CreateTemplate(),creator2.CreateTemplate()};
-            foreach (var res in BinTemplateSimilarity.GetTemplateSimilarity(t[0], t))
+            int countmax = 0;
+            int countmin = 0;
+            int max = 0;
+            int min = 100;
+            for (int i = 1; i <= 110; i++)
             {
-                Console.WriteLine(res);
+                for (int j = 1; j <= 7; j += 4)
+                {
+                    double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//" + i + "_" + j + ".bmp");
+                    double[,] a = CreatTemplateTest(imgDoubles);
+                    int[,] bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
+                    PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
+                    List<Minutia> minutias = MinutiaDetector.GetMinutias(bytes, field);
+                    TemplateCreator creator = new TemplateCreator(minutias);
+                    Template[] t = { creator.CreateTemplate() };
+                    if (BinTemplateSimilarity.GetTemplateSimilarity(t[0], t)[0].Equals(1))
+                    {
+                        min = min > t[0].Cylinders.Count() ? t[0].Cylinders.Count() : min;
+                        countmin++;
+                    }
+                    else
+                    {
+                        countmax++;
+                        max = max < t[0].Cylinders.Count() ? t[0].Cylinders.Count() : max;
+                    }
+                }
             }
+            Console.WriteLine("min count fot 1 - {0} ({1})", min, countmin);
+            Console.WriteLine("max count for < 1 - {0} ({1})", max, countmax);
+            // ImageHelper.SaveArrayToBitmap(CreatTemplateTest(a)).Save("d://hglf23.bmp");
+
+
+            /* imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//3_4.bmp");
+             a = CreatTemplateTest(imgDoubles);
+             bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
+             field = new PixelwiseOrientationField(bytes, 16);
+            
+             List<Minutia> minutiae2 = MinutiaDetector.GetMinutias(bytes, field);
+             TemplateCreator creator2 = new TemplateCreator(minutiae2);*/
             Console.ReadKey();
             // seg.SaveSegmentation(seg.MakeBitmap(seg.Segmentate()),"d://123.bmp");
         }
