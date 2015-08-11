@@ -107,7 +107,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                         flag = false;
                         
                     }
-                    write.Write(s[i, j].ToString("#.##") + " "); 
+                    write.Write(Math.Round(s[i, j], 2) + " "); 
                 }
                 write.WriteLine();
             }
@@ -138,7 +138,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             {
                 for (int j = 0; j < s.GetLength(1); ++j)
                 {
-                    write.Write(s[i, j].ToString("#.##") + " "); 
+                    write.Write(Math.Round(s[i, j], 2) + " "); 
                 }
                 write.WriteLine();
             }
