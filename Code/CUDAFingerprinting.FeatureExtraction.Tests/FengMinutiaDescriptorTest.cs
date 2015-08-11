@@ -41,7 +41,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             width = img.GetLength(0);
         }
         [TestMethod]
-        public void FengMinutiaDescriptorTestMethod()
+        public void DescriptorsCompareTestOneToOne()
         {
             int i;
             float s;
@@ -82,7 +82,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
         }
 
         [TestMethod]
-        public void DescriptorsCompareTest1()
+        public void DescriptorsCompareTestManyToManyOneFingerprint()
         {
             int heigth = 0;
             int width = 0;
@@ -114,7 +114,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             Assert.IsTrue(flag);
         }
         [TestMethod]
-        public void DescriptorsCompareTest2()
+        public void DescriptorsCompareTestManyToManyDifferentFingers()
         {
             int heigth = 0;
             int width = 0;
@@ -139,6 +139,40 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                 for (int j = 0; j < s.GetLength(1); ++j)
                 {
                     write.Write(Math.Round(s[i, j], 2) + " "); 
+                }
+                write.WriteLine();
+            }
+
+            write.Close();
+            Assert.IsTrue(flag);
+        }
+
+        [TestMethod]
+        public void DescriptorsCompareTestManyToManyDifferentFingerprints()
+        {
+            int heigth = 0;
+            int width = 0;
+            getImgSize(Resources.minutia1_11, ref heigth, ref width);
+
+            List<Minutia> mins1 = readMinutiae(Resources.minutia2_6);
+            List<Minutia> mins2 = readMinutiae(Resources.minutia2_2);
+            int radius = 70;
+            float eps = 0.01F;
+
+
+            List<Descriptor> desc1 = DescriptorBuilder.BuildDescriptors(mins1, radius);
+            List<Descriptor> desc2 = DescriptorBuilder.BuildDescriptors(mins2, radius);
+            bool flag = true;
+            var s = FengMinutiaDescriptor.DescriptorsCompare(desc1, desc2, radius, heigth, width);
+
+
+            System.IO.StreamWriter write = new System.IO.StreamWriter("D:\\test2.txt");
+
+            for (int i = 0; i < s.GetLength(0); ++i)
+            {
+                for (int j = 0; j < s.GetLength(1); ++j)
+                {
+                    write.Write(Math.Round(s[i, j], 2) + " ");
                 }
                 write.WriteLine();
             }
