@@ -40,7 +40,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             heigth = img.GetLength(1);
             width = img.GetLength(0);
         }
-        [TestMethod]
+        [TestMethod, Description("Compare two handwriting descriptors")]
         public void DescriptorsCompareTestOneToOne()
         {
             int i;
@@ -81,7 +81,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             Assert.IsTrue(Math.Abs(s - check) < eps);
         }
 
-        [TestMethod]
+        [TestMethod, Description("Compare set of descriptors with itself")]
         public void DescriptorsCompareTestManyToManyOneFingerprint()
         {
             int heigth = 0;
@@ -113,7 +113,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             }
             Assert.IsTrue(flag);
         }
-        [TestMethod]
+        [TestMethod, Description("Compare sets of descriptors from different fingers")]
         public void DescriptorsCompareTestManyToManyDifferentFingers()
         {
             int heigth = 0;
@@ -147,7 +147,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             Assert.IsTrue(flag);
         }
 
-        [TestMethod]
+        [TestMethod, Description("Compare sets of descriptors from different fingerprints of one finger")]
         public void DescriptorsCompareTestManyToManyDifferentFingerprints()
         {
             int heigth = 0;
