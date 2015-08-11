@@ -32,7 +32,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 {
                     length = leng(list[i], list[j]);
                     
-                    if (i != j && (Math.Abs(length - (float)(radius*radius)) < eps))
+                    if (i != j && length <= radius*radius)
                     {
                         d.Center = list[i];
                         d.Minutias.Add(list[j]);

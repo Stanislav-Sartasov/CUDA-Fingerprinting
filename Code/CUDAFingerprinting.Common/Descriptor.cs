@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CUDAFingerprinting.Common
 {
@@ -9,7 +10,7 @@ namespace CUDAFingerprinting.Common
         public Minutia Center;
         public Descriptor(List<Minutia> m, Minutia c)
         {
-            Minutias = m;
+            Minutias = m.ToList();
             Center = c;
         }
     };
