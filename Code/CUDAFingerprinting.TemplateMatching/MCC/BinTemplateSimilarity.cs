@@ -89,6 +89,71 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
             return similarityRates;
         }
 
+        public static double[] GetTemplateSimilarityWithMask(Template query, Template[] db)
+        {
+            double[] similarityRates = new double[db.Length];
+
+            for (int k = 0; k < db.Length; k++)
+            {
+                Template templateDb = db[k];
+
+                // Reset buckets array
+                // Is this necessary?
+                for (int j = 0; j < buckets.Length; j++)
+                {
+                    buckets[j] = 0;
+                }
+
+                for (int countI = 0; countI < query.Cylinders.Length; countI += 2)
+                {
+                    for (int countJ = 0; countJ < templateDb.Cylinders.Length; countJ += 2)
+                    {
+                        if (CylinderHelper.GetAngleDiff(query.Cylinders[countI].Angle, templateDb.Cylinders[countJ].Angle) <= angleThreshold)
+                        {
+                            uint[] common =
+                                query.Cylinders[countI + 1].Values.Zip(templateDb.Cylinders[countJ + 1].Values,
+                                    (first, second) => first & second).ToArray();
+                            uint[] firstAndSecond = query.Cylinders[countI].Values.Zip(common,
+                                    (first, second) => first & second).ToArray();
+                            uint[] secondAndFirst = templateDb.Cylinders[countJ].Values.Zip(common,
+                                    (first, second) => first & second).ToArray();
+                            double givenFristNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(firstAndSecond));
+                            double givenSecondNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(secondAndFirst));
+                            
+                            uint[] givenXOR = firstAndSecond.Zip(secondAndFirst, (first, second) => first ^ second).ToArray();
+
+                            double givenXORNorm = Math.Sqrt(CylinderHelper.GetOneBitsCount(givenXOR)); // Bitwise version
+                            //double givenXORNorm = CalculateCylinderNorm(givenXOR); // Stupid version
+
+
+                            uint bucketIndex = (uint)Math.Floor(givenXORNorm / (givenFristNorm + givenSecondNorm) * bucketsCount);
+                            if (bucketIndex == bucketsCount)
+                            {
+                                bucketIndex--;
+                            }
+                            buckets[bucketIndex]++;
+                            
+                        }
+                    }
+                }
+
+                int numPairs = ComputeNumPairs(templateDb.Cylinders.Length/2, query.Cylinders.Length/2);
+
+                int sum = 0, t = numPairs, i = 0;
+                while (i < bucketsCount && t > 0)
+                {
+                    sum += (int)Math.Min(buckets[i], t) * i;
+                    t -= (int)Math.Min(buckets[i], t);
+                    i++;
+                }
+                sum += t * (int)bucketsCount;
+
+                similarityRates[k] = 1 - (float)sum / (numPairs * bucketsCount);
+            }
+
+            return similarityRates;
+        }
+
         public static double[] GetTemplateSimilarityOptimized(Template query, CylinderDatabase db, int[] dbTemplateLengths)
         {
             double[] similarityRates = new double[dbTemplateLengths.Length];
