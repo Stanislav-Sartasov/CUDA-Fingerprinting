@@ -90,59 +90,22 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             Assert.IsTrue(Math.Abs(s - check) < eps);
         }
 
-        [TestMethod, Description("Compare set of descriptors with itself")]
-        public void DescriptorsCompareTestManyToManyOneFingerprint()
+        private bool cmp(List<Minutia> mins1, List<Minutia> mins2, bool expected)
         {
             int heigth = 0;
             int width = 0;
             getImgSize(Resources.minutia1_11, ref heigth, ref width);
 
-            List<Minutia> mins = readMinutiae(Resources.minutia1_1);
             int radius = 70;
             float eps = 0.01F;
 
-            List<Descriptor> decs = DescriptorBuilder.BuildDescriptors(mins, radius);
-            var s = FengMinutiaDescriptor.DescriptorsCompare(decs, decs, radius, heigth, width);
-            System.IO.StreamWriter write = new System.IO.StreamWriter("D:\\test.txt");
-         
-            bool flag = true;
-
-            for (int i = 0; i < s.GetLength(0); ++i)
-            {
-                for (int j = 0; j < s.GetLength(1); ++j)
-                {
-                    if (Math.Abs(s[i, j] - 1.0) >= eps)
-                    {
-                        flag = false;
-                        
-                    }
-                  write.Write("{0:0.00}", Math.Round(s[i, j], 2));
-                    write.Write(" ");
-                }
-                write.WriteLine();
-            }
-            write.Close();
-            Assert.IsTrue(flag);
-        }
-        [TestMethod, Description("Compare sets of descriptors from different fingers")]
-        public void DescriptorsCompareTestManyToManyDifferentFingers()
-        {
-            int heigth = 0;
-            int width = 0;
-            getImgSize(Resources.minutia1_11, ref heigth, ref width);
-
-            List<Minutia> mins1 = readMinutiae(Resources.minutia1_1);
-            List<Minutia> mins2 = readMinutiae(Resources.minutia2_2);
-            int radius = 70;
-            float eps = 0.01F;
- 
 
             List<Descriptor> desc1 = DescriptorBuilder.BuildDescriptors(mins1, radius);
             List<Descriptor> desc2 = DescriptorBuilder.BuildDescriptors(mins2, radius);
-            bool flag = true;
+            bool flag = expected;
             var s = FengMinutiaDescriptor.DescriptorsCompare(desc1, desc2, radius, heigth, width);
 
-            
+
             System.IO.StreamWriter write = new System.IO.StreamWriter("D:\\test1.txt");
 
             for (int i = 0; i < s.GetLength(0); ++i)
@@ -151,47 +114,52 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                 {
                     write.Write("{0:0.00}", Math.Round(s[i, j], 2));
                     write.Write(" ");
+                    //cmp in progress
                 }
                 write.WriteLine();
             }
 
             write.Close();
-            Assert.IsTrue(flag);
+            return flag;
+        }
+
+        [TestMethod, Description("Compare set of descriptors with itself")]
+        public void DescriptorsCompareTestManyToManyOneFingerprint()
+        {
+            bool cmpres;
+            List<Minutia> mins1 = readMinutiae(Resources.minutia1_1);
+            List<Minutia> mins2 = readMinutiae(Resources.minutia1_1);
+            cmpres = cmp(mins1, mins2, true);
+            Assert.IsTrue(cmpres);
+        }
+        [TestMethod, Description("Compare sets of descriptors from different fingers")]
+        public void DescriptorsCompareTestManyToManyDifferentFingers()
+        {
+            bool cmpres;
+            List<Minutia> mins1 = readMinutiae(Resources.minutia1_1);
+            List<Minutia> mins2 = readMinutiae(Resources.minutia2_2);
+            cmpres = cmp(mins1, mins2, false);
+            Assert.IsTrue(cmpres);
         }
 
         [TestMethod, Description("Compare sets of descriptors from different fingerprints of one finger")]
-        public void DescriptorsCompareTestManyToManyDifferentFingerprints()
+        public void DescriptorsCompareTestManyToManyDifferentFingerprints1()
         {
-            int heigth = 0;
-            int width = 0;
-            getImgSize(Resources.minutia1_11, ref heigth, ref width);
-
+            bool cmpres;
             List<Minutia> mins1 = readMinutiae(Resources.minutia2_6);
             List<Minutia> mins2 = readMinutiae(Resources.minutia2_2);
-            int radius = 70;
-            float eps = 0.01F;
+            cmpres = cmp(mins1, mins2, true);
+            Assert.IsTrue(cmpres);
+        }
 
-
-            List<Descriptor> desc1 = DescriptorBuilder.BuildDescriptors(mins1, radius);
-            List<Descriptor> desc2 = DescriptorBuilder.BuildDescriptors(mins2, radius);
-            bool flag = true;
-            var s = FengMinutiaDescriptor.DescriptorsCompare(desc1, desc2, radius, heigth, width);
-
-
-            System.IO.StreamWriter write = new System.IO.StreamWriter("D:\\test2.txt");
-
-            for (int i = 0; i < s.GetLength(0); ++i)
-            {
-                for (int j = 0; j < s.GetLength(1); ++j)
-                {
-                    write.Write("{0:0.00}", Math.Round(s[i, j], 2));
-                    write.Write(" ");
-                }
-                write.WriteLine();
-            }
-
-            write.Close();
-            Assert.IsTrue(flag);
+        [TestMethod, Description("Compare sets of descriptors from different fingerprints of one finger")]
+        public void DescriptorsCompareTestManyToManyDifferentFingerprints2()
+        {
+            bool cmpres;
+            List<Minutia> mins1 = readMinutiae(Resources.minutia2_6);
+            List<Minutia> mins2 = readMinutiae(Resources.minutia2_3);
+            cmpres = cmp(mins1, mins2, true);
+            Assert.IsTrue(cmpres);
         }
     }
 }
