@@ -11,7 +11,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace CUDAFingerprinting.FeatureExtraction.Tests
 {
     [TestClass]
-    [DebuggerDisplay("s {flag}")]
     public class FengMinutiaDescriptorTest
     {
         private static List<Minutia> readMinutiae(string s)
@@ -28,6 +27,16 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                 m.X = (int)mas[i];
                 m.Y = (int)mas[i + 1];
                 m.Angle = mas[i + 2];
+
+                if (m.Angle > Math.PI)
+                {
+                    m.Angle -= 2 * (float)Math.PI; 
+                }
+                else if (m.Angle < -Math.PI)
+                {
+                    m.Angle += 2 * (float)Math.PI; 
+                }
+
                 mins.Add(m);
             }
 
@@ -107,10 +116,12 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                         flag = false;
                         
                     }
-                    write.Write(Math.Round(s[i, j], 2) + " "); 
+                  write.Write("{0:0.00}", Math.Round(s[i, j], 2));
+                    write.Write(" ");
                 }
                 write.WriteLine();
             }
+            write.Close();
             Assert.IsTrue(flag);
         }
         [TestMethod]
@@ -138,7 +149,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             {
                 for (int j = 0; j < s.GetLength(1); ++j)
                 {
-                    write.Write(Math.Round(s[i, j], 2) + " "); 
+                    write.Write("{0:0.00}", Math.Round(s[i, j], 2));
+                    write.Write(" ");
                 }
                 write.WriteLine();
             }
@@ -172,7 +184,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             {
                 for (int j = 0; j < s.GetLength(1); ++j)
                 {
-                    write.Write(Math.Round(s[i, j], 2) + " ");
+                    write.Write("{0:0.00}", Math.Round(s[i, j], 2));
+                    write.Write(" ");
                 }
                 write.WriteLine();
             }

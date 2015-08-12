@@ -9,6 +9,10 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
     public class FengMinutiaDescriptor
     {
+        private static float sqrLength(Minutia m1, Minutia m2)
+        {
+            return (float)(Math.Pow(m1.X - m2.X, 2) + Math.Pow(m1.Y - m2.Y, 2));
+        }
         private static Descriptor Transformate(Descriptor desc_, Minutia center)
         {
             int i;
@@ -21,13 +25,20 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < desc.Minutias.Count; i++)
             {
                 var min = desc.Minutias[i];
-
+                var testX0 = (desc.Minutias[0].X - desc.Center.X) * Math.Cos(angle) -
+                            (desc.Minutias[0].Y - desc.Center.Y) * Math.Sin(angle) + center.X;
+                var testY0 = (desc.Minutias[0].X - desc.Center.X) * Math.Sin(angle) +
+                            (desc.Minutias[0].Y - desc.Center.Y) * Math.Cos(angle) + center.Y;
+               
                 min.X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) -
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
                 min.Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
                 min.Angle += angle;
-
+                var x = Math.Sqrt(Math.Pow(desc.Minutias[i].X - desc.Center.X, 2) + Math.Pow(desc.Minutias[i].Y - desc.Center.Y, 2)) -
+                    Math.Sqrt(Math.Pow(min.X - center.X, 2) + Math.Pow(min.Y - center.Y, 2));
+                var y = Math.Cos(angle);
+                var z = Math.Sin(angle);
                 desc.Minutias[i] = min;
             }
             
@@ -40,6 +51,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             int i, j;
             float eps = 0.1F;
             bool isExist;
+            int r = 40;
             float fengConstant = 0.64F; //= 0.8 * 0.8;  0.8 is a magic constant!(from Feng book)
 
             for (i = 0; i < desc1.Minutias.Count; i++)
@@ -48,8 +60,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 //sort desc2 and binary search is better solution
                 for (j = 0; j < desc2.Minutias.Count; j++)
                 {
-                    if ((desc1.Minutias[i].X == desc2.Minutias[j].X) && (desc1.Minutias[i].Y == desc2.Minutias[j].Y)
-                        && (Math.Abs(desc1.Minutias[i].Angle - desc2.Minutias[j].Angle) < eps))
+                    if ((sqrLength(desc1.Minutias[i], desc2.Minutias[j]) < r*r)
+                        && (Math.Abs((desc1.Minutias[i].Angle % (2 * Math.PI)) - (desc2.Minutias[j].Angle % (2 * Math.PI))) < eps))
                     {
                         isExist = true;
                     }
@@ -62,8 +74,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((Math.Pow(desc1.Minutias[i].X - desc2.Center.X, 2) +
-                        Math.Pow(desc1.Minutias[i].Y - desc2.Center.Y, 2) < fengConstant * radius * radius) ||
+                    if ((sqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) ||
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
