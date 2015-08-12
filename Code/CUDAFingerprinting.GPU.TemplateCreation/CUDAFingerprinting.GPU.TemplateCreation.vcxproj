@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0C462449-6E51-4AC5-83FC-3BD7800FB069}</ProjectGuid>
+    <ProjectGuid>{F89BF3F5-F724-4014-AB41-16AF6D7DF4B9}</ProjectGuid>
     <RootNamespace>CUDAFingerprinting_GPU_TemplateCreation</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
@@ -68,7 +68,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(SolutionDir)CUDAFingerprinting.GPU.BinCylinderCorrelation\;$(SolutionDir)CUDAFingerprinting.GPU.ConvexHull\;$(SolutionDir)CUDAFingerprinting.GPU.MinutiaDetection\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\User\Documents\Cuda FingerPrinting 2\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.ConvexHull;C:\Users\User\Documents\Cuda FingerPrinting 2\CUDA-Fingerprinting\Code\CUDAFingerprinting.GPU.BinCylinderCorrelation;C:\Users\User\Documents\Cuda FingerPrinting 2\CUDA-Fingerprinting\Code\CUDAFingerprinting.MinutiaDetection;$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -89,7 +89,7 @@
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
-      <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(SolutionDir)CUDAFingerprinting.GPU.BinCorrelation\;$(SolutionDir)CUDAFingerprinting.GPU.ConvexHull\;$(SolutionDir)CUDAFingerprinting.GPU.MinutiaDetection\;%(Include)</Include>
+      <Include>$(SolutionDir)CUDAFingerprinting.GPU.Common\;%(Include)</Include>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -160,19 +160,15 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ProjectReference Include="..\CUDAFingerprinting.GPU.BinCylinderCorrelation\CUDAFingerprinting.GPU.BinCylinderCorrelation.vcxproj">
       <Project>{3f634018-b841-428f-858e-082ae3efc94f}</Project>
-      <Private>true</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
     <ProjectReference Include="..\CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj">
       <Project>{ff7efcd3-be2a-43b4-af3e-91469400e6a8}</Project>
-      <Private>true</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.GPU.ConvexHull\CUDAFingerprinting.GPU.ConvexHull.vcxproj">
+      <Project>{1217f954-7424-43d5-9549-d21e4e0e3c75}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CUDAFingerprinting.GPU.MinutiaDetection\CUDAFingerprinting.GPU.MinutiaDetection.vcxproj">
+      <Project>{cae0fd91-a22c-442b-8380-8043c159a91a}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
