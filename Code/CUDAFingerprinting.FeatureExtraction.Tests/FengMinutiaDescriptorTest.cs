@@ -120,7 +120,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             }
 
             write.Close();
-            return flag;
+            return flag == expected;
         }
 
         [TestMethod, Description("Compare set of descriptors with itself")]
