@@ -90,7 +90,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
         private static bool isMatchable(Minutia m1, Minutia m2, Minutia kernel1, Minutia kernel2)
         {
             bool isOnSameDistance, isClose, isOnSameDirection;
-            float eps = 0.3F;
+            float epsAngle = 0.3F;
+            float eps = 3.0F; 
             float a1, a2, dist1, dist2, chordk, chordm;
 
             dist1 = Length(m1, kernel1);
@@ -99,7 +100,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 
             a1 = kernel1.Angle - kernel2.Angle;
             a2 = m1.Angle - m2.Angle;
-            isOnSameDirection = ((a1 % (2.0F * Math.PI)) - (a2 % (2.0F * Math.PI))) < eps;
+            isOnSameDirection = Math.Abs(((a1 % (2.0F * Math.PI)) - (a2 % (2.0F * Math.PI)))) < epsAngle;
 
             chordk = (float)Math.Sin(Math.Abs(a1/2)) * dist1 * 2;
             Minutia tempm;
@@ -114,7 +115,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 
         public static List<List<Tuple<int, int>>> MatchMinutiae(float[,] s, List<Minutia> mins1, List<Minutia> mins2)
         {
-            int top = 10;
+            int top = 100;
             List<List<Tuple<int, int>>> res = new List<List<Tuple<int, int>>>(top);
             bool[] flag1 = new bool[s.GetLength(0)];
             bool[] flag2 = new bool[s.GetLength(1)];
@@ -141,7 +142,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                     i = list[m].Item2;
                     j = list[m].Item3;
 
-                    if (!flag1[i] && !flag2[j] && isMatchable(mins1[i], mins1[j], mins1[i0], mins1[j0]))
+                    if (!flag1[i] && !flag2[j] && isMatchable(mins1[i], mins2[j], mins1[i0], mins2[j0]))
                    {
                        temp.Add(new Tuple<int, int>(i, j));
 
