@@ -13,8 +13,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
         {
             return (float)(Math.Pow(m1.X - m2.X, 2) + Math.Pow(m1.Y - m2.Y, 2));
         }
-
-        public static Descriptor Transformate(Descriptor desc_, Minutia center)
+        private static Descriptor Transformate(Descriptor desc_, Minutia center)
         {
             int i;
             Descriptor desc = new Descriptor();
@@ -26,22 +25,24 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < desc.Minutias.Count; i++)
             {
                 var min = desc.Minutias[i];
-
+                var testX0 = (desc.Minutias[0].X - desc.Center.X) * Math.Cos(angle) -
+                            (desc.Minutias[0].Y - desc.Center.Y) * Math.Sin(angle) + center.X;
+                var testY0 = (desc.Minutias[0].X - desc.Center.X) * Math.Sin(angle) +
+                            (desc.Minutias[0].Y - desc.Center.Y) * Math.Cos(angle) + center.Y;
+               
                 min.X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) -
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
                 min.Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
                 min.Angle += angle;
-    
+                var x = Math.Sqrt(Math.Pow(desc.Minutias[i].X - desc.Center.X, 2) + Math.Pow(desc.Minutias[i].Y - desc.Center.Y, 2)) -
+                    Math.Sqrt(Math.Pow(min.X - center.X, 2) + Math.Pow(min.Y - center.Y, 2));
+                var y = Math.Cos(angle);
+                var z = Math.Sin(angle);
                 desc.Minutias[i] = min;
             }
             
             return desc;
-        }
-
-        private static bool isMatchable(Minutia m1, Minutia m2, int radius, float eps)
-        {
-            return (sqrLength(m1, m2) < radius * radius) && (Math.Abs((m1.Angle % (2 * Math.PI)) - (m2.Angle % (2 * Math.PI))) < eps);
         }
 
         private static Tuple<int, int> CountMatchings(Descriptor desc1, Descriptor desc2, int radius, int height, int width)
@@ -59,7 +60,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 //sort desc2 and binary search is better solution
                 for (j = 0; j < desc2.Minutias.Count; j++)
                 {
-                    if (isMatchable(desc1.Minutias[i], desc2.Minutias[j], r, eps))
+                    if ((sqrLength(desc1.Minutias[i], desc2.Minutias[j]) < r*r)
+                        && (Math.Abs((desc1.Minutias[i].Angle % (2 * Math.PI)) - (desc2.Minutias[j].Angle % (2 * Math.PI))) < eps))
                     {
                         isExist = true;
                     }
@@ -72,7 +74,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((sqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) &&
+                    if ((sqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) ||
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
@@ -95,18 +97,6 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             mM2 = CountMatchings(tempdesc, desc1, radius, height, width);
             s = (float)((mM1.Item1 + 1) * (mM2.Item1 + 1)) / (float)((mM1.Item2 + 1) * (mM2.Item2 + 1));
             return s;
-        }
-
-        private static bool isMatchable(Minutia m1, Minutia m2, Minutia kernel1, Minutia kernel2)
-        {
-            bool distance, angle;
-            float eps = 0.0F;
-            float a1, a2;
-            distance = Math.Abs(Math.Sqrt(sqrLength(m1, kernel1)) - Math.Sqrt(sqrLength(m2, kernel2))) < eps;
-            a1 = kernel1.Angle + m1.Angle;
-            a2 = kernel2.Angle + m2.Angle;
-            angle = ((a1 - (int)(a1 / (2.0F * Math.PI))) - (a2 - (int)(a2 / (2.0F * Math.PI)))) < eps;
-            return angle && distance;
         }
 
         public static float[,] DescriptorsCompare(List<Descriptor> descs1, List<Descriptor> descs2, int radius, int height, int width)
