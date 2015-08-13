@@ -119,6 +119,18 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
                 write.WriteLine();
             }
 
+            var res = MinutiaeMatching.MatchMinutiae(s, mins1, mins2);
+            
+            foreach (List<Tuple<int, int>> subList in res)
+            {
+                write.WriteLine(subList.Count);
+                foreach (Tuple<int, int> item in subList)
+                {
+                    write.Write("(" + item.Item1 + ", " + item.Item2 + ") ");
+                }
+                write.WriteLine();
+            }
+
             write.Close();
             return flag == expected;
         }
