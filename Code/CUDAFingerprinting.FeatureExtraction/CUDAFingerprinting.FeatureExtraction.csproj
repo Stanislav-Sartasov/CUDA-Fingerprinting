@@ -45,6 +45,7 @@
     <Compile Include="Minutiae\FengMinutiaDescriptor.cs" />
     <Compile Include="Minutiae\MinutiaDetector.cs" />
     <Compile Include="Minutiae\MinutiaeMatching.cs" />
+    <Compile Include="Minutiae\MinutiaHelper.cs" />
     <Compile Include="SingularPoints\PoincareDetection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

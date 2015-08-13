@@ -84,7 +84,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 
         private static float Length(Minutia m1, Minutia m2)
         {
-            return (float)Math.Sqrt(Math.Pow(m1.X - m2.X, 2) + Math.Pow(m1.Y - m2.Y, 2));
+            return (float)Math.Sqrt(MinutiaHelper.SqrLength(m1, m2));
         }
 
         private static bool isMatchable(Minutia m1, Minutia m2, Minutia kernel1, Minutia kernel2)
@@ -98,9 +98,9 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             dist2 = Length(m2, kernel2);
             isOnSameDistance = Math.Abs(dist1 - dist2) < eps;
 
-            a1 = kernel1.Angle - kernel2.Angle;
-            a2 = m1.Angle - m2.Angle;
-            isOnSameDirection = Math.Abs(((a1 % (2.0F * Math.PI)) - (a2 % (2.0F * Math.PI)))) < epsAngle;
+            a1 = MinutiaHelper.NormalizeAngle(kernel1.Angle - kernel2.Angle);
+            a2 = MinutiaHelper.NormalizeAngle(m1.Angle - m2.Angle);
+            isOnSameDirection = Math.Abs(a1 - a2) < epsAngle;
 
             chordk = (float)Math.Sin(Math.Abs(a1/2)) * dist1 * 2;
             Minutia tempm;
