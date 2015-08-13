@@ -26,16 +26,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             {
                 m.X = (int)mas[i];
                 m.Y = (int)mas[i + 1];
-                m.Angle = mas[i + 2];
-
-                if (m.Angle > Math.PI)
-                {
-                    m.Angle -= 2 * (float)Math.PI; 
-                }
-                else if (m.Angle < -Math.PI)
-                {
-                    m.Angle += 2 * (float)Math.PI; 
-                }
+                m.Angle = MinutiaHelper.NormalizeAngle(mas[i + 2]);
 
                 mins.Add(m);
             }

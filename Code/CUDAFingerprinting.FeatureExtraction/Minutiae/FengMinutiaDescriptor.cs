@@ -9,10 +9,6 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
     public class FengMinutiaDescriptor
     {
-        private static float sqrLength(Minutia m1, Minutia m2)
-        {
-            return (float)(Math.Pow(m1.X - m2.X, 2) + Math.Pow(m1.Y - m2.Y, 2));
-        }
         private static Descriptor Transformate(Descriptor desc_, Minutia center)
         {
             int i;
@@ -30,7 +26,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
                 min.Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
-                min.Angle += angle;
+                min.Angle = MinutiaHelper.NormalizeAngle(min.Angle + angle);
 
                 desc.Minutias[i] = min;
             }
@@ -53,8 +49,8 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 //sort desc2 and binary search is better solution
                 for (j = 0; j < desc2.Minutias.Count; j++)
                 {
-                    if ((sqrLength(desc1.Minutias[i], desc2.Minutias[j]) < r*r)
-                        && (Math.Abs((desc1.Minutias[i].Angle % (2 * Math.PI)) - (desc2.Minutias[j].Angle % (2 * Math.PI))) < eps))
+                    if ((MinutiaHelper.SqrLength(desc1.Minutias[i], desc2.Minutias[j]) < r*r)
+                        && (Math.Abs(desc1.Minutias[i].Angle - desc2.Minutias[j].Angle) < eps))
                     {
                         isExist = true;
                     }
@@ -67,7 +63,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((sqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) &&
+                    if ((MinutiaHelper.SqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) &&
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
