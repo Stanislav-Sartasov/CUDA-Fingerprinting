@@ -7,7 +7,7 @@ using CUDAFingerprinting.Common;
 
 namespace CUDAFingerprinting.FeatureExtraction.Minutiae
 {
-    class MinutiaeMatching
+    public class MinutiaeMatching
     {
         private static float SumRow(float[,] s, int row)
         {
