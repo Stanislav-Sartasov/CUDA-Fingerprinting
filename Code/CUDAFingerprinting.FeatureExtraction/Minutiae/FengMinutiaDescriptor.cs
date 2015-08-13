@@ -21,11 +21,11 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < desc.Minutias.Count; i++)
             {
                 var min = desc.Minutias[i];
-               
-                min.X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) +
-                            (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
-                min.Y = -(int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
-                            (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
+
+                min.X = Convert.ToInt32((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) +
+                            (+desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
+                min.Y = -(Convert.ToInt32((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
+                            (-desc.Minutias[i].Y + desc.Center.Y) * Math.Cos(angle)) - center.Y);
                 min.Angle = MinutiaHelper.NormalizeAngle(min.Angle + angle);
 
                 desc.Minutias[i] = min;
