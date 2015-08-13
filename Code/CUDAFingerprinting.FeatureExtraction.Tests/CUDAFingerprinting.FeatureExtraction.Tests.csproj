@@ -100,6 +100,8 @@
     <Content Include="Resources\minutia1_1.txt" />
     <Content Include="Resources\minutia2_2.bmp" />
     <Content Include="Resources\minutia2_2.txt" />
+    <Content Include="Resources\minutia2_3.bmp" />
+    <Content Include="Resources\minutia2_3.txt" />
     <Content Include="Resources\minutia2_6.bmp" />
     <Content Include="Resources\minutia2_6.txt" />
     <Content Include="Resources\test.bmp" />

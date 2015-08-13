@@ -214,4 +214,10 @@
   <data name="minutia2_61" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\minutia2_6.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="minutia2_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\minutia2_3.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1251</value>
+  </data>
+  <data name="minutia2_31" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\minutia2_3.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
