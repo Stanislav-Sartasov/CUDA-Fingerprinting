@@ -19,7 +19,10 @@ namespace OptimumConversionOfTriangles
         private static Point B_ = null;
         private static Point C_ = null;
 
-        private static Pen defaultPointPen = new Pen(Color.Red, 2);
+        private static Pen APen = new Pen(Color.Red, 2);
+        private static Pen BPen = new Pen(Color.Green, 2);
+        private static Pen CPen = new Pen(Color.Blue, 2);
+
         private static Pen defaultLinePen = new Pen(Color.OrangeRed, 1);
 
         private static int formHeight = 0;
@@ -39,21 +42,22 @@ namespace OptimumConversionOfTriangles
                 g.Clear(Color.White);
             else
             if (A == null) {
+                g.Clear(Color.White);
                 A = new Point(e.X, formHeight - e.Y);
-                A.Paint(g, defaultPointPen, formHeight);
+                A.Paint(g, APen, formHeight);
             }
             else
             if (B == null)
             {
                 B = new Point(e.X, formHeight - e.Y);
-                B.Paint(g, defaultPointPen, formHeight);
+                B.Paint(g, BPen, formHeight);
                 g.DrawLine(defaultLinePen, (int)A.X, formHeight - (int)A.Y, (int)B.X, formHeight - (int)B.Y);
             }
             else
             if(C == null)
             {
                 C = new Point(e.X, formHeight - e.Y);
-                C.Paint(g, defaultPointPen, formHeight);
+                C.Paint(g, CPen, formHeight);
                 g.DrawLine(defaultLinePen, (int)C.X, formHeight - (int)C.Y, (int)B.X, formHeight - (int)B.Y);
                 g.DrawLine(defaultLinePen, (int)A.X, formHeight - (int)A.Y, (int)C.X, formHeight - (int)C.Y);
             }
@@ -61,20 +65,20 @@ namespace OptimumConversionOfTriangles
             if (A_ == null)
             {
                 A_ = new Point(e.X, formHeight - e.Y);
-                A_.Paint(g, defaultPointPen, formHeight);
+                A_.Paint(g, APen, formHeight);
             }
             else
             if (B_ == null)
             {
                 B_ = new Point(e.X, formHeight - e.Y);
-                B_.Paint(g, defaultPointPen, formHeight);
+                B_.Paint(g, BPen, formHeight);
                 g.DrawLine(defaultLinePen, (int)A_.X, formHeight - (int)A_.Y, (int)B_.X, formHeight - (int)B_.Y);
             }
             else
                 if (C_ == null)
                 {
                     C_ = new Point(e.X, formHeight - e.Y);
-                    C_.Paint(g, defaultPointPen, formHeight);
+                    C_.Paint(g, CPen, formHeight);
                     g.DrawLine(defaultLinePen, (int)C_.X, formHeight - (int)C_.Y, (int)B_.X, formHeight - (int)B_.Y);
                     g.DrawLine(defaultLinePen, (int)A_.X, formHeight - (int)A_.Y, (int)C_.X, formHeight - (int)C_.Y);
                 }
@@ -84,9 +88,15 @@ namespace OptimumConversionOfTriangles
 
                     Triangle ABC_ = new Triangle(A_, B_, C_);
 
-                    ConversionOptimizator co = new ConversionOptimizator(ABC_, ABC);
+                    //ConversionOptimizator co = new ConversionOptimizator(ABC_, ABC);
+                    //Triangle result = co.result;
+                    ConversionOperator co = new ConversionOperator(ABC_, ABC, !CanRenamePoints.Checked);
                     Triangle result = co.result;
+                    
                     result.Paint(g, new Pen(Color.Gold, 3), new Pen(Color.Red, 3), formHeight);
+                    result.A.Paint(g, APen, formHeight);
+                    result.B.Paint(g, BPen, formHeight);
+                    result.C.Paint(g, CPen, formHeight);
 
                     A = null;
                     B = null;
@@ -95,6 +105,18 @@ namespace OptimumConversionOfTriangles
                     B_ = null;
                     C_ = null;
                 }
+        }
+
+        public void OnChangeSize(object sender, EventArgs e)
+        {
+            g = this.CreateGraphics();
+            g.Clear(Color.White);
+            A = null;
+            B = null;
+            C = null;
+            A_ = null;
+            B_ = null;
+            C_ = null;
         }
     }
 
@@ -560,251 +582,281 @@ namespace OptimumConversionOfTriangles
         
         public double getDistanceTo(Triangle triangle) 
         {
-            double distanceOld = triangle.A.getDistance(A) * triangle.A.getDistance(A) +
+            return triangle.A.getDistance(A) * triangle.A.getDistance(A) +
                 (triangle.B.getDistance(B) * triangle.B.getDistance(B)) +
                 (triangle.C.getDistance(C) * triangle.C.getDistance(C));
-
-            double distanceNew = triangle.A.getDistance(A) * triangle.A.getDistance(A) +
-                (triangle.B.getDistance(C) * triangle.B.getDistance(C)) +
-                (triangle.C.getDistance(B) * triangle.C.getDistance(B));
-
-            if (distanceNew < distanceOld)
-                distanceOld = distanceNew;
-
-            distanceNew = triangle.A.getDistance(B) * triangle.A.getDistance(B) +
-                (triangle.B.getDistance(A) * triangle.B.getDistance(A)) +
-                (triangle.C.getDistance(C) * triangle.C.getDistance(C));
-
-            if (distanceNew < distanceOld)
-                distanceOld = distanceNew;
-
-            distanceNew = triangle.A.getDistance(B) * triangle.A.getDistance(B) +
-                (triangle.B.getDistance(C) * triangle.B.getDistance(C)) +
-                (triangle.C.getDistance(A) * triangle.C.getDistance(A));
-
-            if (distanceNew < distanceOld)
-                distanceOld = distanceNew;
-
-            distanceNew = triangle.A.getDistance(C) * triangle.A.getDistance(C) +
-                  (triangle.B.getDistance(B) * triangle.B.getDistance(B)) +
-                  (triangle.C.getDistance(A) * triangle.C.getDistance(A));
-
-            if (distanceNew < distanceOld)
-                distanceOld = distanceNew;
-
-            distanceNew = triangle.A.getDistance(C) * triangle.A.getDistance(C) +
-                (triangle.B.getDistance(C) * triangle.B.getDistance(C)) +
-                (triangle.C.getDistance(B) * triangle.C.getDistance(B));
-            
-            if (distanceNew < distanceOld)
-                distanceOld = distanceNew;
-
-            return distanceOld;
         }
     }
 
-    public class ConversionOptimizator {
+    public class ConversionOperator {
 
         public Triangle result
         {
             get;
             private set;
         }
-        public double[] transformation
-        {
-            get;
-            private set;
-        }
-        public ConversionOptimizator(Triangle src, Triangle dest) 
+
+        private double[] transformation;
+
+        public double dx { get {return transformation[0]; } }
+        public double dy { get { return transformation[1]; } }
+        public double phi { get { return transformation[2]; } }
+
+        public ConversionOperator(Triangle src, Triangle dest, bool canChangeVertexes = false) 
         {
             result = src;
             transformation = new double[3];
             double distanceOld = src.getDistanceTo(dest);
-            
-            OptimumConversionOperator o1 = new OptimumConversionOperator(src, dest);
-            Triangle tmpResult1 = o1.getOptimumTriangle();
-            double distance = tmpResult1.getDistanceTo(dest);
 
-            if (distance < distanceOld) {
-                result = tmpResult1;
-                distanceOld = distance;
-                transformation = o1.transformation;
-            }
-
-            OptimumConversionOperator o2 = new OptimumConversionOperator(src, new Triangle(dest.B, dest.C, dest.A));
-            Triangle tmpResult2 = o2.getOptimumTriangle();
-            distance = tmpResult2.getDistanceTo(dest);
-
-            if (distance < distanceOld)
+            int n = 180;
+            double nearestDistance = distanceOld;
+            for (int i = 0; i < n; i++)
             {
-                result = tmpResult2;
-                distanceOld = distance;
-                transformation = o1.transformation;
-            }
-
-            OptimumConversionOperator o3 = new OptimumConversionOperator(src, new Triangle(dest.C, dest.A, dest.B));
-            Triangle tmpResult3 = o3.getOptimumTriangle();
-            distance = tmpResult3.getDistanceTo(dest);
-
-            if (distance < distanceOld)
-            {
-                result = tmpResult3;
-                distanceOld = distance;
-                transformation = o1.transformation;
-            }   
-        }
-    }
-
-    public class OptimumConversionOperator {
-        public Triangle ABC
-        {
-            get;
-            private set;
-        }
-        private double ABCx;
-        private double ABCy;
-        
-        public Triangle ABC_
-        {
-            get;
-            private set;
-        }
-        private double ABC_x;
-        private double ABC_y;
-
-        public double[] transformation
-        {
-            get;
-            private set;
-        }
-
-        private double vectorsProductions;
-        private double scalarProductions;
-
-        public OptimumConversionOperator(Triangle src, Triangle dest)
-        {
-            ABC = dest;
-            Point ABCcenter = Point.getMassCenter(dest.A, dest.B, dest.C);
-            ABCx = ABCcenter.X;
-            ABCy = ABCcenter.Y;
-
-            ABC_ = src;
-            Point ABC_center = Point.getMassCenter(src.A, src.B, src.C);
-            ABC_x = ABC_center.X;
-            ABC_y = ABC_center.Y;
-
-            vectorsProductions = ABC.A.X * ABC_.A.Y - ABC.A.Y * ABC_.A.X +
-                    +ABC.B.X * ABC_.B.Y - ABC.B.Y * ABC_.B.X +
-                    +ABC.C.X * ABC_.C.Y - ABC.C.Y * ABC_.C.X;
-
-            scalarProductions = ABC.A.X * ABC_.A.X + ABC.A.Y * ABC_.A.Y +
-                    +ABC.B.X * ABC_.B.X + ABC.B.Y * ABC_.B.Y +
-                    +ABC.C.X * ABC_.C.X + ABC.C.Y * ABC_.C.Y;
-
-            
-        }
-        public Triangle getOptimumTriangle() 
-        {
-            transformation = SolveNonLinearSystem(0.0000000001, 10000);
-            Triangle tmp_result = ABC_.getTransformation(transformation[0], transformation[1], transformation[2]);
-
-            return tmp_result;
-        }
-
-        private double f1(double dx, double dy, double phi) {
-            return ABC_x * Math.Cos(phi) - ABC_y * Math.Sin(phi) + dx - ABCx;
-        }
-        private double f2(double dx, double dy, double phi) {
-            return ABC_x * Math.Sin(phi) + ABC_y * Math.Cos(phi) + dy - ABCy;
-        }
-        private double f3(double dx, double dy, double phi) {
-            return Math.Cos(phi) * (3 * dx * ABC_y - 3 * dy * ABC_x + vectorsProductions) +
-                Math.Sin(phi) * (3 * dx * ABC_x + 3 * dy * ABC_y - scalarProductions);
-        }
-
-        private double df1dx(double dx, double dy, double phi) 
-        {
-            return 1;
-        }
-        private double df1dy(double dx, double dy, double phi)
-        {
-            return 0;
-        }
-        private double df1dphi(double dx, double dy, double phi)
-        {
-            return -ABC_x * Math.Sin(phi) - ABC_y * Math.Cos(phi);
-        }
-       
-        private double df2dx(double dx, double dy, double phi)
-        {
-            return 0;
-        }
-        private double df2dy(double dx, double dy, double phi)
-        {
-            return 1;
-        }
-        private double df2dphi(double dx, double dy, double phi)
-        {
-            return ABC_x * Math.Cos(phi) - ABC_y * Math.Sin(phi);
-        }
-
-        private double df3dx(double dx, double dy, double phi) 
-        {
-            return 3 * ABC_y * Math.Cos(phi) + 3 * ABC_x * Math.Sin(phi);
-        }
-        private double df3dy(double dx, double dy, double phi) 
-        {
-            return -3 * ABC_x * Math.Cos(phi) - 3 * ABC_y * Math.Sin(phi);
-        }
-        private double df3dphi(double dx, double dy, double phi)
-        {
-            return -Math.Sin(phi) * (3 * dx * ABC_y - 3 * dy * ABC_x + vectorsProductions) +
-                    Math.Cos(phi) * (3 * dx * ABC_x + 3 * dy * ABC_y - scalarProductions);
-        }
-    
-        private double[,] getJacobian(double dx, double dy, double phi) 
-        {
-            double[,] matrix = new double[3, 3];
-            matrix[0,0] = df1dx(dx,dy,phi);
-            matrix[0,1] = df1dy(dx, dy, phi);
-            matrix[0,2] = df1dphi(dx, dy, phi);
-
-            matrix[1,0] = df2dx(dx, dy, phi);
-            matrix[1,1] = df2dy(dx, dy, phi);
-            matrix[1,2] = df2dphi(dx, dy, phi);
-
-            matrix[2,0] = df3dx(dx, dy, phi);
-            matrix[2,1] = df3dy(dx, dy, phi);
-            matrix[2,2] = df3dphi(dx, dy, phi);
-            return matrix;
-        }
-        private double[] getF(double dx, double dy, double phi)
-        {
-            double[] result = new double[3];
-            result[0] = -f1(dx, dy, phi);
-            result[1] = -f2(dx, dy, phi);
-            result[2] = -f3(dx, dy, phi);
-            return result;
-        }
-         
-        private double[] SolveNonLinearSystem(double e, int maxItarations = 10) {
-            double[] xk = new double[3];
-            int iteration = 0;
-            while (iteration < maxItarations)
-            {
-                double[] dxk = Matrix.SolveLinearSystem(getJacobian(xk[0], xk[1], xk[2]), getF(xk[0], xk[1], xk[2]));
-                if (dxk[2] * dxk[2] < e)
-                    break;
-                else
+                double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                OptimumConversionOperator oco = new OptimumConversionOperator(src.getTransformation(0,0,phi), dest);
+                Triangle tmpResult = oco.getOptimumTriangle();
+                double distanceNew = dest.getDistanceTo(tmpResult);
+                if (distanceNew < nearestDistance)
                 {
-                    xk[0] += dxk[0];
-                    xk[1] += dxk[1];
-                    xk[2] += dxk[2];
+                    nearestDistance = distanceNew;
+                    result = tmpResult;
+                    transformation = oco.transformation;
                 }
-                iteration++;
             }
 
-            return xk;
+            Triangle src_change = new Triangle(src.A, src.C, src.B);
+            for (int i = 0; i < n; i++)
+            {
+                double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                Triangle tmpResult = oco.getOptimumTriangle();
+                double distance = dest.getDistanceTo(tmpResult);
+                if (nearestDistance == -1 || distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    result = tmpResult;
+                    transformation = oco.transformation;
+                }
+            }
+
+            if (canChangeVertexes)
+            {
+                src_change = new Triangle(src.B, src.C, src.A);
+                for (int i = 0; i < n; i++)
+                {
+                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                    Triangle tmpResult = oco.getOptimumTriangle();
+                    double distance = dest.getDistanceTo(tmpResult);
+                    if (nearestDistance == -1 || distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        result = tmpResult;
+                        transformation = oco.transformation;
+                    }
+                }
+
+                src_change = new Triangle(src.B, src.A, src.C);
+                for (int i = 0; i < n; i++)
+                {
+                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                    Triangle tmpResult = oco.getOptimumTriangle();
+                    double distance = dest.getDistanceTo(tmpResult);
+                    if (nearestDistance == -1 || distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        result = tmpResult;
+                        transformation = oco.transformation;
+                    }
+                }
+
+                src_change = new Triangle(src.C, src.A, src.B);
+                for (int i = 0; i < n; i++)
+                {
+                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                    Triangle tmpResult = oco.getOptimumTriangle();
+                    double distance = dest.getDistanceTo(tmpResult);
+                    if (nearestDistance == -1 || distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        result = tmpResult;
+                        transformation = oco.transformation;
+                    }
+                }
+
+                src_change = new Triangle(src.C, src.B, src.A);
+                for (int i = 0; i < n; i++)
+                {
+                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                    Triangle tmpResult = oco.getOptimumTriangle();
+                    double distance = dest.getDistanceTo(tmpResult);
+                    if (nearestDistance == -1 || distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        result = tmpResult;
+                        transformation = oco.transformation;
+                    }
+                }
+            }
+
+        }
+        
+        public class OptimumConversionOperator
+        {
+            public Triangle ABC
+            {
+                get;
+                private set;
+            }
+            private double ABCx;
+            private double ABCy;
+
+            public Triangle ABC_
+            {
+                get;
+                private set;
+            }
+            private double ABC_x;
+            private double ABC_y;
+
+            public double[] transformation
+            {
+                get;
+                private set;
+            }
+
+            private double vectorsProductions;
+            private double scalarProductions;
+
+            public OptimumConversionOperator(Triangle src, Triangle dest)
+            {
+                ABC = dest;
+                Point ABCcenter = Point.getMassCenter(dest.A, dest.B, dest.C);
+                ABCx = ABCcenter.X;
+                ABCy = ABCcenter.Y;
+
+                ABC_ = src;
+                Point ABC_center = Point.getMassCenter(src.A, src.B, src.C);
+                ABC_x = ABC_center.X;
+                ABC_y = ABC_center.Y;
+
+                vectorsProductions = ABC.A.X * ABC_.A.Y - ABC.A.Y * ABC_.A.X +
+                        +ABC.B.X * ABC_.B.Y - ABC.B.Y * ABC_.B.X +
+                        +ABC.C.X * ABC_.C.Y - ABC.C.Y * ABC_.C.X;
+
+                scalarProductions = ABC.A.X * ABC_.A.X + ABC.A.Y * ABC_.A.Y +
+                        +ABC.B.X * ABC_.B.X + ABC.B.Y * ABC_.B.Y +
+                        +ABC.C.X * ABC_.C.X + ABC.C.Y * ABC_.C.Y;
+            }
+            public Triangle getOptimumTriangle()
+            {
+                transformation = SolveNonLinearSystem(0.0000000001, 10000);
+
+                return ABC_.getTransformation(transformation[0], transformation[1], transformation[2]);
+            }
+
+            private double f1(double dx, double dy, double phi)
+            {
+                return ABC_x * Math.Cos(phi) - ABC_y * Math.Sin(phi) + dx - ABCx;
+            }
+            private double f2(double dx, double dy, double phi)
+            {
+                return ABC_x * Math.Sin(phi) + ABC_y * Math.Cos(phi) + dy - ABCy;
+            }
+            private double f3(double dx, double dy, double phi)
+            {
+                return Math.Cos(phi) * (3 * dx * ABC_y - 3 * dy * ABC_x + vectorsProductions) +
+                    Math.Sin(phi) * (3 * dx * ABC_x + 3 * dy * ABC_y - scalarProductions);
+            }
+
+            private double df1dx(double dx, double dy, double phi)
+            {
+                return 1;
+            }
+            private double df1dy(double dx, double dy, double phi)
+            {
+                return 0;
+            }
+            private double df1dphi(double dx, double dy, double phi)
+            {
+                return -ABC_x * Math.Sin(phi) - ABC_y * Math.Cos(phi);
+            }
+
+            private double df2dx(double dx, double dy, double phi)
+            {
+                return 0;
+            }
+            private double df2dy(double dx, double dy, double phi)
+            {
+                return 1;
+            }
+            private double df2dphi(double dx, double dy, double phi)
+            {
+                return ABC_x * Math.Cos(phi) - ABC_y * Math.Sin(phi);
+            }
+
+            private double df3dx(double dx, double dy, double phi)
+            {
+                return 3 * ABC_y * Math.Cos(phi) + 3 * ABC_x * Math.Sin(phi);
+            }
+            private double df3dy(double dx, double dy, double phi)
+            {
+                return -3 * ABC_x * Math.Cos(phi) - 3 * ABC_y * Math.Sin(phi);
+            }
+            private double df3dphi(double dx, double dy, double phi)
+            {
+                return -Math.Sin(phi) * (3 * dx * ABC_y - 3 * dy * ABC_x + vectorsProductions) +
+                        Math.Cos(phi) * (3 * dx * ABC_x + 3 * dy * ABC_y - scalarProductions);
+            }
+
+            private double[,] getJacobian(double dx, double dy, double phi)
+            {
+                double[,] matrix = new double[3, 3];
+                matrix[0, 0] = df1dx(dx, dy, phi);
+                matrix[0, 1] = df1dy(dx, dy, phi);
+                matrix[0, 2] = df1dphi(dx, dy, phi);
+
+                matrix[1, 0] = df2dx(dx, dy, phi);
+                matrix[1, 1] = df2dy(dx, dy, phi);
+                matrix[1, 2] = df2dphi(dx, dy, phi);
+
+                matrix[2, 0] = df3dx(dx, dy, phi);
+                matrix[2, 1] = df3dy(dx, dy, phi);
+                matrix[2, 2] = df3dphi(dx, dy, phi);
+                return matrix;
+            }
+            private double[] getF(double dx, double dy, double phi)
+            {
+                double[] result = new double[3];
+                result[0] = -f1(dx, dy, phi);
+                result[1] = -f2(dx, dy, phi);
+                result[2] = -f3(dx, dy, phi);
+                return result;
+            }
+
+            private double[] SolveNonLinearSystem(double e, int maxItarations = 10)
+            {
+                double[] xk = new double[3];
+                int iteration = 0;
+                while (iteration < maxItarations)
+                {
+                    double[] dxk = Matrix.SolveLinearSystem(getJacobian(xk[0], xk[1], xk[2]), getF(xk[0], xk[1], xk[2]));
+                    if (dxk[2] * dxk[2] < e)
+                        break;
+                    else
+                    {
+                        xk[0] += dxk[0];
+                        xk[1] += dxk[1];
+                        xk[2] += dxk[2];
+                    }
+                    iteration++;
+                }
+
+                return xk;
+            }
         }
     }
 }

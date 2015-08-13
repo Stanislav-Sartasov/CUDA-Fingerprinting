@@ -28,7 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.CanRenamePoints = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
+            // 
+            // CanRenamePoints
+            // 
+            this.CanRenamePoints.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CanRenamePoints.AutoSize = true;
+            this.CanRenamePoints.Location = new System.Drawing.Point(66, 12);
+            this.CanRenamePoints.Name = "CanRenamePoints";
+            this.CanRenamePoints.Size = new System.Drawing.Size(206, 17);
+            this.CanRenamePoints.TabIndex = 0;
+            this.CanRenamePoints.Text = "Имеет ли значение порядок точек?";
+            this.CanRenamePoints.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -36,14 +48,20 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.CanRenamePoints);
             this.Name = "MainForm";
             this.Text = "ConversionOfTriangles";
+            this.ResizeEnd += new System.EventHandler(this.OnChangeSize);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseClick);
+            this.Resize += new System.EventHandler(this.OnChangeSize);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
+
+        private System.Windows.Forms.CheckBox CanRenamePoints;
     }
 }
 
