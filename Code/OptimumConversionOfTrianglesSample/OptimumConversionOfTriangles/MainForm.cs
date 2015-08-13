@@ -88,15 +88,9 @@ namespace OptimumConversionOfTriangles
 
                     Triangle ABC_ = new Triangle(A_, B_, C_);
 
-                    //ConversionOptimizator co = new ConversionOptimizator(ABC_, ABC);
-                    //Triangle result = co.result;
-                    ConversionOperator co = new ConversionOperator(ABC_, ABC, !CanRenamePoints.Checked);
-                    Triangle result = co.result;
-                    
-                    result.Paint(g, new Pen(Color.Gold, 3), new Pen(Color.Red, 3), formHeight);
-                    result.A.Paint(g, APen, formHeight);
-                    result.B.Paint(g, BPen, formHeight);
-                    result.C.Paint(g, CPen, formHeight);
+                    ConversionOperator co = new ConversionOperator(ABC_, ABC, !CanRenamePoints.Checked, CanReflect.Checked);
+
+                    ABC_.getTransformation(co.dx, co.dy, co.phi).Paint(g, new Pen(Color.LimeGreen, 3), new Pen(Color.Red, 3), formHeight);
 
                     A = null;
                     B = null;
@@ -602,7 +596,7 @@ namespace OptimumConversionOfTriangles
         public double dy { get { return transformation[1]; } }
         public double phi { get { return transformation[2]; } }
 
-        public ConversionOperator(Triangle src, Triangle dest, bool canChangeVertexes = false) 
+        public ConversionOperator(Triangle src, Triangle dest, bool canChangeVertexes = false, bool canReflect = false) 
         {
             result = src;
             transformation = new double[3];
@@ -621,27 +615,32 @@ namespace OptimumConversionOfTriangles
                     nearestDistance = distanceNew;
                     result = tmpResult;
                     transformation = oco.transformation;
+                    transformation[2] += phi;
                 }
             }
 
-            Triangle src_change = new Triangle(src.A, src.C, src.B);
-            for (int i = 0; i < n; i++)
+            if (canReflect)
             {
-                double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
-                OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
-                Triangle tmpResult = oco.getOptimumTriangle();
-                double distance = dest.getDistanceTo(tmpResult);
-                if (nearestDistance == -1 || distance < nearestDistance)
+                Triangle src_change = new Triangle(src.A, src.C, src.B);
+                for (int i = 0; i < n; i++)
                 {
-                    nearestDistance = distance;
-                    result = tmpResult;
-                    transformation = oco.transformation;
+                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                    Triangle tmpResult = oco.getOptimumTriangle();
+                    double distance = dest.getDistanceTo(tmpResult);
+                    if (nearestDistance == -1 || distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        result = tmpResult;
+                        transformation = oco.transformation;
+                        transformation[2] += phi;
+                    }
                 }
             }
 
             if (canChangeVertexes)
             {
-                src_change = new Triangle(src.B, src.C, src.A);
+                Triangle src_change = new Triangle(src.B, src.C, src.A);
                 for (int i = 0; i < n; i++)
                 {
                     double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
@@ -653,24 +652,28 @@ namespace OptimumConversionOfTriangles
                         nearestDistance = distance;
                         result = tmpResult;
                         transformation = oco.transformation;
+                        transformation[2] += phi;
                     }
                 }
 
-                src_change = new Triangle(src.B, src.A, src.C);
-                for (int i = 0; i < n; i++)
+                if (canReflect)
                 {
-                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
-                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
-                    Triangle tmpResult = oco.getOptimumTriangle();
-                    double distance = dest.getDistanceTo(tmpResult);
-                    if (nearestDistance == -1 || distance < nearestDistance)
+                    src_change = new Triangle(src.B, src.A, src.C);
+                    for (int i = 0; i < n; i++)
                     {
-                        nearestDistance = distance;
-                        result = tmpResult;
-                        transformation = oco.transformation;
+                        double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                        OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                        Triangle tmpResult = oco.getOptimumTriangle();
+                        double distance = dest.getDistanceTo(tmpResult);
+                        if (nearestDistance == -1 || distance < nearestDistance)
+                        {
+                            nearestDistance = distance;
+                            result = tmpResult;
+                            transformation = oco.transformation;
+                            transformation[2] += phi;
+                        }
                     }
                 }
-
                 src_change = new Triangle(src.C, src.A, src.B);
                 for (int i = 0; i < n; i++)
                 {
@@ -683,21 +686,26 @@ namespace OptimumConversionOfTriangles
                         nearestDistance = distance;
                         result = tmpResult;
                         transformation = oco.transformation;
+                        transformation[2] += phi;
                     }
                 }
 
-                src_change = new Triangle(src.C, src.B, src.A);
-                for (int i = 0; i < n; i++)
+                if (canReflect)
                 {
-                    double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
-                    OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
-                    Triangle tmpResult = oco.getOptimumTriangle();
-                    double distance = dest.getDistanceTo(tmpResult);
-                    if (nearestDistance == -1 || distance < nearestDistance)
+                    src_change = new Triangle(src.C, src.B, src.A);
+                    for (int i = 0; i < n; i++)
                     {
-                        nearestDistance = distance;
-                        result = tmpResult;
-                        transformation = oco.transformation;
+                        double phi = Math.PI * i * 2.0 / n; //(Math.PI / 180) * i * (360 / n);
+                        OptimumConversionOperator oco = new OptimumConversionOperator(src_change.getTransformation(0, 0, phi), dest);
+                        Triangle tmpResult = oco.getOptimumTriangle();
+                        double distance = dest.getDistanceTo(tmpResult);
+                        if (nearestDistance == -1 || distance < nearestDistance)
+                        {
+                            nearestDistance = distance;
+                            result = tmpResult;
+                            transformation = oco.transformation;
+                            transformation[2] += phi;
+                        }
                     }
                 }
             }
