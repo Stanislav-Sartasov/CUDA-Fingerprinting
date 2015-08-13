@@ -25,20 +25,13 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < desc.Minutias.Count; i++)
             {
                 var min = desc.Minutias[i];
-                var testX0 = (desc.Minutias[0].X - desc.Center.X) * Math.Cos(angle) -
-                            (desc.Minutias[0].Y - desc.Center.Y) * Math.Sin(angle) + center.X;
-                var testY0 = (desc.Minutias[0].X - desc.Center.X) * Math.Sin(angle) +
-                            (desc.Minutias[0].Y - desc.Center.Y) * Math.Cos(angle) + center.Y;
                
                 min.X = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Cos(angle) -
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Sin(angle)) + center.X;
                 min.Y = (int)Math.Round((desc.Minutias[i].X - desc.Center.X) * Math.Sin(angle) +
                             (desc.Minutias[i].Y - desc.Center.Y) * Math.Cos(angle)) + center.Y;
                 min.Angle += angle;
-                var x = Math.Sqrt(Math.Pow(desc.Minutias[i].X - desc.Center.X, 2) + Math.Pow(desc.Minutias[i].Y - desc.Center.Y, 2)) -
-                    Math.Sqrt(Math.Pow(min.X - center.X, 2) + Math.Pow(min.Y - center.Y, 2));
-                var y = Math.Cos(angle);
-                var z = Math.Sin(angle);
+
                 desc.Minutias[i] = min;
             }
             
@@ -74,7 +67,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                 }
                 else
                 {
-                    if ((sqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) ||
+                    if ((sqrLength(desc1.Minutias[i], desc2.Center) < fengConstant * radius * radius) &&
                         (desc1.Minutias[i].X >= 0 && desc1.Minutias[i].Y < width
                         && desc1.Minutias[i].Y >= 0 && desc1.Minutias[i].Y < height))
                     {
