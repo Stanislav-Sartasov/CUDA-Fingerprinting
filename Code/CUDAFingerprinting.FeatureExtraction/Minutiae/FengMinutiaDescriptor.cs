@@ -99,6 +99,18 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return s;
         }
 
+        private static bool isMatchable(Minutia m1, Minutia m2, Minutia kernel1, Minutia kernel2)
+        {
+            bool distance, angle;
+            float eps = 0.0F;
+            float a1, a2;
+            distance = Math.Abs(Math.Sqrt(sqrLength(m1, kernel1)) - Math.Sqrt(sqrLength(m2, kernel2))) < eps;
+            a1 = kernel1.Angle + m1.Angle;
+            a2 = kernel2.Angle + m2.Angle;
+            angle = ((a1 - (int)(a1 / (2.0F * Math.PI))) - (a2 - (int)(a2 / (2.0F * Math.PI)))) < eps;
+            return angle && distance;
+        }
+
         public static float[,] DescriptorsCompare(List<Descriptor> descs1, List<Descriptor> descs2, int radius, int height, int width)
         {
             float[,] res = new float[descs1.Count, descs2.Count];
