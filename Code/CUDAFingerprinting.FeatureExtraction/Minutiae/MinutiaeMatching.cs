@@ -91,7 +91,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
         {
             bool isOnSameDistance, isClose, isOnSameDirection;
             float eps = 0.3F;
-            float a1, a2, dist1, dist2;
+            float a1, a2, dist1, dist2, chordk, chordm;
 
             dist1 = Length(m1, kernel1);
             dist2 = Length(m2, kernel2);
@@ -101,8 +101,13 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             a2 = m1.Angle - m2.Angle;
             isOnSameDirection = ((a1 % (2.0F * Math.PI)) - (a2 % (2.0F * Math.PI))) < eps;
 
-            float chord = (float)Math.Sin(Math.Abs(a1/2)) * dist1 * 2;
-            isClose = chord < eps;
+            chordk = (float)Math.Sin(Math.Abs(a1/2)) * dist1 * 2;
+            Minutia tempm;
+            tempm.Angle = 0.0F;
+            tempm.X = m2.X + (kernel1.X - kernel2.X);
+            tempm.Y = m2.Y + (kernel1.Y - kernel2.Y);
+            chordm = Length(m1, tempm);
+            isClose = Math.Abs(chordk - chordm) < eps;
 
             return isOnSameDistance && isClose && isOnSameDirection;
         }
