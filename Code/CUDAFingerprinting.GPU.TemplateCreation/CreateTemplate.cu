@@ -158,7 +158,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 
 }
 
-__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, Point* hull, int hullLenght)
+__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, int hullLenght)
 {
 	if (defaultX() > 16 || defaultY() > 16 || defaultZ() > 6 || defaultMinutia() > minutiae.Width)
 	{
@@ -178,10 +178,27 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	}
 }
 
-/*__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks,CUDAArray<Cylinder> cylinders)
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum,CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, CUDAArray<Cylinder> cylinders)
 {
-	cylinders.SetAt(0, blockIdx.x * 2, Cylinder(values.At(0, blockIdx.x , minutiae.At(0, blockIdx.x * 2).angle, )
-}*/
+	cylinders.SetAt(0, blockIdx.x * 2, Cylinder(values.AtPtr(blockIdx.x, 0), values.Width,
+		minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(0,blockIdx.x))), 0));
+	cylinders.SetAt(0, blockIdx.x * 2 + 1, Cylinder(masks.AtPtr(blockIdx.x, 0), masks.Width,
+		minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(1, blockIdx.x))), 0));
+}
+
+__global__ void createNorm(CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, CUDAArray<unsigned int> sum)
+{
+	if (blockIdx.y == 0)
+	{
+		unsigned int x = __popc(values.At(blockIdx.x, threadIdx.x));
+		atomicAdd(sum.AtPtr(blockIdx.y, blockIdx.x),x);
+	}
+	else if (blockIdx.y == 1)
+	{
+		unsigned int x = __popc(masks.At(blockIdx.x, threadIdx.x));
+		atomicAdd(sum.AtPtr(blockIdx.y, blockIdx.x), x);
+	}
+}
 
 __global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae)
 {
