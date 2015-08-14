@@ -68,6 +68,11 @@ public:
 		return cudaPtr[row*deviceStride + column];
 	}
 
+	__device__ T* AtPtr(int row, int column)
+	{
+		return &cudaPtr[row*deviceStride + column];
+	}
+
 	__device__ void SetAt(int row, int column, T value)
 	{
 		cudaPtr[row*deviceStride + column] = value;
