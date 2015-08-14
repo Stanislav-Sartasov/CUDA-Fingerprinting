@@ -22,8 +22,6 @@ struct Minutia
 	int y;
 };
 
-__constant__ Consts constsGPU;
-
 __device__  Point getPoint(Minutia *minutiae)
 {
 	return Point(
@@ -65,25 +63,21 @@ __device__  float angleHeight()
 	return (-CUDART_PI + (defaultZ() - 0.5) * constsGPU.heightCell);
 }
 
-__device__ __host__ float gaussian1D(float x, float sigma)
+__device__ __host__ float gaussian1D(float x)
 {
-	float commonDenom = 2 * sigma * sigma;
-	float denominator = sigma * sqrtf(CUDART_PI * 2);
-	float result = expf(-(x * x) / commonDenom) / denominator;
-	return result;
+	return expf(-(x * x) / (2 * constsGPU.sigmaLocation * constsGPU.sigmaLocation)) / (constsGPU.sigmaLocation * sqrtf(CUDART_PI * 2));
 }
 
-__device__ __host__ float gaussianLocation(Minutia minutia, Point point)
+__device__ __host__ float gaussianLocation(Minutia *minutia, Point *point)
 {
-	return gaussian1D(pointDistance(Point(minutia.x, minutia.y), point),
-		constsGPU.sigmaLocation);
+	return gaussian1D(pointDistance(Point((*minutia).x, (*minutia).y), *point);
 }
 
-__device__ float gaussianDirection(Minutia middleMinutia, Minutia minutia, float anglePoint)
+__device__ float gaussianDirection(Minutia *middleMinutia, Minutia *minutia, float anglePoint)
 {
 	float common = sqrt(2.0) * constsGPU.sigmaDirection;
 	double angle = getAngleDiff(anglePoint,
-		getAngleDiff(middleMinutia.angle, minutia.angle));
+		getAngleDiff((*middleMinutia).angle, (*minutia).angle));
 	double first = erf(((angle + constsGPU.heightCell / 2)) / common);
 	double second = erf(((angle - constsGPU.heightCell / 2)) / common);
 	return (first - second) / 2;

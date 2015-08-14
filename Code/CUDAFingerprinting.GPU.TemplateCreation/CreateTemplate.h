@@ -1,6 +1,7 @@
 #ifndef CUDAFINGERPRINTING_CREATETEMPLATE
 #define CUDAFINGERPRINTING_CREATETEMPLATE
 #include "math_constants.h"
+
 struct Consts
 {
 	const char radius = 70;
@@ -15,6 +16,8 @@ struct Consts
 	const char omega = 50;
 	const char minNumberMinutiae = 2;
 };
+
+__constant__ Consts constsGPU;
 
 #define defaultX() threadIdx.x+1
 #define defaultY() threadIdx.y+1
