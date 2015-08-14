@@ -27,17 +27,29 @@ namespace test
             int countmin = 0;
             int max = 0;
             int min = 100;
-            for (int i = 1; i <= 110; i++)
+            /*for (int i = 1; i <= 110; i++)
             {
                 for (int j = 1; j <= 7; j += 4)
                 {
-                    double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//" + i + "_" + j + ".bmp");
+                    double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//" + i + "_" + j + ".bmp");
                     double[,] a = CreatTemplateTest(imgDoubles);
                     int[,] bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
                     PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
                     List<Minutia> minutias = MinutiaDetector.GetMinutias(bytes, field);
+                    foreach (var minutia in minutias)
+                    {
+                        Console.WriteLine(minutia.X + ", " + minutia.Y + ", " + minutia.Angle + ", ");
+                    }
+                    Console.WriteLine();
                     TemplateCreator creator = new TemplateCreator(minutias);
                     Template[] t = { creator.CreateTemplate() };
+                    foreach (var template in t)
+                    {
+                        for (int k = 0; k < template.Cylinders.Length; k+=2)
+                        {
+                            PrintCylinder(template.Cylinders[k].Values, template.Cylinders[k + 1].Values);
+                        }
+                    }
                     if (BinTemplateSimilarity.GetTemplateSimilarity(t[0], t)[0].Equals(1))
                     {
                         min = min > t[0].Cylinders.Count() ? t[0].Cylinders.Count() : min;
@@ -49,7 +61,33 @@ namespace test
                         max = max < t[0].Cylinders.Count() ? t[0].Cylinders.Count() : max;
                     }
                 }
+            }*/
+
+            Minutia minutia = new Minutia();
+            List<Minutia> minutiae = new List<Minutia>();
+            for (int i = 0; i < 15; i++)
+            {
+                minutia.X = i;
+                minutia.Y = (int)(Math.Sin(i));
+                minutia.Angle = (float)(Math.PI / 4);
+                minutiae.Add(minutia);
+                minutia.X = i;
+                minutia.Y = (int)(Math.Sin(i + Math.PI) + 300);
+                minutia.Angle = (float)(Math.PI / 4);
+                minutiae.Add(minutia);
             }
+            TemplateCreator creator = new TemplateCreator(minutiae);
+            Template[] t = { creator.CreateTemplate() };
+            int count = 1;
+            foreach (var template in t)
+            {
+                for (int k = 0; k < template.Cylinders.Length; k += 2)
+                {
+                    PrintCylinder(template.Cylinders[k].Values, template.Cylinders[k + 1].Values, count);
+                    count++;
+                }
+            }
+
             Console.WriteLine("min count fot 1 - {0} ({1})", min, countmin);
             Console.WriteLine("max count for < 1 - {0} ({1})", max, countmax);
             // ImageHelper.SaveArrayToBitmap(CreatTemplateTest(a)).Save("d://hglf23.bmp");
@@ -79,6 +117,29 @@ namespace test
             var res = ImageEnhancement.Enhance(imgDoubles, orient, freqMatrx, 32, 8);
 
             return ImageBinarization.Binarize2D(res, 128);
+        }
+
+        public static void PrintCylinder(uint[] cylinderValue, uint[] cylinderMask, int number)
+        {
+            Cylinder3D cylinder3DValue = new Cylinder3D();
+            Cylinder3D cylinder3DMask = new Cylinder3D();
+            cylinder3DValue.Cylinder = cylinderValue;
+            cylinder3DMask.Cylinder = cylinderMask;
+            FileStream file = new FileStream("cylinder" + number + ".txt" , FileMode.Create, FileAccess.ReadWrite);
+            StreamWriter write = new StreamWriter(file);
+            for (int k = 1; k <= TemplateCreator.HeightCuboid; k++)
+            {
+                for (int i = 1; i <= TemplateCreator.BaseCuboid; i++)
+                {
+                    for (int j = 1; j <= TemplateCreator.BaseCuboid; j++)
+                    {
+                        write.Write(cylinder3DValue.GetValue(i, j, k) + cylinder3DMask.GetValue(i, j, k));
+                    }
+                    write.WriteLine();
+                }
+                write.WriteLine();
+            }
+            write.Close();
         }
     }
 }
