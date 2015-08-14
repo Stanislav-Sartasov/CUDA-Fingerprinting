@@ -17,7 +17,28 @@ struct Consts
 	const char minNumberMinutiae = 2;
 };
 
+struct Minutia
+{
+	float angle;
+	int x;
+	int y;
+};
+
 __constant__ Consts constsGPU;
+__device__  Point* getPoint(Minutia *minutiae);
+__device__ CUDAArray<Minutia*> getNeighborhood(CUDAArray<Minutia> *minutiaArr);
+__device__  float angleHeight();
+__device__ __host__ float gaussian1D(float x);
+__device__ __host__ float gaussianLocation(Minutia *minutia, Point *point);
+__device__ float gaussianDirection(Minutia *middleMinutia, Minutia *minutia, float anglePoint);
+__inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondMinutia);
+__device__ __host__ bool isValidPoint(Minutia* middleMinutia, Point* hull, int hullLength);
+__device__ __host__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia);
+__device__ __host__ char stepFunction(float value);
+void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght);
+__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, Point* hull, int hullLenght);
+__global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae);
+__global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points, int lenght);
 
 #define defaultX() threadIdx.x+1
 #define defaultY() threadIdx.y+1

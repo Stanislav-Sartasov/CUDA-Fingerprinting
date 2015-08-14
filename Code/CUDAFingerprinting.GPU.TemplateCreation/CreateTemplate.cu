@@ -15,13 +15,6 @@
 #include "CreateTemplate.h"
 #include "device_functions_decls.h"
 
-struct Minutia
-{
-	float angle;
-	int x;
-	int y;
-};
-
 __device__  Point* getPoint(Minutia *minutiae)
 {
 	return &Point(
@@ -206,10 +199,5 @@ __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points, 
 	{
 		points.SetAt(0, threadIdx.x, Point(minutiae.At(0, threadIdx.x).x, minutiae.At(0, threadIdx.x).y));
 	}
-}
-
-int main()
-{
-
 }
 
