@@ -88,23 +88,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\CUDA-Fingerprinting\Code\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
+    <ProjectReference Include="..\..\..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\CUDA-Fingerprinting\Code\CUDAFingerprinting.FeatureExtraction\CUDAFingerprinting.FeatureExtraction.csproj">
+    <ProjectReference Include="..\..\..\CUDAFingerprinting.FeatureExtraction\CUDAFingerprinting.FeatureExtraction.csproj">
       <Project>{004c8b66-4bfc-4337-b4ad-12e125189051}</Project>
       <Name>CUDAFingerprinting.FeatureExtraction</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\CUDA-Fingerprinting\Code\CUDAFingerprinting.ImageProcessing\CUDAFingerprinting.ImageProcessing.csproj">
+    <ProjectReference Include="..\..\..\CUDAFingerprinting.ImageProcessing\CUDAFingerprinting.ImageProcessing.csproj">
       <Project>{6b1354d8-3b37-4946-93c0-5fbc2ef11544}</Project>
       <Name>CUDAFingerprinting.ImageProcessing</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\CUDA-Fingerprinting\Code\CUDAFingerprinting.MinutiaDetection\CUDAFingerprinting.MinutiaDetection.csproj">
-      <Project>{29bd2034-69dc-4ac2-a98c-d9626fba2f4b}</Project>
-      <Name>CUDAFingerprinting.MinutiaDetection</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\CUDA-Fingerprinting\Code\CUDAFingerprinting.TemplateMatching\CUDAFingerprinting.TemplateMatching.csproj">
+    <ProjectReference Include="..\..\..\CUDAFingerprinting.TemplateMatching\CUDAFingerprinting.TemplateMatching.csproj">
       <Project>{9dcdbfa8-d0fb-4f13-b903-c6a82f024297}</Project>
       <Name>CUDAFingerprinting.TemplateMatching</Name>
     </ProjectReference>
