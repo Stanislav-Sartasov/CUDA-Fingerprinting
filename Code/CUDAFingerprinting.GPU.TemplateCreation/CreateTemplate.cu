@@ -119,7 +119,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	int* hullLenght;
 	Point* hull = (Point*)malloc(lenght*sizeof(Point));
 
-	getConvexHull(cudaPoints.GetData, lenght, hull, hullLenght);
+	getConvexHull(cudaPoints.GetData(), lenght, hull, hullLenght);
 	cudaPoints.Dispose();
 	Point* exdHull = extendHull(hull, *hullLenght, constsGPU.omega);
 	free(hull);
@@ -128,7 +128,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	free(hullLenght);
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
 	CUDAArray<bool> cudaIsValidMinutiae = CUDAArray<bool>(isValidMinutiae, lenght, 1);
-	getValidMinutias << <1, lenght >> >(cudaMinutiae, isValidMinutiae);
+	getValidMinutias << <1, lenght >> >(cudaMinutiae, cudaIsValidMinutiae);
 	cudaMinutiae.Dispose();
 	cudaIsValidMinutiae.GetData(isValidMinutiae);
 	cudaIsValidMinutiae.Dispose();
@@ -173,6 +173,11 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 		atomicOr(masks.AtPtr(defaultMinutia(), linearizationIndex() / 32), 0 << linearizationIndex() % 32);
 	}
 }
+
+/*__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks,CUDAArray<Cylinder> cylinders)
+{
+	cylinders.SetAt(0, blockIdx.x * 2, Cylinder(values.At(0, blockIdx.x , minutiae.At(0, blockIdx.x * 2).angle, )
+}*/
 
 __global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae)
 {
