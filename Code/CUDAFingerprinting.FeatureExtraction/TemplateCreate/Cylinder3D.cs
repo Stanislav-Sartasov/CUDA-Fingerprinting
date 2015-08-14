@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
 {
-    class Cylinder3D
+    public class Cylinder3D
     {
-        public uint[] Cylinder { get; private set; }
+        public uint[] Cylinder { get; set; }
 
         public Cylinder3D()
         {
