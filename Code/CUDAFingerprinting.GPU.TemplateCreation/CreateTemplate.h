@@ -1,6 +1,7 @@
 #ifndef CUDAFINGERPRINTING_CREATETEMPLATE
 #define CUDAFINGERPRINTING_CREATETEMPLATE
 #include "math_constants.h"
+#include "VectorHelper.cuh"
 
 struct Consts
 {
@@ -25,6 +26,8 @@ struct Minutia
 };
 
 __constant__ Consts constsGPU;
+Point* hullGPU;
+
 __device__  Point* getPoint(Minutia *minutiae);
 __device__ CUDAArray<Minutia*> getNeighborhood(CUDAArray<Minutia> *minutiaArr);
 __device__  float angleHeight();

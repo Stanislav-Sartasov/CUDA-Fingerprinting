@@ -121,11 +121,14 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 
 	getConvexHull(cudaPoints.GetData, lenght, hull, hullLenght);
 	cudaPoints.Dispose();
-	Point* exdHull = extendHull(hull, *hullLenght, constsGPU.omega);
+	Point* extHull = extendHull(hull, *hullLenght, constsGPU.omega);
 	free(hull);
 	int* extLenght;
 	*extLenght = *hullLenght * 2;
 	free(hullLenght);
+	cudaMalloc((void**)&hullGPU, sizeof(Point)*(*extLenght));
+	cudaMemcpy(hullGPU, extHull, sizeof(Point)*(*extLenght), cudaMemcpyHostToDevice);
+	free(extHull);
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
 	CUDAArray<bool> cudaIsValidMinutiae = CUDAArray<bool>(isValidMinutiae, lenght, 1);
 	getValidMinutias << <1, lenght >> >(cudaMinutiae, isValidMinutiae);
@@ -151,6 +154,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 		}
 	}//count - validMinutiaeLenght	
 	free(isValidMinutiae);
+
 
 }
 
