@@ -12,8 +12,8 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
     public class TemplateCreator
     {
         public const byte Radius = 70;
-        public const byte BaseCuboid = 8;
-        public const byte HeightCuboid = 5;
+        public const byte BaseCuboid = 16;
+        public const byte HeightCuboid = 6;
         public const uint NumberCell = BaseCuboid * BaseCuboid * HeightCuboid;
         public const double BaseCell = (2.0d * Radius) / BaseCuboid;
         public const double HeightCell = (2 * Math.PI) / HeightCuboid;
