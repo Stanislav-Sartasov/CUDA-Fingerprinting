@@ -91,7 +91,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
         {
             bool isOnSameDistance, isClose, isOnSameDirection;
             float epsAngle = 0.3F;
-            float eps = 3.0F; 
+            float eps = 5.0F; 
             float a1, a2, dist1, dist2, chordk, chordm;
 
             dist1 = Length(m1, kernel1);
@@ -113,10 +113,10 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             return isOnSameDistance && isClose && isOnSameDirection;
         }
 
-        public static List<List<Tuple<int, int>>> MatchMinutiae(float[,] s, List<Minutia> mins1, List<Minutia> mins2)
+        public static List<Tuple<int, int>> MatchMinutiae(float[,] s, List<Minutia> mins1, List<Minutia> mins2)
         {
             int top = 100;
-            List<List<Tuple<int, int>>> res = new List<List<Tuple<int, int>>>(top);
+            List<Tuple<int, int>> res = new List<Tuple<int, int>>();
             bool[] flag1 = new bool[s.GetLength(0)];
             bool[] flag2 = new bool[s.GetLength(1)];
             int i0, j0, i, j;
@@ -150,8 +150,10 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
                        flag2[j] = true;
                    }
                 }
-
-                res.Add(temp);
+                if (res.Count < temp.Count)
+                {
+                    res = temp.ToList();
+                }
             }
 
             return res;

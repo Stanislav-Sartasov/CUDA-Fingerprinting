@@ -40,7 +40,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             int i, j;
             float eps = 0.1F;
             bool isExist;
-            int r = 40;
+            int r = 5;
             float fengConstant = 0.64F; //= 0.8 * 0.8;  0.8 is a magic constant!(from Feng book)
 
             for (i = 0; i < desc1.Minutias.Count; i++)

@@ -90,39 +90,18 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             int radius = 70;
             float eps = 0.01F;
 
-
             List<Descriptor> desc1 = DescriptorBuilder.BuildDescriptors(mins1, radius);
             List<Descriptor> desc2 = DescriptorBuilder.BuildDescriptors(mins2, radius);
-            bool flag = expected;
             var s = FengMinutiaDescriptor.DescriptorsCompare(desc1, desc2, radius, heigth, width);
 
-
-            System.IO.StreamWriter write = new System.IO.StreamWriter("D:\\test1.txt");
-
-            for (int i = 0; i < s.GetLength(0); ++i)
-            {
-                for (int j = 0; j < s.GetLength(1); ++j)
-                {
-                    write.Write("{0:0.00}", Math.Round(s[i, j], 2));
-                    write.Write(" ");
-                    //cmp in progress
-                }
-                write.WriteLine();
-            }
-
             var res = MinutiaeMatching.MatchMinutiae(s, mins1, mins2);
-            
-            foreach (List<Tuple<int, int>> subList in res)
-            {
-                write.WriteLine(subList.Count);
-                foreach (Tuple<int, int> item in subList)
-                {
-                    write.Write("(" + item.Item1 + ", " + item.Item2 + ") ");
-                }
-                write.WriteLine();
-            }
 
-            write.Close();
+            bool flag;
+
+            float border = 0.3F; //why? JUST FOR FUN
+            float cmp = (float)(2.0 * res.Count) / (mins1.Count + mins2.Count);
+            flag = cmp > border;
+
             return flag == expected;
         }
 
@@ -136,11 +115,21 @@ namespace CUDAFingerprinting.FeatureExtraction.Tests
             Assert.IsTrue(cmpres);
         }
         [TestMethod, Description("Compare sets of descriptors from different fingers")]
-        public void DescriptorsCompareTestManyToManyDifferentFingers()
+        public void DescriptorsCompareTestManyToManyDifferentFingers1()
         {
             bool cmpres;
             List<Minutia> mins1 = readMinutiae(Resources.minutia1_1);
             List<Minutia> mins2 = readMinutiae(Resources.minutia2_2);
+            cmpres = cmp(mins1, mins2, false);
+            Assert.IsTrue(cmpres);
+        }
+
+        [TestMethod, Description("Compare sets of descriptors from different fingers")]
+        public void DescriptorsCompareTestManyToManyDifferentFingers2()
+        {
+            bool cmpres;
+            List<Minutia> mins1 = readMinutiae(Resources.minutia1_1);
+            List<Minutia> mins2 = readMinutiae(Resources.minutia2_6);
             cmpres = cmp(mins1, mins2, false);
             Assert.IsTrue(cmpres);
         }
