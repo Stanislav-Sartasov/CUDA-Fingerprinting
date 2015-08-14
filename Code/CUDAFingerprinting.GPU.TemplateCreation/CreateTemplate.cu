@@ -121,6 +121,7 @@ __device__ __host__ char stepFunction(float value)
 
 void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght)
 {
+	cudaSetDevice(0);
 	Consts myConst;
 	cudaMemcpyToSymbol(&constsGPU, &myConst, sizeof(Consts));
 	Point* points = (Point*)malloc(lenght * sizeof(Point));
@@ -129,7 +130,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	free(points);
 	getPoints << <1, lenght >> >(cudaMinutiae, cudaPoints, lenght);
 	int* hullLenght;
-	Point* hull;
+	Point* hull = (Point*)malloc(lenght*sizeof(Point));
 
 	getConvexHull(cudaPoints.GetData, lenght, hull, hullLenght);
 	cudaPoints.Dispose();
@@ -168,26 +169,22 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, Point* hull, int hullLenght)
 {
-	if (defaultX()>16 || defaultY() > 16 || defaultZ() > 6 || defaultMinutia() > minutiae.Width)
+	if (defaultX() > 16 || defaultY() > 16 || defaultZ() > 6 || defaultMinutia() > minutiae.Width)
 	{
 		return;
 	}
-	/*if (isValidPoint(&minutiae.At(0, defaultMinutia()), hull, hullLenght))
+	if (isValidPoint(&minutiae.At(0, defaultMinutia()), hull, hullLenght))
 	{
-		unsigned int tempValue = (unsigned int)
-			(stepFunction(sum(getNeighborhood(&minutiae), &minutiae.At(0, defaultMinutia()))))
-			<< linearizationIndex() % 32;
-			atomicOr(values.AtPtr(defaultMinutia(), linearizationIndex() / 32), tempValue);
-			atomicOr(masks.AtPtr(defaultMinutia(), linearizationIndex() / 32), 1 << linearizationIndex() % 32));
+		char tempValue =
+			(stepFunction(sum(getNeighborhood(&minutiae), &(minutiae.At(0, defaultMinutia())))));
+		atomicOr(values.AtPtr(defaultMinutia(), linearizationIndex() / 32), (tempValue - '0') << linearizationIndex() % 32);
+		atomicOr(masks.AtPtr(defaultMinutia(), linearizationIndex() / 32), 1 << linearizationIndex() % 32);
 	}
 	else
 	{
-		values.SetAt(defaultMinutia(), linearizationIndex() / 32,
-			(values.At(defaultMinutia(), linearizationIndex() / 32) | 0));//atomicAdd
-
-		masks.SetAt(defaultMinutia(), linearizationIndex() / 32,
-			masks.At(defaultMinutia(), linearizationIndex() / 32) | 0 << linearizationIndex() % 32);
-	}*/
+		atomicOr(values.AtPtr(defaultMinutia(), linearizationIndex() / 32), 0 << linearizationIndex() % 32);
+		atomicOr(masks.AtPtr(defaultMinutia(), linearizationIndex() / 32), 0 << linearizationIndex() % 32);
+	}
 }
 
 __global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae)
