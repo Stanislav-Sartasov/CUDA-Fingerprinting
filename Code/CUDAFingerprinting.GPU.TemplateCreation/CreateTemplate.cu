@@ -154,11 +154,20 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 		}
 	}//count - validMinutiaeLenght	
 	free(isValidMinutiae);
-
+	unsigned int** valuesAndMasks = (unsigned int**)malloc(count*sizeof(unsigned int*));
+	for (int i = 0; i < count; i++)
+	{
+		valuesAndMasks[i] = (unsigned int*)malloc(2 * 48 * sizeof(unsigned int));
+	}
+	CUDAArray <unsigned int> cudaValuesAndMasks = CUDAArray<unsigned int>(*valuesAndMasks, 96, count);
+	createValuesAndMasks << < dim3(count, 2), 48 >> >(cudaMinutiae, cudaValuesAndMasks, hullLenght)
+		/*Cylinder value =
+		int maxNorm = 0;
+		for (int i = 0;i<)*/
 
 }
 
-__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, int hullLenght)
+__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, int hullLenght)
 {
 	if (defaultX() > 16 || defaultY() > 16 || defaultZ() > 6 || defaultMinutia() > minutiae.Width)
 	{
@@ -167,35 +176,33 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	if (isValidPoint(&minutiae.At(0, defaultMinutia()), hull, hullLenght))
 	{
 		char tempValue =
-			(stepFunction(sum(getNeighborhood(&minutiae), &(minutiae.At(0, defaultMinutia())))));
-		atomicOr(values.AtPtr(defaultMinutia(), linearizationIndex() / 32), (tempValue - '0') << linearizationIndex() % 32);
-		atomicOr(masks.AtPtr(defaultMinutia(), linearizationIndex() / 32), 1 << linearizationIndex() % 32);
+			(defaultY() % 2)*(stepFunction(sum(getNeighborhood(&minutiae), &(minutiae.At(0, defaultMinutia())))));
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0' + blockIdx.y) << linearizationIndex() % 32);
 	}
 	else
 	{
-		atomicOr(values.AtPtr(defaultMinutia(), linearizationIndex() / 32), 0 << linearizationIndex() % 32);
-		atomicOr(masks.AtPtr(defaultMinutia(), linearizationIndex() / 32), 0 << linearizationIndex() % 32);
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), 0 << linearizationIndex() % 32);
 	}
 }
 
-__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum,CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, CUDAArray<Cylinder> cylinders)
+__global__ void IsValidCylinders(CUDAArray<Cylinder> masksCylinders, CUDAArray<bool> isValidCylinders)
+{
+
+}
+
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, CUDAArray<Cylinder> cylinders)
 {
 	cylinders.SetAt(0, blockIdx.x * 2, Cylinder(values.AtPtr(blockIdx.x, 0), values.Width,
-		minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(0,blockIdx.x))), 0));
+		minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(0, blockIdx.x))), 0));
 	cylinders.SetAt(0, blockIdx.x * 2 + 1, Cylinder(masks.AtPtr(blockIdx.x, 0), masks.Width,
 		minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(1, blockIdx.x))), 0));
 }
 
-__global__ void createNorm(CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, CUDAArray<unsigned int> sum)
+__global__ void createNorm(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum)
 {
 	if (blockIdx.y == 0)
 	{
-		unsigned int x = __popc(values.At(blockIdx.x, threadIdx.x));
-		atomicAdd(sum.AtPtr(blockIdx.y, blockIdx.x),x);
-	}
-	else if (blockIdx.y == 1)
-	{
-		unsigned int x = __popc(masks.At(blockIdx.x, threadIdx.x));
+		unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x * 2 + blockIdx.y));
 		atomicAdd(sum.AtPtr(blockIdx.y, blockIdx.x), x);
 	}
 }
