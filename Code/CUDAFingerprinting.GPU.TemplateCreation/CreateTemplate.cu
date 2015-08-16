@@ -164,14 +164,17 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	unsigned int** valuesAndMasks = (unsigned int**)malloc(count*sizeof(unsigned int*));
 	for (int i = 0; i < count; i++)
 	{
-		valuesAndMasks[i] = (unsigned int*)malloc(2 * 48 * sizeof(unsigned int));
+		valuesAndMasks[i] = (unsigned int*)malloc(2 * constsGPU.numberCell / 32 * sizeof(unsigned int));
 	}
 	CUDAArray <unsigned int> cudaValuesAndMasks = CUDAArray<unsigned int>(*valuesAndMasks, 96, count);
-	createValuesAndMasks << < dim3(count, 2), 48 >> >(cudaMinutiae, cudaValuesAndMasks, hullLenght);
-		/*Cylinder value =
-		int maxNorm = 0;
-		for (int i = 0;i<)*/
+	for (int i = count - 1; i >= 0; i--)
+	{
+		free(valuesAndMasks[i]);
+	}
+	free(valuesAndMasks);
+	createValuesAndMasks << < dim3(count, 2), constsGPU.numberCell/32 >> >(cudaIsValidMinutiae, cudaValuesAndMasks, hullLenght);
 
+	int* sum = (int*)malloc(96 * sizeof(int));
 }
 
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, int hullLenght)
@@ -192,9 +195,9 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	}
 }
 
-__global__ void IsValidCylinders(CUDAArray<Cylinder> cylinders, CUDAArray<bool> isValidCylinders, float line)
+__global__ void IsValidCylinders(CUDAArray<Cylinder> cylinders, CUDAArray<bool> isValidMasks, float line)
 {
-	
+	isValidMasks.SetAt(0, threadIdx.x, cylinders.At(0, threadIdx.x * 2 + 1).norm >= line ? true : false);
 }
 
 __global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CUDAArray<Cylinder> cylinders)
@@ -213,7 +216,7 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 	atomicAdd(sum.AtPtr(0, threadIdx.x * 2 + blockIdx.y), x);
 }
 
-__global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae)
+__global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae)
 {
 	if (threadIdx.x >= minutiae.Width)
 	{
