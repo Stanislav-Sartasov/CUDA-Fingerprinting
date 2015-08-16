@@ -185,10 +185,10 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	}
 }
 
-/*__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks,CUDAArray<Cylinder> cylinders)
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, CUDAArray<Cylinder> cylinders)
 {
-	cylinders.SetAt(0, blockIdx.x * 2, Cylinder(values.At(0, blockIdx.x , minutiae.At(0, blockIdx.x * 2).angle, )
-}*/
+	cylinders.SetAt(0, blockIdx.x * 2, Cylinder(values.AtPtr(blockIdx.x, 0), values.Width,  minutiae.At(0, blockIdx.x).angle, 0, 0));
+}
 
 __global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae)
 {
