@@ -109,8 +109,11 @@ __device__ __host__ char stepFunction(float value)
 void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght)
 {
 	cudaSetDevice(0);
+	cudaError_t error;
 	Consts myConst;
-	cudaMemcpyToSymbol(&constsGPU, &myConst, sizeof(Consts));
+	error = cudaMemcpyToSymbol(&constsGPU, &myConst, sizeof(Consts));
+	error = cudaDeviceSynchronize();
+	error = cudaGetLastError();
 	Point* points = (Point*)malloc(lenght * sizeof(Point));
 	CUDAArray<Minutia> cudaMinutiae = CUDAArray<Minutia>(minutiae, lenght, 1);
 	CUDAArray<Point> cudaPoints = CUDAArray<Point>(points, lenght, 1);
@@ -126,9 +129,13 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	int* extLenght;
 	*extLenght = *hullLenght * 2;
 	free(hullLenght);
-	cudaMalloc((void**)&hullGPU, sizeof(Point)*(*extLenght));
-	cudaMemcpy(hullGPU, extHull, sizeof(Point)*(*extLenght), cudaMemcpyHostToDevice);
+	error = cudaMalloc((void**)&hullGPU, sizeof(Point)*(*extLenght));
+	error = cudaDeviceSynchronize();
+	error = cudaGetLastError();
+	error = cudaMemcpy(hullGPU, extHull, sizeof(Point)*(*extLenght), cudaMemcpyHostToDevice);
 	free(extHull);
+	error = cudaDeviceSynchronize();
+	error = cudaGetLastError();
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
 	CUDAArray<bool> cudaIsValidMinutiae = CUDAArray<bool>(isValidMinutiae, lenght, 1);
 	getValidMinutias << <1, lenght >> >(cudaMinutiae, cudaIsValidMinutiae);
