@@ -27,6 +27,9 @@ struct Minutia
 
 __constant__ Consts constsGPU;
 Point* hullGPU;
+int* hullLenghtGPU;
+float* lineGPU;
+
 
 __device__  Point* getPoint(Minutia *minutiae);
 __device__ CUDAArray<Minutia*> getNeighborhood(CUDAArray<Minutia> *minutiaArr);
@@ -47,6 +50,14 @@ __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points, 
 #define defaultY() threadIdx.y+1
 #define defaultZ() (blockIdx.y+1)*(threadIdx.z+1)
 #define defaultMinutia() blockIdx.x
+
+#define cudaCheckError() {\
+	cudaError_t e = cudaGetLastError(); \
+	if (e != cudaSuccess) {\
+		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
+		exit(0);\
+		}\
+}
 
 #define linearizationIndex() (defaultZ()-1)*constsGPU.baseCuboid*constsGPU.baseCuboid+(defaultY()-1)*constsGPU.baseCuboid+defaultX()-1
 #endif

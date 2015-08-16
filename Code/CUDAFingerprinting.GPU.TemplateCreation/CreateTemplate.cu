@@ -109,39 +109,49 @@ __device__ __host__ char stepFunction(float value)
 void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght)
 {
 	cudaSetDevice(0);
-	cudaError_t error;
 	Consts myConst;
-	error = cudaMemcpyToSymbol(&constsGPU, &myConst, sizeof(Consts));
-	error = cudaDeviceSynchronize();
-	error = cudaGetLastError();
+	cudaMemcpyToSymbol(&constsGPU, &myConst, sizeof(Consts));
+	cudaCheckError();
+
 	Point* points = (Point*)malloc(lenght * sizeof(Point));
 	CUDAArray<Minutia> cudaMinutiae = CUDAArray<Minutia>(minutiae, lenght, 1);
 	CUDAArray<Point> cudaPoints = CUDAArray<Point>(points, lenght, 1);
 	free(points);
 	getPoints << <1, lenght >> >(cudaMinutiae, cudaPoints, lenght);
+	cudaCheckError();
 	int* hullLenght;
 	Point* hull = (Point*)malloc(lenght*sizeof(Point));
-
 	getConvexHull(cudaPoints.GetData(), lenght, hull, hullLenght);
 	cudaPoints.Dispose();
+
 	Point* extHull = extendHull(hull, *hullLenght, constsGPU.omega);
 	free(hull);
+
 	int* extLenght;
 	*extLenght = *hullLenght * 2;
 	free(hullLenght);
-	error = cudaMalloc((void**)&hullGPU, sizeof(Point)*(*extLenght));
-	error = cudaDeviceSynchronize();
-	error = cudaGetLastError();
-	error = cudaMemcpy(hullGPU, extHull, sizeof(Point)*(*extLenght), cudaMemcpyHostToDevice);
+
+	cudaMalloc((void**)&hullGPU, sizeof(Point)*(*extLenght));
+	cudaCheckError(error);
+
+	cudaMemcpy(hullGPU, extHull, sizeof(Point)*(*extLenght), cudaMemcpyHostToDevice);
+	cudaCheckError();
 	free(extHull);
-	error = cudaDeviceSynchronize();
-	error = cudaGetLastError();
+
+	cudaMalloc((void**)&hullLenghtGPU, sizeof(int));
+	cudaCheckError();
+
+	cudaMalloc((void**)&lineGPU, sizeof(float));
+	cudaCheckError();
+	
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
 	CUDAArray<bool> cudaIsValidMinutiae = CUDAArray<bool>(isValidMinutiae, lenght, 1);
 	getValidMinutias << <1, lenght >> >(cudaMinutiae, cudaIsValidMinutiae);
+
 	cudaMinutiae.Dispose();
 	cudaIsValidMinutiae.GetData(isValidMinutiae);
 	cudaIsValidMinutiae.Dispose();
+
 	int count = 0;
 	for (int i = 0; i < lenght; i++)
 	{
@@ -195,7 +205,7 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	}
 }
 
-__global__ void IsValidCylinders(CUDAArray<Cylinder> cylinders, CUDAArray<bool> isValidMasks, float line)
+__global__ void isValidCylinders(CUDAArray<Cylinder> cylinders, CUDAArray<bool> isValidCylinders, float line)
 {
 	isValidMasks.SetAt(0, threadIdx.x, cylinders.At(0, threadIdx.x * 2 + 1).norm >= line ? true : false);
 }
