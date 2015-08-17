@@ -28,7 +28,7 @@ public:
 		deviceStride = arr.deviceStride;
 	}
 
-	__host__ __device__ CUDAArray(T* cpuPtr, int width, int height)
+	CUDAArray(T* cpuPtr, int width, int height)
 	{
 		Width = width;
 		Height = height;
@@ -41,7 +41,7 @@ public:
 		error = cudaGetLastError();
 	}
 
-	__host__ __device__ CUDAArray(int width, int height)
+	CUDAArray(int width, int height)
 	{
 		Width = width;
 		Height = height;
@@ -78,7 +78,7 @@ public:
 		cudaPtr[row*deviceStride + column] = value;
 	}
 
-	__host__ __device__ void Dispose()
+	void Dispose()
 	{
 		cudaFree(cudaPtr);
 	}

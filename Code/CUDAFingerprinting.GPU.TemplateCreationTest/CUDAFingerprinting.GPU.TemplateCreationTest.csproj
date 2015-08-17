@@ -51,10 +51,6 @@
       <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
       <Name>CUDAFingerprinting.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CUDAFingerprinting.GPU.TemplateCreation\CUDAFingerprinting.GPU.TemplateCreation.vcxproj">
-      <Project>{0c462449-6e51-4ac5-83fc-3bd7800fb069}</Project>
-      <Name>CUDAFingerprinting.GPU.TemplateCreation</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
