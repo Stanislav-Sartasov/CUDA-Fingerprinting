@@ -19,7 +19,7 @@ public:
 		valuesCount = givenValuesCount;
 	}
 
-	Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
+	__device__ __host__ Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
 		valuesCount(givenValuesCount), angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex)
 	{
 		values = (unsigned int *)malloc(givenValuesCount * sizeof(unsigned int));

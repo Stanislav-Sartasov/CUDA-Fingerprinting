@@ -87,7 +87,7 @@ __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondM
 __device__ __host__ bool isValidPoint(Minutia* middleMinutia, Point* hull)
 {
 	return pointDistance(Point((*middleMinutia).x, (*middleMinutia).y), *getPoint(middleMinutia)) < (*constsGPU).radius &&
-		isPointInsideHull(*getPoint(middleMinutia), hull,*hullLenghtGPU);
+		isPointInsideHull(*getPoint(middleMinutia), hull, *hullLenghtGPU);
 }
 
 __device__ __host__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia)
@@ -270,13 +270,13 @@ __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points)
 
 int main()
 {
-	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia)*100);
+	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * 100);
 	Minutia tmp;
 	for (int i = 0; i < 100; i++)
 	{
 		tmp.x = i + 1;
 		tmp.y = i + 1;
-		tmp.angle = (rand()%4)*0.75;
+		tmp.angle = (rand() % 4)*0.75;
 		minutiae[i] = tmp;
 	}
 	Cylinder* cylinders;
