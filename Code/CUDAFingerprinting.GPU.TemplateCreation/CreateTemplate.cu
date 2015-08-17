@@ -12,7 +12,7 @@
 #include "ConvexHull.cu"
 #include "ConvexHullModified.cu"
 #include "math.h"
-#include "CreateTemplate.h"
+#include "CreateTemplate.cuh"
 #include "device_functions_decls.h"
 
 __device__  Point* getPoint(Minutia *minutiae)
@@ -132,7 +132,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	free(hullLenght);
 
 	cudaMalloc((void**)&hullGPU, sizeof(Point)*(*extLenght));
-	cudaCheckError(error);
+	cudaCheckError();
 
 	cudaMemcpy(hullGPU, extHull, sizeof(Point)*(*extLenght), cudaMemcpyHostToDevice);
 	cudaCheckError();
@@ -198,8 +198,8 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	{
 		if ((*cylinders)[i].norm >= 0.75*maxNorm)
 		{
-			validCylinders[validCylindersLenght++] = cylinders[i - 1];
-			validCylinders[validCylindersLenght++] = cylinders[i];
+			validCylinders[validCylindersLenght++] = *cylinders[i - 1];
+			validCylinders[validCylindersLenght++] = *cylinders[i];
 		}
 	}
 	validCylinders = (Cylinder*)realloc(validCylinders, validCylindersLenght*sizeof(Cylinder));
@@ -267,5 +267,23 @@ __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points)
 	{
 		points.SetAt(0, threadIdx.x, Point(minutiae.At(0, threadIdx.x).x, minutiae.At(0, threadIdx.x).y));
 	}
+}
+
+int main()
+{
+	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia)*100);
+	Minutia tmp;
+	for (int i = 0; i < 100; i++)
+	{
+		tmp.x = i + 1;
+		tmp.y = i + 1;
+		tmp.angle = (rand()%4)*0.75;
+		minutiae[i] = tmp;
+	}
+	Cylinder* cylinders;
+	int lenght;
+	createTemplate(minutiae, 100, &cylinders, &lenght);
+	free(minutiae);
+	return 0;
 }
 

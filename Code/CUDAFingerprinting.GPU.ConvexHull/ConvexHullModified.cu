@@ -317,7 +317,7 @@ int parsePoints(char* path, Point** points)
 }
 
 
-int main()
+/*int main()
 {
 	char pathPointDb[MAX_FILE_NAME_LENGTH] = "C:\\Users\\resaglow\\convex_hull_db.txt";
 	Point* points = nullptr;
@@ -330,4 +330,4 @@ int main()
 	terminateConvexHull();
 
 	return 0;
-}
+}*/
