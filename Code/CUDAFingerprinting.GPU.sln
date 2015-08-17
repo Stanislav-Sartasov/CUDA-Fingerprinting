@@ -74,6 +74,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.Poin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.TemplateCreation", "CUDAFingerprinting.GPU.TemplateCreation\CUDAFingerprinting.GPU.TemplateCreation.vcxproj", "{0C462449-6E51-4AC5-83FC-3BD7800FB069}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateTemplateTest", "CreateTemplateTest\CreateTemplateTest.csproj", "{CD3BFFD9-9B28-47C9-B145-936D104E2A08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -388,6 +390,18 @@ Global
 		{0C462449-6E51-4AC5-83FC-3BD7800FB069}.Release|Win32.Build.0 = Release|Win32
 		{0C462449-6E51-4AC5-83FC-3BD7800FB069}.Release|x64.ActiveCfg = Release|x64
 		{0C462449-6E51-4AC5-83FC-3BD7800FB069}.Release|x64.Build.0 = Release|x64
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Release|Win32.ActiveCfg = Release|Any CPU
+		{CD3BFFD9-9B28-47C9-B145-936D104E2A08}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

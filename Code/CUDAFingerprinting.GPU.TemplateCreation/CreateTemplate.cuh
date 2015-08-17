@@ -1,7 +1,11 @@
 #ifndef CUDAFINGERPRINTING_CREATETEMPLATE
 #define CUDAFINGERPRINTING_CREATETEMPLATE
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 #include "math_constants.h"
 #include "VectorHelper.cuh"
+#include "CUDAArray.cuh"
+#include "CylinderHelper.cuh"
 
 struct Consts
 {
@@ -24,6 +28,8 @@ struct Minutia
 	int x;
 	int y;
 };
+
+extern "C" __declspec(dllexport) void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght);
 
 __constant__ Consts constsGPU;
 Point* hullGPU;
@@ -57,7 +63,7 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 	if (e != cudaSuccess) {\
 		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
 		exit(0);\
-					}\
+						}\
 }
 
 #define linearizationIndex() (defaultZ()-1)*constsGPU.baseCuboid*constsGPU.baseCuboid+(defaultY()-1)*constsGPU.baseCuboid+defaultX()-1

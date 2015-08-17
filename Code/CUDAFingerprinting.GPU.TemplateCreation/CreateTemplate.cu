@@ -12,7 +12,7 @@
 #include "ConvexHull.cu"
 #include "ConvexHullModified.cu"
 #include "math.h"
-#include "CreateTemplate.h"
+#include "CreateTemplate.cuh"
 #include "device_functions_decls.h"
 
 __device__  Point* getPoint(Minutia *minutiae)
