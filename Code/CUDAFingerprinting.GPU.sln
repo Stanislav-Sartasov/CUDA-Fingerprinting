@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
@@ -74,7 +74,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.Poin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.TemplateCreation", "CUDAFingerprinting.GPU.TemplateCreation\CUDAFingerprinting.GPU.TemplateCreation.vcxproj", "{0C462449-6E51-4AC5-83FC-3BD7800FB069}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateTemplateTest", "CreateTemplateTest\CreateTemplateTest.csproj", "{CD3BFFD9-9B28-47C9-B145-936D104E2A08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.TemplateCreationTest", "CUDAFingerprinting.GPU.TemplateCreationTest\CUDAFingerprinting.GPU.TemplateCreationTest.csproj", "{CD3BFFD9-9B28-47C9-B145-936D104E2A08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

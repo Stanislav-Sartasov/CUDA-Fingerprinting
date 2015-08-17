@@ -12,7 +12,7 @@
 #include "ConvexHull.cu"
 #include "ConvexHullModified.cu"
 #include "math.h"
-#include "CreateTemplate.cuh"
+#include "CreateTemplate.h"
 #include "device_functions_decls.h"
 
 __device__  Point* getPoint(Minutia *minutiae)
@@ -106,7 +106,7 @@ __device__ __host__ char stepFunction(float value)
 	return (char)(value >= constsGPU.sigmoidParametrPsi ? 1 : 0);
 }
 
-void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght)
+void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght)
 {
 	cudaSetDevice(0);
 	Consts myConst;
@@ -158,7 +158,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 			validMinutiae[validMinutiaeLenght] = minutiae[i];
 			validMinutiaeLenght++;
 		}
-	}//validMinutiaeLenght - validMinutiaeLenght	
+	}
 	free(isValidMinutiae);
 	validMinutiae = (Minutia*)realloc(validMinutiae, validMinutiaeLenght*sizeof(Minutia));
 	cudaMinutiae = CUDAArray<Minutia>(validMinutiae, validMinutiaeLenght, 1);
@@ -180,23 +180,23 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	free(sumArr);
 	createSum << <2, validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
 
-	cylinders = (Cylinder*)malloc(validMinutiaeLenght * 2 * sizeof(Cylinder));
+	*cylinders = (Cylinder*)malloc(validMinutiaeLenght * 2 * sizeof(Cylinder));
 	CUDAArray<Cylinder> cudaCylinders = CUDAArray<Cylinder>();
 	createCylinders << <validMinutiaeLenght * 2, 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);
 
 	free(cylinders);
-	cylinders = cudaCylinders.GetData();
+	*cylinders = cudaCylinders.GetData();
 	cudaCylinders.Dispose();
 	Cylinder* validCylinders = (Cylinder*)malloc(validMinutiaeLenght*sizeof(Cylinder));
 	float maxNorm = 0;
 	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
 	{
-		maxNorm = cylinders[i].norm > maxNorm ? cylinders[i].norm : maxNorm;
+		maxNorm = (*cylinders)[i].norm > maxNorm ? (*cylinders)[i].norm : maxNorm;
 	}
 	int validCylindersLenght = 0;
 	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
 	{
-		if (cylinders[i].norm >= 0.75*maxNorm)
+		if ((*cylinders)[i].norm >= 0.75*maxNorm)
 		{
 			validCylinders[validCylindersLenght++] = cylinders[i - 1];
 			validCylinders[validCylindersLenght++] = cylinders[i];
@@ -204,7 +204,8 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cyl
 	}
 	validCylinders = (Cylinder*)realloc(validCylinders, validCylindersLenght*sizeof(Cylinder));
 	free(cylinders);
-	cylinders = validCylinders;
+	*cylinders = validCylinders;
+	*cylindersLenght = validCylindersLenght;
 	cudaFree(hullGPU);
 	cudaFree(hullLenghtGPU);
 }
