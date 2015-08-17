@@ -28,7 +28,6 @@ struct Minutia
 __constant__ Consts constsGPU;
 Point* hullGPU;
 int* hullLenghtGPU;
-float* lineGPU;
 
 
 __device__  Point* getPoint(Minutia *minutiae);
@@ -42,9 +41,11 @@ __device__ __host__ bool isValidPoint(Minutia* middleMinutia, Point* hull, int h
 __device__ __host__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia);
 __device__ __host__ char stepFunction(float value);
 void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght);
-__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> values, CUDAArray<unsigned int> masks, Point* hull, int hullLenght);
+__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks);
 __global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae);
 __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points, int lenght);
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CUDAArray<Cylinder> cylinders);
+__global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum);
 
 #define defaultX() threadIdx.x+1
 #define defaultY() threadIdx.y+1
@@ -56,8 +57,9 @@ __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points, 
 	if (e != cudaSuccess) {\
 		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
 		exit(0);\
-		}\
+					}\
 }
 
 #define linearizationIndex() (defaultZ()-1)*constsGPU.baseCuboid*constsGPU.baseCuboid+(defaultY()-1)*constsGPU.baseCuboid+defaultX()-1
+#define curIndex() 2*(linearizationIndex()/32)+threadIdx.y
 #endif
