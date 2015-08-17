@@ -37,7 +37,7 @@ int fieldHeight;
 
 #define BLOCK_DIM 32
 
-Point* hull;
+__device__ Point* hull;
 // Is it possible to store this in constant memory? 
 // As for now it's not passed properly as a parameter 
 // (global var usage bad practice & impossible from another file)

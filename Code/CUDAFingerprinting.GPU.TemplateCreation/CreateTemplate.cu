@@ -55,12 +55,12 @@ __device__  float angleHeight()
 	return (-CUDART_PI + (defaultZ() - 0.5) * (*constsGPU).heightCell);
 }
 
-__device__ __host__ float gaussian1D(float x)
+__device__  float gaussian1D(float x)
 {
 	return expf(-(x * x) / (2 * (*constsGPU).sigmaLocation * (*constsGPU).sigmaLocation)) / ((*constsGPU).sigmaLocation * sqrtf(CUDART_PI * 2));
 }
 
-__device__ __host__ float gaussianLocation(Minutia *minutia, Point *point)
+__device__  float gaussianLocation(Minutia *minutia, Point *point)
 {
 	return gaussian1D(pointDistance(Point((*minutia).x, (*minutia).y), *point));
 }
@@ -84,13 +84,13 @@ __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondM
 		);
 }
 
-__device__ __host__ bool isValidPoint(Minutia* middleMinutia, Point* hull)
+__device__ bool isValidPoint(Minutia* middleMinutia, Point* hull)
 {
 	return pointDistance(Point((*middleMinutia).x, (*middleMinutia).y), *getPoint(middleMinutia)) < (*constsGPU).radius &&
 		isPointInsideHull(*getPoint(middleMinutia), hull, *hullLenghtGPU);
 }
 
-__device__ __host__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia)
+__device__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia)
 {
 	double sum = 0;
 	for (size_t i = 0; i < neighborhood.Width * neighborhood.Height; i++)
@@ -100,7 +100,7 @@ __device__ __host__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleM
 	return sum;
 }
 
-__device__ __host__ char stepFunction(float value)
+__device__ char stepFunction(float value)
 {
 	return (char)(value >= (*constsGPU).sigmoidParametrPsi ? 1 : 0);
 }

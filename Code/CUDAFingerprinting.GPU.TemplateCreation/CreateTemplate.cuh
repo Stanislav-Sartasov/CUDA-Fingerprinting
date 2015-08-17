@@ -32,20 +32,20 @@ struct Minutia
 extern "C" __declspec(dllexport) void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght);
 
 __constant__ Consts *constsGPU;
-Point* hullGPU;
-int* hullLenghtGPU;
+__device__ Point* hullGPU;
+__device__ int* hullLenghtGPU;
 
 
 __device__  Point* getPoint(Minutia *minutiae);
 __device__ CUDAArray<Minutia*> getNeighborhood(CUDAArray<Minutia> *minutiaArr);
 __device__  float angleHeight();
-__device__ __host__ float gaussian1D(float x);
-__device__ __host__ float gaussianLocation(Minutia *minutia, Point *point);
+__device__ float gaussian1D(float x);
+__device__ float gaussianLocation(Minutia *minutia, Point *point);
 __device__ float gaussianDirection(Minutia *middleMinutia, Minutia *minutia, float anglePoint);
 __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondMinutia);
-__device__ __host__ bool isValidPoint(Minutia* middleMinutia, Point* hull, int hullLength);
-__device__ __host__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia);
-__device__ __host__ char stepFunction(float value);
+__device__ bool isValidPoint(Minutia* middleMinutia, Point* hull, int hullLength);
+__device__ float sum(CUDAArray<Minutia*> neighborhood, Minutia* middleMinutia);
+__device__ char stepFunction(float value);
 void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght);
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks);
 __global__ void getValidMinutias(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae);
