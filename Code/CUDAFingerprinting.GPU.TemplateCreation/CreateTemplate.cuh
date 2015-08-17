@@ -7,7 +7,7 @@
 #include "CUDAArray.cuh"
 #include "CylinderHelper.cuh"
 
-struct Consts
+typedef struct
 {
 	const char radius = 70;
 	const char baseCuboid = 8;
@@ -20,7 +20,7 @@ struct Consts
 	const float sigmoidParametrPsi = 0.01;
 	const char omega = 50;
 	const char minNumberMinutiae = 2;
-};
+}Consts;
 
 struct Minutia
 {
@@ -31,7 +31,7 @@ struct Minutia
 
 extern "C" __declspec(dllexport) void createTemplate(Minutia* minutiae, int lenght, Cylinder* cylinders, int* cylindersLenght);
 
-__constant__ Consts constsGPU;
+__constant__ Consts *constsGPU;
 Point* hullGPU;
 int* hullLenghtGPU;
 
@@ -66,6 +66,6 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 						}\
 }
 
-#define linearizationIndex() (defaultZ()-1)*constsGPU.baseCuboid*constsGPU.baseCuboid+(defaultY()-1)*constsGPU.baseCuboid+defaultX()-1
+#define linearizationIndex() (defaultZ()-1)*(*constsGPU).baseCuboid*(*constsGPU).baseCuboid+(defaultY()-1)*(*constsGPU).baseCuboid+defaultX()-1
 #define curIndex() 2*(linearizationIndex()/32)+threadIdx.y
 #endif
