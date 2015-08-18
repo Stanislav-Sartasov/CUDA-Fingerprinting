@@ -154,8 +154,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <CudaCompile Include="DescriptorsCompare.cu" />
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="MinutiaHelper.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Constants.cuh" />
+    <ClInclude Include="MinutiaHelper.cuh" />
     <ClInclude Include="MinutiaStructs.cuh" />
   </ItemGroup>
   <ItemGroup>
