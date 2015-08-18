@@ -1,11 +1,11 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include <stdio.h>
 #include "BinTemplateCorrelation.cu"
 #include "CylinderHelper.cuh"
 #include "constsmacros.h"
 #include "ConvexHull.cu"
 #include "CUDAArray.cuh"
-#include <stdio.h>
 #include "math_constants.h"
 #include "VectorHelper.cuh"
 #include "math.h"

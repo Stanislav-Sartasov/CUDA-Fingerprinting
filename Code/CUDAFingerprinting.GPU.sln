@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
@@ -75,6 +75,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.TemplateCreationTest", "CUDAFingerprinting.GPU.TemplateCreationTest\CUDAFingerprinting.GPU.TemplateCreationTest.csproj", "{CD3BFFD9-9B28-47C9-B145-936D104E2A08}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAGingerprinting.GPU.CreateTemplate", "CUDAGingerprinting.GPU.CreateTemplate\CUDAGingerprinting.GPU.CreateTemplate.vcxproj", "{AE05173E-6329-4CE2-9B65-B20CCDA1E998}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.TemplateCreation", "CUDAFingerprinting.GPU.TemplateCreation\CUDAFingerprinting.GPU.TemplateCreation.vcxproj", "{89AC63DF-6174-409A-BF54-60971B6A2BC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -402,6 +404,20 @@ Global
 		{AE05173E-6329-4CE2-9B65-B20CCDA1E998}.Release|Win32.Build.0 = Release|Win32
 		{AE05173E-6329-4CE2-9B65-B20CCDA1E998}.Release|x64.ActiveCfg = Release|x64
 		{AE05173E-6329-4CE2-9B65-B20CCDA1E998}.Release|x64.Build.0 = Release|x64
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|Win32.Build.0 = Debug|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|x64.ActiveCfg = Debug|x64
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Debug|x64.Build.0 = Debug|x64
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|Any CPU.ActiveCfg = Release|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|Win32.ActiveCfg = Release|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|Win32.Build.0 = Release|Win32
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|x64.ActiveCfg = Release|x64
+		{89AC63DF-6174-409A-BF54-60971B6A2BC6}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
