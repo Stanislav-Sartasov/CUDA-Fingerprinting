@@ -17,7 +17,7 @@ int comparator(const void *a, const void *b)
 
 	float res = rotate(firstPoint, A, B);
 
-	return 
+	return
 		res >= 0 ? -1 : 1;
 }
 
