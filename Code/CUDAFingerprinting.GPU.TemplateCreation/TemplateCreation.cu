@@ -141,8 +141,8 @@ __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> is
 
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum)
 {
-	unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x * 2 + blockIdx.x));
-	atomicAdd(sum.AtPtr(0, threadIdx.x * 2 + blockIdx.x), x);
+	unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x * 2 + blockIdx.y));
+	atomicAdd(sum.AtPtr(0, defaultMinutia() + blockIdx.y), x);
 }
 
 
@@ -164,8 +164,8 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	if (isValidPoint(&minutiae.At(0, defaultMinutia()), hullGPU, hullLenghtGPU))
 	{
 		char tempValue =
-			(defaultY() % 2)*(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0' + blockIdx.y) << linearizationIndex() % 32);
+			((threadIdx.z + 1) % 2)*(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0' + threadIdx.z) << linearizationIndex() % 32);
 	}
 	else
 	{
@@ -264,7 +264,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	free(valuesAndMasks);
 	Minutia **neighborhood;
 	cudaMalloc((void**)&neighborhood, sizeof(Minutia*)*(cudaMinutiae.Height));
-	createValuesAndMasks << < dim3(validMinutiaeLenght, 2), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, myConst[0].heightCuboid / 2) >> >(cudaMinutiae, cudaValuesAndMasks, hullGPU, hullLenghtGPU);
+	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks, hullGPU, hullLenghtGPU);
 	cudaCheckError();
 
 	cudaFree(neighborhood);
@@ -272,7 +272,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	CUDAArray<unsigned int> cudaSumArr = CUDAArray<unsigned int>(sumArr, myConst[0].numberCell / 32, 1);
 	free(sumArr);
 	cudaCheckError();
-	createSum << <2, validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
+	createSum << <dim3(validMinutiaeLenght, 2), 2 * validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
 	CUDAArray<Cylinder> cudaCylinders = CUDAArray<Cylinder>();
 	createCylinders << <validMinutiaeLenght * 2, 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);
@@ -304,9 +304,10 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 
 int main()
 {
-	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * 100);
+	int l = 100;
+	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * l);
 	Minutia tmp;
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < l; i++)
 	{
 		tmp.x = i + 1;
 		tmp.y = i + 1;
@@ -315,7 +316,7 @@ int main()
 	}
 	Cylinder* cylinders;
 	int lenght;
-	createTemplate(minutiae, 100, &cylinders, &lenght);
+	createTemplate(minutiae, l, &cylinders, &lenght);
 	printf("%d", lenght);
 	getchar();
 	free(minutiae);
