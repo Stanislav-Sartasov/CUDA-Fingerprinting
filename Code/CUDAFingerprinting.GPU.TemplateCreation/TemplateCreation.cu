@@ -30,6 +30,7 @@ __device__  Point* getPoint(Minutia *minutiae)
 
 __device__ Minutia** getNeighborhood(CUDAArray<Minutia> *minutiaArr, int *lenghtNeighborhood)
 {
+	int tmp = *lenghtNeighborhood;
 	Minutia* neighborhood[150];
 	for (size_t i = 0; i < (*minutiaArr).Height*(*minutiaArr).Width; i++)
 	{
@@ -37,10 +38,12 @@ __device__ Minutia** getNeighborhood(CUDAArray<Minutia> *minutiaArr, int *lenght
 			*getPoint(&(*minutiaArr).At(0, defaultMinutia())))) < 3 * constsGPU[0].sigmaLocation &&
 			(!equalsMinutae((*minutiaArr).AtPtr(0, i), (*minutiaArr).AtPtr(0, defaultMinutia()))))
 		{
-			neighborhood[*lenghtNeighborhood] = &((*minutiaArr).At(0, i));
-			*lenghtNeighborhood++;
+			
+			neighborhood[tmp] = ((*minutiaArr).AtPtr(0, i));
+			tmp++;
 		}
 	}
+	*lenghtNeighborhood = tmp;
 	return neighborhood;
 }
 
@@ -271,13 +274,9 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	cudaCheckError();
 	createSum << <2, validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
-
-	*cylinders = (Cylinder*)malloc(validMinutiaeLenght * 2 * sizeof(Cylinder));
 	CUDAArray<Cylinder> cudaCylinders = CUDAArray<Cylinder>();
 	createCylinders << <validMinutiaeLenght * 2, 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);
 	cudaCheckError();
-
-	free(cylinders);
 	*cylinders = cudaCylinders.GetData();
 	cudaCylinders.Dispose();
 	Cylinder* validCylinders = (Cylinder*)malloc(validMinutiaeLenght*sizeof(Cylinder));

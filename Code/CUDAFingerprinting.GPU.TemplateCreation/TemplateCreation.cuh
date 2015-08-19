@@ -41,7 +41,7 @@ __device__ float gaussianLocation(Minutia *minutia, Point *point);
 __device__ float gaussianDirection(Minutia *middleMinutia, Minutia *minutia, float anglePoint);
 __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondMinutia);
 __device__ bool isValidPoint(Minutia* middleMinutia, Point* hullGPU, int* hullLenghtGPU);
-__device__ float sum(Minutia** neighborhood, Minutia* middleMinutia, int lenghtNeigborhood);
+__device__ float sum(Minutia** neighborhood, Minutia* middleMinutia);
 __device__ char stepFunction(float value);
 void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght);
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, Point* hullGPU, int* hullLenghtGPU);
