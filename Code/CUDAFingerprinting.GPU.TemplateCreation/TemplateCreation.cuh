@@ -9,17 +9,17 @@
 
 struct Consts
 {
-	const char radius = 70;
-	const char baseCuboid = 8;
-	const char heightCuboid = 5;
-	const unsigned int numberCell = baseCuboid * baseCuboid * heightCuboid;
-	const float baseCell = (2.0 * radius) / baseCuboid;
-	const float heightCell = (2 * CUDART_PI) / heightCuboid;
-	const float sigmaLocation = 28.0 / 3;
-	const float sigmaDirection = 2 * CUDART_PI / 9;
-	const float sigmoidParametrPsi = 0.01;
-	const char omega = 50;
-	const char minNumberMinutiae = 2;
+	char radius;
+	char baseCuboid;
+	char heightCuboid;
+	unsigned int numberCell;
+	float baseCell;
+	float heightCell;
+	float sigmaLocation;
+	float sigmaDirection;
+	float sigmoidParametrPsi;
+	char omega;
+	char minNumberMinutiae;
 };
 
 struct Minutia
@@ -29,7 +29,7 @@ struct Minutia
 	int y;
 };
 
-__constant__ struct Consts *constsGPU;
+__constant__ Consts constsGPU[1];
 __device__ Point* hullGPU;
 __device__ int* hullLenghtGPU;
 
@@ -61,9 +61,9 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 	if (e != cudaSuccess) {\
 		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
 		exit(0);\
-								}\
+									}\
 }
 
-#define linearizationIndex() (defaultZ()-1)*(*constsGPU).baseCuboid*(*constsGPU).baseCuboid+(defaultY()-1)*(*constsGPU).baseCuboid+defaultX()-1
+#define linearizationIndex() (defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1
 #define curIndex() 2*(linearizationIndex()/32)+threadIdx.y
 #endif
