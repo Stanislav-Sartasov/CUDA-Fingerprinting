@@ -16,8 +16,9 @@ struct Descriptor
 {
 	Minutia* minutias;
 	Minutia center;
+	int length;
 
-	Descriptor(Minutia* m, Minutia c) : minutias(m), center(c) {}
+	Descriptor(Minutia* m, Minutia c, int l) : minutias(m), center(c), length(l) {}
 };
 
 #endif
