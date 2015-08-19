@@ -88,7 +88,7 @@ __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondM
 
 __device__ bool isValidPoint(Minutia* middleMinutia)
 {
-	return getPointDistance(Point((*middleMinutia).x, (*middleMinutia).y), *getPoint(middleMinutia)) < constsGPU[0].radius &&
+	return /*getPointDistance(Point((*middleMinutia).x, (*middleMinutia).y), *getPoint(middleMinutia)) < constsGPU[0].radius &&*/
 		isPointInsideHull(*getPoint(middleMinutia), hullGPU, *hullLenghtGPU);
 }
 
@@ -161,13 +161,14 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	if (isValidPoint(&minutiae.At(0, defaultMinutia())))
 	{
 		char tempValue =
-			(defaultY() % 2)*(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0' + blockIdx.y) << linearizationIndex() % 32);
+			((threadIdx.z + 1) % 2)*(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0' + threadIdx.z) << linearizationIndex() % 32);
 	}
 	else
 	{
 		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), 0 << linearizationIndex() % 32);
 	}
+
 }
 
 void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght)
@@ -187,14 +188,14 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	myConst[0].minNumberMinutiae = 2;
 
 	cudaMemcpyToSymbol(constsGPU, myConst, sizeof(Consts));
-	cudaCheckError();
+	cudaMyCheckError();
 
 	Point* points = (Point*)malloc(lenght * sizeof(Point));
 	CUDAArray<Minutia> cudaMinutiae = CUDAArray<Minutia>(minutiae, lenght, 1);
 	CUDAArray<Point> cudaPoints = CUDAArray<Point>(points, lenght, 1);
 	free(points);
 	getPoints << <1, lenght >> >(cudaMinutiae, cudaPoints);
-	cudaCheckError();
+	cudaMyCheckError();
 
 	int hullLenght = 0;
 	Point* hull = (Point*)malloc(lenght*sizeof(Point));
@@ -208,21 +209,21 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	extLenght = hullLenght * 2;
 
 	cudaMalloc((void**)&hullGPU, sizeof(Point)*(extLenght));
-	cudaCheckError();
+	cudaMyCheckError();
 
 	cudaMemcpy(hullGPU, extHull, sizeof(Point)*(extLenght), cudaMemcpyHostToDevice);
-	cudaCheckError();
+	cudaMyCheckError();
 	free(extHull);
 
 	cudaMalloc((void**)&hullLenghtGPU, sizeof(int));
-	cudaCheckError();
+	cudaMyCheckError();
 
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
 	CUDAArray<bool> cudaIsValidMinutiae = CUDAArray<bool>(isValidMinutiae, lenght, 1);
 
 
 	getValidMinutiae << <1, lenght >> >(cudaMinutiae, cudaIsValidMinutiae);
-	cudaCheckError();
+	cudaMyCheckError();
 
 	cudaMinutiae.Dispose();
 	cudaIsValidMinutiae.GetData(isValidMinutiae);
@@ -255,20 +256,20 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	free(valuesAndMasks);
 	Minutia **neighborhood;
 	cudaMalloc((void**)&neighborhood, sizeof(Minutia*)*(cudaMinutiae.Height));
-	createValuesAndMasks << < dim3(validMinutiaeLenght, 2), myConst[0].numberCell / 32 >> >(cudaMinutiae, cudaValuesAndMasks);
-	cudaCheckError();
+	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks);
+	cudaMyCheckError();
 
 	cudaFree(neighborhood);
 	unsigned int* sumArr = (unsigned int*)malloc(2 * myConst[0].numberCell / 32 * sizeof(unsigned int));
 	CUDAArray<unsigned int> cudaSumArr = CUDAArray<unsigned int>(sumArr, myConst[0].numberCell / 32, 1);
 	free(sumArr);
 	createSum << <2, validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
-	cudaCheckError();
+	cudaMyCheckError();
 
 	*cylinders = (Cylinder*)malloc(validMinutiaeLenght * 2 * sizeof(Cylinder));
 	CUDAArray<Cylinder> cudaCylinders = CUDAArray<Cylinder>();
 	createCylinders << <validMinutiaeLenght * 2, 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);
-	cudaCheckError();
+	cudaMyCheckError();
 
 	free(cylinders);
 	*cylinders = cudaCylinders.GetData();

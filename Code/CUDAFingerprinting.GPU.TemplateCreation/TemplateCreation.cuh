@@ -53,15 +53,16 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 
 #define defaultX() threadIdx.x+1
 #define defaultY() threadIdx.y+1
-#define defaultZ() (blockIdx.y+1)*(threadIdx.z+1)
+#define defaultZ() (blockIdx.y+1)
 #define defaultMinutia() blockIdx.x
 
-#define cudaCheckError() {\
+#define cudaMyCheckError() {\
 	cudaError_t e = cudaGetLastError(); \
 	if (e != cudaSuccess) {\
 		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
+		getchar();\
 		exit(0);\
-									}\
+										}\
 }
 
 #define linearizationIndex() (defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1
