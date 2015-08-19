@@ -31,7 +31,6 @@ struct Minutia
 
 __constant__ Consts constsGPU[1];
 
-
 __device__ float getPointDistance(Point A, Point B);
 __device__  Point* getPoint(Minutia *minutiae);
 __device__ Minutia** getNeighborhood(CUDAArray<Minutia> *minutiaArr, int *lenghtNeighborhood);
@@ -52,7 +51,7 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 
 #define defaultX() threadIdx.x+1
 #define defaultY() threadIdx.y+1
-#define defaultZ() (blockIdx.y+1)*(threadIdx.z+1)
+#define defaultZ() (blockIdx.y+1)
 #define defaultMinutia() blockIdx.x
 
 #define cudaCheckError() {\
@@ -64,5 +63,5 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 }
 
 #define linearizationIndex() (defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1
-#define curIndex() 2*(linearizationIndex()/32)+threadIdx.y
+#define curIndex() 2*(linearizationIndex()/32)+threadIdx.z
 #endif
