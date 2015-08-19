@@ -84,7 +84,7 @@
     <None Include="Resources\27_8.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Debug\CUDAFingerprinting.GPU.OrientationField.dll">
+    <Content Include="..\Release\CUDAFingerprinting.GPU.OrientationField.dll">
       <Link>CUDAFingerprinting.GPU.OrientationField.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

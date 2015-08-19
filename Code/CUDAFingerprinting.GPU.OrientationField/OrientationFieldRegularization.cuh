@@ -3,9 +3,9 @@
 
 extern "C"
 {
-	__declspec(dllexport) void OrientationRegularizationPixels(float* res, float* floatArray, int height, int width);
+	__declspec(dllexport) void OrientationRegularizationPixels(float* res, float* floatArray, int height, int width, int sizeFil);
 }
-float* OrientationRegularizationPixels(float* floatArray, int height, int width);
-void OrientationRegularizationPixels(float* res, float* floatArray, int height, int width);
+float* OrientationRegularizationPixels(float* floatArray, int height, int width, int sizeFil);
+void OrientationRegularizationPixels(float* res, float* floatArray, int height, int width, int sizeFil);
 
 #endif

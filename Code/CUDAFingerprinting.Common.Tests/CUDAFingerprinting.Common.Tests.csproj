@@ -62,7 +62,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SmoothOrientationFieldTest .cs" />
+    <Compile Include="OrientationFieldRegularizationTest.cs" />
     <Compile Include="VisualizationTest.cs" />
   </ItemGroup>
   <ItemGroup>

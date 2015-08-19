@@ -62,9 +62,9 @@
 			return this._orientation[x, y];
 		}
 
-        public void NewOrientation(double[,] O)
-        {
-            _orientation = O;
-        }
+    public void NewOrientation(double [,] O)
+    {
+      _orientation = O;
+    }
 	}
 }

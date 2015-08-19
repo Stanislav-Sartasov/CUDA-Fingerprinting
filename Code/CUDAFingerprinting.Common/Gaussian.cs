@@ -75,10 +75,10 @@ namespace CUDAFingerprinting.Common
             {
                 for (int j = 0; j < size; j++)
                 {
-                    Console.Write("{0:##.######} ", Matrix[i, j]);
+                    Console.Write("| {0:##.####} ", Matrix[i, j]);
                 }
 
-                Console.WriteLine("");
+                Console.WriteLine("|");
             }
         }
     }
