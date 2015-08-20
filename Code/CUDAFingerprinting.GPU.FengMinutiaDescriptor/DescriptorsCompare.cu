@@ -1,6 +1,6 @@
 #include "cuda_runtime.h"
 #include "MinutiaHelper.cuh"
-/*
+
 //#include "device_launch_parameters.h"
 
 __device__ void transformate(Minutia* src, Minutia center, Minutia* dst, int j)
@@ -14,11 +14,11 @@ __device__ void transformate(Minutia* src, Minutia center, Minutia* dst, int j)
 	int x = (int)round(dx * cosAngle + dy * sinAngle) + center.x;
 	int y = (int)round(-dx * sinAngle + dy * cosAngle) + center.y;
 
-	Minutia temp(normalizeAngle(src[j].angle + angle), x, y);
-
-	dst[j] = temp;
+	dst[j].angle = normalizeAngle(src[j].angle + angle);
+	dst[j].x = x;
+	dst[j].y = y;
 }
-
+/*
 __device__ void matchingPoints(Descriptor desc1, Descriptor desc2, int* m, int* M, int i, int j, int width, int height)
 {
 	float eps = 0.1;
