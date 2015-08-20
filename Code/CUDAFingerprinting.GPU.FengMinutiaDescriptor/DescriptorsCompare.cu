@@ -1,7 +1,5 @@
 #include "cuda_runtime.h"
 #include "MinutiaHelper.cuh"
-#include "math.h"
-#include "Constants.cuh"
 
 //#include "device_launch_parameters.h"
 
@@ -16,7 +14,7 @@ __device__ void transformate(Minutia* src, Minutia center, Minutia* dst, int j)
 	int x = (int)round(dx * cosAngle + dy * sinAngle) + center.x;
 	int y = (int)round(-dx * sinAngle + dy * cosAngle) + center.y;
 
-	Minutia temp(src[j].angle + angle, x, y);
+	Minutia temp(normalizeAngle(src[j].angle + angle), x, y);
 
 	dst[j] = temp;
 }
@@ -46,15 +44,16 @@ __device__ void matchingPoints(Descriptor desc1, Descriptor desc2, int* m, int* 
 }
 
 __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Descriptor** temp0, Descriptor** temp1, 
-	float** s, int height, int width) //block 16*16*2
+	float*** s, int height, int width) //block 16*16*2
 { 
 	__shared__ int cache_m[DESC_BLOCK_SIZE][DESC_BLOCK_SIZE][2];
 	__shared__ int cache_M[DESC_BLOCK_SIZE][DESC_BLOCK_SIZE][2];
 	
 	int row = defaultRow();
 	int column = defaultColumn();
-	int x = blockIdx.y / DESC_PER_BLOCK;
-	int y = blockIdx.x / DESC_PER_BLOCK;
+	int x = defaultDescriptorRow();
+	int y = defaultDescriptorColumn();
+	int k = defaultFinger();
 	
 	int cacheIdxX = threadIdx.y;
 	int cacheIdxY = threadIdx.x;
@@ -64,22 +63,22 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Desc
 
 	if ((cacheIdxX == 0) && (cacheIdxZ == 0))
 	{
-		transformate(input[x].minutias, current[x][y].center, temp0[x][y].minutias, column);
+		transformate(input[x].minutias, current[k][y].center, temp0[k][y].minutias, column);
 	}
 	else if ((cacheIdxX == 0) && (cacheIdxZ == 1))
 	{
-		transformate(current[x][y].minutias, input[x].center, temp1[x][y].minutias, column);
+		transformate(current[k][y].minutias, input[x].center, temp1[k][y].minutias, column);
 	}
 	__syncthreads();
 		
 	if (cacheIdxZ == 0)
 	{
-		matchingPoints(temp0[x][y], current[x][y], &cache_m[cacheIdxX][cacheIdxY][0],
+		matchingPoints(temp0[k][y], current[k][y], &cache_m[cacheIdxX][cacheIdxY][0],
 			&cache_M[cacheIdxX][cacheIdxY][0], row, column, width, height);
 	}
 	else
 	{
-		matchingPoints(temp1[x][y], input[x], &cache_m[cacheIdxX][cacheIdxY][1],
+		matchingPoints(temp1[k][y], input[x], &cache_m[cacheIdxX][cacheIdxY][1],
 			&cache_M[cacheIdxX][cacheIdxY][1], row, column, width, height);
 	}
 
@@ -108,11 +107,11 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Desc
 		{
 			if (cacheIdxY < i)
 			{
-				cache_m[cacheIdxX][cacheIdxY][cacheIdxZ] += cache_m[cacheIdxX + i][cacheIdxY][cacheIdxZ];
+				cache_m[cacheIdxX][cacheIdxY][cacheIdxZ] += cache_m[cacheIdxX][cacheIdxY + i][cacheIdxZ];
 			}
 			else
 			{
-				cache_M[cacheIdxX - i][cacheIdxY][cacheIdxZ] += cache_m[cacheIdxX][cacheIdxY][cacheIdxZ];
+				cache_M[cacheIdxX][cacheIdxY][cacheIdxZ] += cache_m[cacheIdxX][cacheIdxY - i][cacheIdxZ];
 			}
 		}
 
@@ -120,7 +119,10 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Desc
 		i /= 2;
 	}
 
-	s[row][column] = (cache_m[0][0][0] + 1.0f)*(cache_m[0][0][1] + 1.0f) / (cache_M[0][0][0] + 1.0f) / (cache_M[0][0][1] + 1.0f);
+	if ((cacheIdxX == 0) && (cacheIdxY == 0) && (cacheIdxZ == 0))
+	{
+		s[k][blockIdx.y][blockIdx.x] = (cache_m[0][0][0] + 1.0f)*(cache_m[0][0][1] + 1.0f) / (cache_M[0][0][0] + 1.0f) / (cache_M[0][0][1] + 1.0f);
+	}
 }
 
 #ifdef DEBUG
