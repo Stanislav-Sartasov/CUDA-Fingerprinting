@@ -21,7 +21,7 @@ __global__ void makeNormalSize(float*** s, float*** sn) ///block 8*8
 		i /= 2;
 	}
 
-	int i = DESC_PER_BLOCK / 2;
+	i = DESC_PER_BLOCK / 2;
 	while (i != 0)
 	{
 		if (threadIdx.y == 0)
@@ -38,7 +38,7 @@ __global__ void makeNormalSize(float*** s, float*** sn) ///block 8*8
 
 	if ((threadIdx.y == 0) && (threadIdx.x == 0))
 	{
-		s[blockIdx.y][blockIdx.x] = sum[0][0];
+		sn[k][blockIdx.y][blockIdx.x] = sum[0][0];
 	}
 }
 

@@ -100,7 +100,7 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Desc
 		i /= 2;
 	}
 
-	int i = DESC_BLOCK_SIZE / 2;
+	i = DESC_BLOCK_SIZE / 2;
 	while (i != 0)
 	{
 		if (cacheIdxX == 0)

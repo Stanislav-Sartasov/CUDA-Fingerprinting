@@ -15,6 +15,7 @@
 #define DESC_PER_BLOCK		8
 #define DESC_BLOCK_SIZE		16
 #define MAX_DESC_SIZE		128
+#define FILENAME_LENGTH		5
 
 #define defaultDescriptorRow() blockIdx.y / DESC_PER_BLOCK;
 #define defaultDescriptorColumn() blockIdx.x / DESC_PER_BLOCK;
