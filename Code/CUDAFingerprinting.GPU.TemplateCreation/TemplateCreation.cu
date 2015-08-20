@@ -1,13 +1,13 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "constsmacros.h"
+#include "TemplateCreation.cuh"
 #include "BinTemplateCorrelation.cu"
 #include "ConvexHull.cu"
 #include "CUDAArray.cuh"
 #include "math_constants.h"
 #include "VectorHelper.cu"
 #include "math.h"
-#include "TemplateCreation.cuh"
 #include "device_functions_decls.h"
 #include "ConvexHullModified.cu"
 #include <stdio.h>
@@ -29,7 +29,7 @@ __device__  Point* getPoint(Minutia *minutiae)
 __device__ Minutia** getNeighborhood(CUDAArray<Minutia> *minutiaArr, int *lenghtNeighborhood)
 {
 	int tmp = 0;
-	Minutia* neighborhood[70];
+	Minutia* neighborhood[100];
 	for (size_t i = 0; i < (*minutiaArr).Height*(*minutiaArr).Width; i++)
 	{
 		if ((pointDistance(Point((float)(*minutiaArr).At(0, i).x, (float)((*minutiaArr).At(0, i).y)),
@@ -145,10 +145,10 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 }
 
 __global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum,
-	CUDAArray<unsigned int> valuesAndMasks, CUDAArray<Cylinder> cylinders)
+	CUDAArray<unsigned int> valuesAndMasks, CUDAArray<CylinderMulti> cylinders)
 {
 	//cudaMemcpy(cylinders.AtPtr(0, blockIdx.x), valuesAndMasks.cudaPtr + blockIdx.x * sizeof(unsigned int)*constsGPU[0].numberCell / 32, sizeof(unsigned int)*constsGPU[0].numberCell / 32, cudaMemcpyDeviceToDevice);
-	cylinders.SetAt(0, blockIdx.x, Cylinder(valuesAndMasks.cudaPtr + blockIdx.x * sizeof(unsigned int)*constsGPU[0].numberCell / 32,
+	cylinders.SetAt(0, blockIdx.x, CylinderMulti(valuesAndMasks.AtPtr(blockIdx.x*48, 0),
 		minutiae.At(0, blockIdx.x).angle, sqrt( (float) (sum.At(0, blockIdx.x)))));
 }
 
@@ -164,15 +164,15 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	{
 		char tempValue =
 			(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0')* ((threadIdx.z+1)%2) << linearizationIndex() % 32);
+		atomicOr(valuesAndMasks.AtPtr(0, curIndex()), (tempValue - '0')* ((threadIdx.z+1)%2) << linearizationIndex() % 32);
 	}
 	else
 	{
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), 0 << linearizationIndex() % 32);
+		atomicOr(valuesAndMasks.AtPtr(0, curIndex()), 0 << linearizationIndex() % 32);
 	}
 }
 
-void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght)
+void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, int* cylindersLenght)
 {
 	cudaSetDevice(0);
 	Consts *myConst = (Consts*)malloc(sizeof(Consts));
@@ -271,12 +271,12 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	cudaCheckError();
 	createSum << <dim3(validMinutiaeLenght, 2),validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
-	CUDAArray<Cylinder> cudaCylinders = CUDAArray<Cylinder>();
+	CUDAArray<CylinderMulti> cudaCylinders = CUDAArray<CylinderMulti>();
 	createCylinders << <validMinutiaeLenght * 2, 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);
 	cudaCheckError();
 	*cylinders = cudaCylinders.GetData();
 	cudaCylinders.Dispose();
-	Cylinder* validCylinders = (Cylinder*)malloc(validMinutiaeLenght*sizeof(Cylinder));
+	CylinderMulti* validCylinders = (CylinderMulti*)malloc(validMinutiaeLenght*sizeof(CylinderMulti));
 	float maxNorm = 0;
 	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
 	{
@@ -291,7 +291,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 			validCylinders[validCylindersLenght++] = *cylinders[i];
 		}
 	}
-	validCylinders = (Cylinder*)realloc(validCylinders, validCylindersLenght*sizeof(Cylinder));
+	validCylinders = (CylinderMulti*)realloc(validCylinders, validCylindersLenght*sizeof(CylinderMulti));
 	free(cylinders);
 	*cylinders = validCylinders;
 	*cylindersLenght = validCylindersLenght;
@@ -301,7 +301,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 
 int main()
 {
-	int l = 3;
+	int l = 100;
 	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * l);
 	Minutia tmp;
 	for (int i = 0; i < l; i++)
@@ -311,7 +311,7 @@ int main()
 		tmp.angle = i*0.3;
 		minutiae[i] = tmp;
 	}
-	Cylinder* cylinders;
+	CylinderMulti* cylinders;
 	int lenght;
 	createTemplate(minutiae, l, &cylinders, &lenght);
 	printf("%d", lenght);

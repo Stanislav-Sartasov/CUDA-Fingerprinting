@@ -5,7 +5,6 @@
 #include "math_constants.h"
 #include "VectorHelper.cuh"
 #include "CUDAArray.cuh"
-#include "CylinderHelper.cuh"
 
 struct Consts
 {
@@ -29,24 +28,24 @@ struct Minutia
 	int y;
 };
 
-struct Cylinder
+struct CylinderMulti
 {
 public:
 	unsigned int values[48];
 	float angle;
 	float norm;
 
-	Cylinder()
+	CylinderMulti()
 	{
 
 	}
 
-	__device__ __host__ Cylinder(unsigned int *givenValues, float givenAngle, float givenNorm) :
+	__device__ __host__ CylinderMulti(unsigned int *givenValues, float givenAngle, float givenNorm) :
 		angle(givenAngle), norm(givenNorm)
 	{
 		for (int i = 0; i < 48; i++)
 		{
-			values[i] = givenValues[i];
+			values[i] = *(givenValues + i*4);
 		}
 	}
 };
@@ -64,11 +63,11 @@ __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondM
 __device__ bool isValidPoint(Minutia* middleMinutia, Point* hullGPU, int* hullLenghtGPU);
 __device__ float sum(Minutia** neighborhood, Minutia* middleMinutia);
 __device__ char stepFunction(float value);
-void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght);
+void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, int* cylindersLenght);
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, Point* hullGPU, int* hullLenghtGPU);
 __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae);
 __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points);
-__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CUDAArray<Cylinder> cylinders);
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CUDAArray<CylinderMulti> cylinders);
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum);
 
 #define defaultX() threadIdx.x+1
@@ -83,7 +82,7 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 		exit(0);\
 										}\
 }
-#define linearizationLenght() constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].heightCuboid/32
+#define linearizationLenght() constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].heightCuboid/32
 #define linearizationIndex() (defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1
 #define curIndex() linearizationIndex()/32+threadIdx.z*linearizationLenght()
 #endif
