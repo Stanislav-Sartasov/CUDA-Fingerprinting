@@ -18,7 +18,7 @@ __device__ float normalizeAngle(float angle)
 	return angle;
 }
 
-__global__ void fingerRead(char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
+void fingerRead(char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
 {
 	FILE *finger;
 	char filePath[FILEPATH_LENGTH];
