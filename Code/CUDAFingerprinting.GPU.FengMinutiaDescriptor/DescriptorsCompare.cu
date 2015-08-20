@@ -1,6 +1,6 @@
 #include "cuda_runtime.h"
 #include "MinutiaHelper.cuh"
-
+/*
 //#include "device_launch_parameters.h"
 
 __device__ void transformate(Minutia* src, Minutia center, Minutia* dst, int j)
@@ -131,4 +131,4 @@ int main()
 
 	return 0;
 }
-#endif
+#endif*/
