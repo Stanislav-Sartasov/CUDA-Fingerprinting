@@ -2,7 +2,6 @@
 #include "device_launch_parameters.h"
 #include "constsmacros.h"
 #include "BinTemplateCorrelation.cu"
-#include "CylinderHelper.cuh"
 #include "ConvexHull.cu"
 #include "CUDAArray.cuh"
 #include "math_constants.h"
@@ -11,7 +10,6 @@
 #include "TemplateCreation.cuh"
 #include "device_functions_decls.h"
 #include "ConvexHullModified.cu"
-#include "CylinderHelper.cuh"
 #include <stdio.h>
 
 __device__  Point* getPoint(Minutia *minutiae)
@@ -149,8 +147,9 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 __global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum,
 	CUDAArray<unsigned int> valuesAndMasks, CUDAArray<Cylinder> cylinders)
 {
-	cylinders.SetAt(0, blockIdx.x, Cylinder(valuesAndMasks.AtPtr(blockIdx.x, 0), valuesAndMasks.Width,
-		minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(0, blockIdx.x))), 0));
+	//cudaMemcpy(cylinders.AtPtr(0, blockIdx.x), valuesAndMasks.cudaPtr + blockIdx.x * sizeof(unsigned int)*constsGPU[0].numberCell / 32, sizeof(unsigned int)*constsGPU[0].numberCell / 32, cudaMemcpyDeviceToDevice);
+	cylinders.SetAt(0, blockIdx.x, Cylinder(valuesAndMasks.cudaPtr + blockIdx.x * sizeof(unsigned int)*constsGPU[0].numberCell / 32,
+		minutiae.At(0, blockIdx.x).angle, sqrt( (float) (sum.At(0, blockIdx.x)))));
 }
 
 
