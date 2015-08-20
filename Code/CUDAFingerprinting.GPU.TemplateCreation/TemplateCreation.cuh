@@ -40,7 +40,7 @@ public:
 
 	}
 
-	__device__ __host__ CylinderMulti(unsigned int *givenValues, float givenAngle, float givenNorm) :
+	__device__ CylinderMulti(unsigned int *givenValues, float givenAngle, float givenNorm) :
 		angle(givenAngle), norm(givenNorm)
 	{
 		for (int i = 0; i < 48; i++)
@@ -70,10 +70,10 @@ __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points);
 __global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CUDAArray<CylinderMulti> cylinders);
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum);
 
-#define defaultX() threadIdx.x+1
-#define defaultY() threadIdx.y+1
+#define defaultX() (threadIdx.x+1)
+#define defaultY() (threadIdx.y+1)
 #define defaultZ() (blockIdx.y+1)
-#define defaultMinutia() blockIdx.x
+#define defaultMinutia() (blockIdx.x)
 
 #define cudaCheckError() {\
 	cudaError_t e = cudaGetLastError(); \
@@ -82,7 +82,7 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 		exit(0);\
 										}\
 }
-#define linearizationLenght() constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].heightCuboid/32
-#define linearizationIndex() (defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1
-#define curIndex() linearizationIndex()/32+threadIdx.z*linearizationLenght()
+#define linearizationLenght() (constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].heightCuboid/32)
+#define linearizationIndex() ((defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1)
+#define curIndex() ((linearizationIndex()+threadIdx.z*linearizationLenght())/32)
 #endif
