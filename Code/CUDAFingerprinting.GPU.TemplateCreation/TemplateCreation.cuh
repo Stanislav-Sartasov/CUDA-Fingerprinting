@@ -29,6 +29,28 @@ struct Minutia
 	int y;
 };
 
+struct Cylinder
+{
+public:
+	unsigned int values[48];
+	float angle;
+	float norm;
+
+	Cylinder()
+	{
+
+	}
+
+	__device__ __host__ Cylinder(unsigned int *givenValues, float givenAngle, float givenNorm) :
+		angle(givenAngle), norm(givenNorm)
+	{
+		for (int i = 0; i < 48; i++)
+		{
+			values[i] = givenValues[i];
+		}
+	}
+};
+
 __constant__ Consts constsGPU[1];
 
 __device__ float getPointDistance(Point A, Point B);
