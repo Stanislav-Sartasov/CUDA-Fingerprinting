@@ -13,10 +13,12 @@ __device__ float sqrLength(Minutia m1, Minutia m2)
 
 __device__ float normalizeAngle(float angle)
 {
-	float res = angle - (float)(floor(angle / (2 * M_PI)) * 2 * M_PI);
+	angle -= (float)(floor(angle / (2 * M_PI)) * 2 * M_PI);
+
+	return angle;
 }
 
-__global__ void fingerRead (char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
+__global__ void fingerRead(char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
 {
 	FILE *finger;
 	int pathLength = 100;

@@ -27,5 +27,5 @@ __global__ void buildDescriptors(Minutia **mins, int *minutiaNum, Descriptor **d
 		dev_j = atomicAdd(&k, 1);
 		desc[num][i].center = mins[num][i];
 		desc[num][i].minutias[dev_j] = mins[num][j];
-	}
-}*/
+	}*/
+}
