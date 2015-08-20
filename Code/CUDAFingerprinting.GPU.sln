@@ -82,6 +82,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Feng
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests", "CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests\CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests.csproj", "{6D720616-366E-456A-A03E-5FB4BBAB70C7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qwerty", "qwerty\qwerty.vcxproj", "{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -444,6 +446,20 @@ Global
 		{6D720616-366E-456A-A03E-5FB4BBAB70C7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{6D720616-366E-456A-A03E-5FB4BBAB70C7}.Release|Win32.ActiveCfg = Release|Any CPU
 		{6D720616-366E-456A-A03E-5FB4BBAB70C7}.Release|x64.ActiveCfg = Release|Any CPU
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|Win32.Build.0 = Debug|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|x64.ActiveCfg = Debug|x64
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Debug|x64.Build.0 = Debug|x64
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|Any CPU.ActiveCfg = Release|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|Win32.ActiveCfg = Release|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|Win32.Build.0 = Release|Win32
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|x64.ActiveCfg = Release|x64
+		{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
