@@ -82,7 +82,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Feng
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests", "CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests\CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests.csproj", "{6D720616-366E-456A-A03E-5FB4BBAB70C7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qwerty", "qwerty\qwerty.vcxproj", "{27100D69-BC0C-493B-B398-3B76DDAE3D82}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qwerty", "qwerty\qwerty.vcxproj", "{F4062C8E-D9E5-462D-919E-B050E0FB2C7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
