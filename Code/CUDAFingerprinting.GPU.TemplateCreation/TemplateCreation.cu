@@ -138,15 +138,13 @@ __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> is
 			validMinutiaeLenght + 1 : validMinutiaeLenght;
 	}
 	isValidMinutiae.SetAt(0, threadIdx.x, validMinutiaeLenght >= constsGPU[0].minNumberMinutiae ? true : false);
-
 }
 
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum)
 {
-	unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x * 2 + blockIdx.y));
+	unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x+ blockIdx.y*linearizationIndex()));
 	atomicAdd(sum.AtPtr(0, defaultMinutia() + blockIdx.y), x);
 }
-
 
 __global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum,
 	CUDAArray<unsigned int> valuesAndMasks, CUDAArray<Cylinder> cylinders)
@@ -166,8 +164,8 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	if (isValidPoint(&minutiae.At(0, defaultMinutia()), hullGPU, hullLenghtGPU))
 	{
 		char tempValue =
-			((threadIdx.z + 1) % 2)*(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0' + threadIdx.z) << linearizationIndex() % 32);
+			(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0')* ((threadIdx.z+1)%2) << linearizationIndex() % 32);
 	}
 	else
 	{
@@ -272,7 +270,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	CUDAArray<unsigned int> cudaSumArr = CUDAArray<unsigned int>(sumArr, myConst[0].numberCell / 32, 1);
 	free(sumArr);
 	cudaCheckError();
-	createSum << <dim3(validMinutiaeLenght, 2), 2 * validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
+	createSum << <dim3(validMinutiaeLenght, 2),validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
 	CUDAArray<Cylinder> cudaCylinders = CUDAArray<Cylinder>();
 	createCylinders << <validMinutiaeLenght * 2, 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);

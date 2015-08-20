@@ -59,9 +59,9 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsi
 	if (e != cudaSuccess) {\
 		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
 		exit(0);\
-									}\
+										}\
 }
-
+#define linearizationLenght() constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].heightCuboid/32
 #define linearizationIndex() (defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1
-#define curIndex() 2*(linearizationIndex()/32)+threadIdx.z
+#define curIndex() linearizationIndex()/32+threadIdx.z*linearizationLenght()
 #endif
