@@ -28,15 +28,14 @@ __device__  Point* getPoint(Minutia *minutiae)
 
 __device__ Minutia** getNeighborhood(CUDAArray<Minutia> *minutiaArr, int *lenghtNeighborhood)
 {
-	int tmp = *lenghtNeighborhood;
-	Minutia* neighborhood[150];
+	int tmp = 0;
+	Minutia* neighborhood[70];
 	for (size_t i = 0; i < (*minutiaArr).Height*(*minutiaArr).Width; i++)
 	{
 		if ((pointDistance(Point((float)(*minutiaArr).At(0, i).x, (float)((*minutiaArr).At(0, i).y)),
 			*getPoint(&(*minutiaArr).At(0, defaultMinutia())))) < 3 * constsGPU[0].sigmaLocation &&
 			(!equalsMinutae((*minutiaArr).AtPtr(0, i), (*minutiaArr).AtPtr(0, defaultMinutia()))))
 		{
-			
 			neighborhood[tmp] = ((*minutiaArr).AtPtr(0, i));
 			tmp++;
 		}
@@ -71,10 +70,10 @@ __device__ float gaussianLocation(Minutia *minutia, Point *point)
 __device__ float gaussianDirection(Minutia *middleMinutia, Minutia *minutia, float anglePoint)
 {
 	float common = sqrt(2.0) * constsGPU[0].sigmaDirection;
-	double angle = getAngleDiff(anglePoint,
+	float angle = getAngleDiff(anglePoint,
 		getAngleDiff((*middleMinutia).angle, (*minutia).angle));
-	double first = erf(((angle + constsGPU[0].heightCell / 2)) / common);
-	double second = erf(((angle - constsGPU[0].heightCell / 2)) / common);
+	float first = erf(((angle + constsGPU[0].heightCell / 2)) / common);
+	float second = erf(((angle - constsGPU[0].heightCell / 2)) / common);
 	return (first - second) / 2;
 }
 
@@ -95,7 +94,7 @@ __device__ bool isValidPoint(Minutia* middleMinutia, Point* hullGPU, int* hullLe
 
 __device__ float sum(Minutia** neighborhood, Minutia* middleMinutia, int lenghtNeigborhood)
 {
-	double sum = 0;
+	float sum = 0;
 	for (size_t i = 0; i < lenghtNeigborhood; i++)
 	{
 		sum += gaussianLocation(&(*neighborhood[i]), getPoint(middleMinutia)) * gaussianDirection(middleMinutia, neighborhood[i], angleHeight());
@@ -129,12 +128,15 @@ __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> is
 		{
 			continue;
 		}
-		validMinutiaeLenght = sqrt((float)
-			((minutiae.At(0, threadIdx.x).x - minutiae.At(0, i).x)*(minutiae.At(0, threadIdx.x).x - minutiae.At(0, i).x) +
-			minutiae.At(0, threadIdx.x).y - minutiae.At(0, i).y)*(minutiae.At(0, threadIdx.x).y - minutiae.At(0, i).y))
-			< constsGPU[0].radius + 3 * constsGPU[0].sigmaLocation ? validMinutiaeLenght + 1 : validMinutiaeLenght;
+		validMinutiaeLenght =
+			sqrt((float)((minutiae.At(0, threadIdx.x).x - minutiae.At(0, i).x)*
+			(minutiae.At(0, threadIdx.x).x - minutiae.At(0, i).x) +
+			(minutiae.At(0, threadIdx.x).y - minutiae.At(0, i).y)*
+			(minutiae.At(0, threadIdx.x).y - minutiae.At(0, i).y))) ?
+			validMinutiaeLenght + 1 : validMinutiaeLenght;
 	}
 	isValidMinutiae.SetAt(0, threadIdx.x, validMinutiaeLenght >= constsGPU[0].minNumberMinutiae ? true : false);
+
 }
 
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum)
@@ -261,7 +263,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 		free(valuesAndMasks[i]);
 	}
 	free(valuesAndMasks);
-	
+
 	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks, hullGPU, hullLenghtGPU);
 	cudaCheckError();
 
@@ -301,7 +303,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 
 int main()
 {
-	int l = 100;
+	int l = 3;
 	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * l);
 	Minutia tmp;
 	for (int i = 0; i < l; i++)
