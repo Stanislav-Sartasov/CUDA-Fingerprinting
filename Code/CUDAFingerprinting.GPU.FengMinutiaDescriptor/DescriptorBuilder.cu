@@ -6,26 +6,28 @@
 #include <Math.h>
 
 
-__global__ void buildDescriptors(Minutia **mins, int *minutiaNum, Descriptor **desc)//desc must be shared!
+__global__ void buildDescriptors(Minutia **mins, int *minutiaNum, Descriptor **desc, int dbSize)//desc must be shared!
 {/*
 	int i, j, dev_j, num;
 	float length;
-	__shared__ int k = 0;
+	__shared__ int k;
+	if (threadIdx.x == 0)
+	{
+		k = 0;
+	}
+	__syncthreads();
 	num = blockIdx.x;
 	i = blockIdx.y;
 	j = threadIdx.x;
 
-	if (blockIdx.x >= MAX_DESC_SIZE*MAX_DESC_SIZE ||
-		i >= minutiaNum[num] || j >= minutiaNum[num])
+	if (blockIdx.x < dbSize && i < minutiaNum[num] && j < minutiaNum[num])
 	{
-		return;
-	}
-
-	length = sqrLength(mins[num][i], mins[num][j]);
-	if (i != j && length <= DESCRIPTOR_RADIUS*DESCRIPTOR_RADIUS)
-	{
-		dev_j = atomicAdd(&k, 1);
-		desc[num][i].center = mins[num][i];
-		desc[num][i].minutias[dev_j] = mins[num][j];
-	}
-}*/
+		length = sqrLength(mins[num][i], mins[num][j]);
+		if (i != j && length <= DESCRIPTOR_RADIUS*DESCRIPTOR_RADIUS)
+		{
+			dev_j = atomicAdd(&k, 1);
+			desc[num][i].center = mins[num][i];
+			desc[num][i].minutias[dev_j] = mins[num][j];
+		}
+	}*/
+}

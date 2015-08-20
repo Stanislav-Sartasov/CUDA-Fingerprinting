@@ -19,29 +19,33 @@ __device__ float normalizeAngle(float angle)
 __global__ void fingerRead (char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
 {
 	FILE *finger;
-	int pathLength = 100;
-	char filePath[1] = "";
-	int num = blockIdx.x;
+	char filePath[FILEPATH_LENGTH];
 	char fileNum[FILENAME_LENGTH];
-	int i;
+	int i, j;
 
-	if (num >= dbSize)
+	for (i = 0; i < dbSize; i++)
 	{
-		return;
+		filePath[0] = '\0';
+		itoa(i, fileNum, 10);
+		strncat(filePath, dbPath, FILEPATH_LENGTH);
+		strncat(filePath, "\\", FILENAME_LENGTH);
+		strncat(filePath, fileNum, FILENAME_LENGTH);
+		strncat(filePath, ".txt", FILENAME_LENGTH);
+
+		finger = fopen(filePath, "r");
+
+		fscanf(finger, "%d", &(minutiaNum[i]));
+		for (j = 0; j < minutiaNum[i]; j++)
+		{
+			fscanf(finger, "%d %d %f", &(mins[i][j].x), &(mins[i][j].y), &(mins[i][j].angle));
+		}
+
+		fclose(finger);
+		/*
+		for (j = 0; j < minutiaNum[i]; j++)
+		{
+			printf("%d %d %f\n", mins[i][j].x, mins[i][j].y, mins[i][j].angle);
+		}
+		printf("__\n");*/
 	}
-
-	/*itoa(num, fileNum, 10);
-	strncat(filePath, dbPath, FILENAME_LENGTH);
-	strncat(filePath, fileNum, FILENAME_LENGTH);
-	strncat(filePath, ".txt", FILENAME_LENGTH);
-
-	finger = fopen(dbPath, "r");
-
-	fscanf(finger, "%d", minutiaNum[num]);
-	for (i = 0; i < *minutiaNum; i++)
-	{
-		fscanf(finger, "%d %d %f", mins[num][i].x, mins[num][i].y, mins[num][i].angle);
-	}
-
-	fclose(finger);
-*/}
+}
