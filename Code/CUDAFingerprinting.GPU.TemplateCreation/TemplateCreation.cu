@@ -140,7 +140,7 @@ __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> is
 
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum)
 {
-	unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x+ blockIdx.y*linearizationIndex()));
+	unsigned int x = __popc(valuesAndMasks.At(0, threadIdx.x+ blockIdx.y*linearizationIndex()));
 	atomicAdd(sum.AtPtr(0, defaultMinutia() + blockIdx.y), x);
 }
 
@@ -254,6 +254,10 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	for (int i = 0; i < validMinutiaeLenght; i++)
 	{
 		valuesAndMasks[i] = (unsigned int*)malloc(2 * myConst[0].numberCell / 32 * sizeof(unsigned int));
+		for (int j = 0; j < 96; j++)
+		{
+			valuesAndMasks[i][j] = 0;
+		}
 	}
 	CUDAArray <unsigned int> cudaValuesAndMasks = CUDAArray<unsigned int>(*valuesAndMasks, 2 * myConst[0].numberCell / 32, validMinutiaeLenght);
 	for (int i = validMinutiaeLenght - 1; i >= 0; i--)
@@ -301,7 +305,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 
 int main()
 {
-	int l = 100;
+	int l = 10;
 	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * l);
 	Minutia tmp;
 	for (int i = 0; i < l; i++)
