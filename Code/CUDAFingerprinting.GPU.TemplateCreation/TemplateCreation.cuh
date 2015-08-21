@@ -82,7 +82,6 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, unsigned int* 
 		exit(0);\
 										}\
 }
-#define linearizationLenght() (constsGPU[0].baseCuboid*constsGPU[0].baseCuboid*constsGPU[0].heightCuboid/32)
 #define linearizationIndex() ((defaultZ()-1)*constsGPU[0].baseCuboid*constsGPU[0].baseCuboid+(defaultY()-1)*constsGPU[0].baseCuboid+defaultX()-1)
-#define curIndex() ((linearizationIndex()+threadIdx.z*linearizationLenght())/32)
+#define curIndex() ((linearizationIndex()+threadIdx.z*constsGPU[0].numberCell)/32)
 #endif
