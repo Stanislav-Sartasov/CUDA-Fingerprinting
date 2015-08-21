@@ -65,20 +65,23 @@ namespace test
 
             Minutia minutia = new Minutia();
             List<Minutia> minutiae = new List<Minutia>();
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 10; i++)
             {
-                minutia.X = i;
-                minutia.Y = (int)(Math.Sin(i));
-                minutia.Angle = (float)(Math.PI / 4);
-                minutiae.Add(minutia);
-                minutia.X = i;
-                minutia.Y = (int)(Math.Sin(i + Math.PI) + 300);
-                minutia.Angle = (float)(Math.PI / 4);
+                minutia.X = i+1;
+                minutia.Y =(int)Math.Sin((i+1));
+                minutia.Angle = (float)(i*0.3);
                 minutiae.Add(minutia);
             }
             TemplateCreator creator = new TemplateCreator(minutiae);
             Template[] t = { creator.CreateTemplate() };
-            int count = 1;
+            foreach (var v in t[0].Cylinders)
+            {
+                Console.WriteLine(v.Norm);
+                Console.WriteLine(v.Angle);
+            }
+            Console.WriteLine(t[0].Cylinders.Length);
+            Console.ReadKey();
+        /*    int count = 1;
             foreach (var template in t)
             {
                 for (int k = 0; k < template.Cylinders.Length; k += 2)
@@ -86,10 +89,10 @@ namespace test
                     PrintCylinder(template.Cylinders[k].Values, template.Cylinders[k + 1].Values, count);
                     count++;
                 }
-            }
+            }*/
 
-            Console.WriteLine("min count fot 1 - {0} ({1})", min, countmin);
-            Console.WriteLine("max count for < 1 - {0} ({1})", max, countmax);
+       /*     Console.WriteLine("min count fot 1 - {0} ({1})", min, countmin);
+            Console.WriteLine("max count for < 1 - {0} ({1})", max, countmax);*/
             // ImageHelper.SaveArrayToBitmap(CreatTemplateTest(a)).Save("d://hglf23.bmp");
 
 
