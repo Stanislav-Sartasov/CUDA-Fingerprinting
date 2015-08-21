@@ -138,16 +138,16 @@ __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> is
 	isValidMinutiae.SetAt(0, threadIdx.x, validMinutiaeLenght >= constsGPU[0].minNumberMinutiae ? true : false);
 }
 
-__global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum)
+__global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, unsigned int* sum)
 {
-	unsigned int x = __popc(valuesAndMasks.At(0, threadIdx.x+ blockIdx.y* constsGPU[0].numberCell));
-	atomicAdd(sum.AtPtr(0, 2 * defaultMinutia() + blockIdx.y), x);
+	unsigned int x = __popc(valuesAndMasks.At(defaultMinutia(), threadIdx.x+ blockIdx.y* constsGPU[0].numberCell/32));
+	atomicAdd(&(sum[2 * defaultMinutia() + blockIdx.y]), x);
 }
 
-__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum,
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, unsigned int* sum,
 	CUDAArray<unsigned int> valuesAndMasks, CylinderMulti* cylinders)
 {
-	CylinderMulti tmpCylinder = CylinderMulti(valuesAndMasks.AtPtr(blockIdx.x, blockIdx.y* constsGPU[0].numberCell / 32), minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum.At(0, blockIdx.x * 2 + blockIdx.y))));
+	CylinderMulti tmpCylinder = CylinderMulti(valuesAndMasks.AtPtr(blockIdx.x, blockIdx.y* constsGPU[0].numberCell / 32), minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum[blockIdx.x * 2 + blockIdx.y])));
 
 	cylinders[blockIdx.x*2 + blockIdx.y] = tmpCylinder;
 }
@@ -270,12 +270,17 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 		sumArr[i] = 0;
 	}
 
-	CUDAArray<unsigned int> cudaSumArr = CUDAArray<unsigned int>(sumArr, 2 * validMinutiaeLenght, 1);
+	unsigned int* cudaSumArr;
+	cudaMalloc((void**)&cudaSumArr, 2 * validMinutiaeLenght * sizeof(unsigned int));
+	cudaCheckError();
+	cudaMemcpy(cudaSumArr, sumArr, 2 * validMinutiaeLenght * sizeof(unsigned int), cudaMemcpyHostToDevice);
+	cudaCheckError();
+
 	free(sumArr);
 	cudaCheckError();
 	createSum << <dim3(validMinutiaeLenght, 2),validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
-
+	cudaFree(cudaSumArr);
 	CylinderMulti* cudaCylinders;
 	cudaMalloc((void**)&cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2);
 	cudaCheckError();
@@ -326,7 +331,7 @@ int main()
 	for (int i = 0; i < l; i++)
 	{
 		tmp.x = i + 1;
-		tmp.y = (int)sin((float)(i + 1));
+		tmp.y = (i + 1);
 		tmp.angle = i*0.3;
 		minutiae[i] = tmp;
 	}
