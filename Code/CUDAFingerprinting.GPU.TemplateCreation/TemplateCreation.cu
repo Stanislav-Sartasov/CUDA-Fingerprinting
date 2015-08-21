@@ -164,7 +164,7 @@ __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsi
 	{
 		char tempValue =
 			(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), (tempValue - '0')* ((threadIdx.z + 1) % 2) << linearizationIndex() % 32);
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), ((unsigned int)(tempValue)* ((threadIdx.z + 1) % 2) + threadIdx.z) << linearizationIndex() % 32);
 	}
 	else
 	{
@@ -276,9 +276,11 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 
 	free(sumArr);
 	cudaCheckError();
-	createSum << <dim3(validMinutiaeLenght, 2),validMinutiaeLenght >> >(cudaValuesAndMasks, cudaSumArr);
+
+	createSum << <dim3(validMinutiaeLenght, 2), myConst[0].numberCell / 32 >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
-	cudaFree(cudaSumArr);
+
+
 	CylinderMulti* cudaCylinders;
 	cudaMalloc((void**)&cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2);
 	cudaCheckError();
@@ -287,14 +289,6 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	CylinderMulti *cylindersTmp = (CylinderMulti*)malloc(sizeof(CylinderMulti) * validMinutiaeLenght * 2);
 	cudaMemcpy(cylindersTmp, cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2, cudaMemcpyDeviceToHost);
 	cudaFree(cudaCylinders);
-	//test
-
-	for (int i = 0; i < validMinutiaeLenght * 2; i++)
-	{
-		printf("angle %f ", cylindersTmp[i].angle);
-		printf("norm %f ", cylindersTmp[i].norm);
-		printf("\n");
-	}
 	CylinderMulti* validCylinders = (CylinderMulti*)malloc(2*validMinutiaeLenght*sizeof(CylinderMulti));
 	float maxNorm = 0;
 	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
@@ -328,7 +322,7 @@ int main()
 	for (int i = 0; i < l; i++)
 	{
 		tmp.x = i + 1;
-		tmp.y = (i + 1);
+		tmp.y = (int)sin((float)(i + 1));
 		tmp.angle = i*0.3;
 		minutiae[i] = tmp;
 	}
