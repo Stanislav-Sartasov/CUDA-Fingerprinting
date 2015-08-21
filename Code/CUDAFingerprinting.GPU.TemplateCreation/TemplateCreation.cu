@@ -258,7 +258,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	free(valuesAndMasks);
 
 	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks, hullGPU, hullLenghtGPU);
-	cudaCheckError();	
+	cudaCheckError();
 	unsigned int* sumArr = (unsigned int*)malloc(2 * validMinutiaeLenght * sizeof(unsigned int));
 
 	for (int i = 0; i < 2 * validMinutiaeLenght; i++)
@@ -287,19 +287,19 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	CylinderMulti *cylindersTmp = (CylinderMulti*)malloc(sizeof(CylinderMulti) * validMinutiaeLenght * 2);
 	cudaMemcpy(cylindersTmp, cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2, cudaMemcpyDeviceToHost);
 	cudaFree(cudaCylinders);
-	CylinderMulti* validCylinders = (CylinderMulti*)malloc(2*validMinutiaeLenght*sizeof(CylinderMulti));
-	float maxNorm = 0;
-	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
-	{
-		maxNorm = cylindersTmp[i].norm > maxNorm ? cylindersTmp[i].norm : maxNorm;
-	}
 	unsigned int* sum = (unsigned int*)malloc(2 * validMinutiaeLenght * sizeof(unsigned int));
 	cudaMemcpy(sum, cudaSumArr, 2 * validMinutiaeLenght * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 	cudaCheckError();
+	CylinderMulti* validCylinders = (CylinderMulti*)malloc(2 * validMinutiaeLenght*sizeof(CylinderMulti));
+	unsigned int	maxSum = 0;
+	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
+	{
+		maxSum = sum[i]> maxSum ? sum[i] : maxSum;
+	}
 	int validCylindersLenght = 0;
 	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
 	{
-		if (sum[i]>= 0.75*sum[i])
+		if (sum[i] >= 0.75*maxSum)
 		{
 			validCylinders[validCylindersLenght] = cylindersTmp[i - 1];
 			validCylindersLenght++;
@@ -318,7 +318,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 
 int main()
 {
-	int l = 10;
+	int l = 100;
 	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * l);
 	Minutia tmp;
 	for (int i = 0; i < l; i++)

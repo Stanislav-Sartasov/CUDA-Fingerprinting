@@ -65,7 +65,7 @@ namespace test
 
             Minutia minutia = new Minutia();
             List<Minutia> minutiae = new List<Minutia>();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 minutia.X = i+1;
                 minutia.Y =(int)Math.Sin((i+1));
@@ -74,11 +74,6 @@ namespace test
             }
             TemplateCreator creator = new TemplateCreator(minutiae);
             Template[] t = { creator.CreateTemplate() };
-            foreach (var v in t[0].Cylinders)
-            {
-                Console.WriteLine(v.Norm);
-                Console.WriteLine(v.Angle);
-            }
             Console.WriteLine(t[0].Cylinders.Length);
             Console.ReadKey();
         /*    int count = 1;
