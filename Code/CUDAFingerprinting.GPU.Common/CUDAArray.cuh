@@ -19,7 +19,7 @@ public:
 
 	}
 
-	CUDAArray(const CUDAArray& arr)
+	__host__ __device__ CUDAArray(const CUDAArray& arr)
 	{
 		cudaPtr = arr.cudaPtr;
 		Height = arr.Height;

@@ -67,7 +67,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, Point* hullGPU, int* hullLenghtGPU);
 __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae);
 __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points);
-__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CUDAArray<CylinderMulti> cylinders);
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> sum, CUDAArray<unsigned int> valuesAndMasks, CylinderMulti* cylinders);
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, CUDAArray<unsigned int> sum);
 
 #define defaultX() (threadIdx.x+1)
