@@ -259,9 +259,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	free(valuesAndMasks);
 
 	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks, hullGPU, hullLenghtGPU);
-	cudaCheckError();
-
-	
+	cudaCheckError();	
 
 	unsigned int* sumArr = (unsigned int*)malloc(2 * validMinutiaeLenght * sizeof(unsigned int));
 
@@ -293,7 +291,6 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 
 	for (int i = 0; i < validMinutiaeLenght * 2; i++)
 	{
-		printf("value %u ", cylindersTmp[i].values[0]);
 		printf("angle %f ", cylindersTmp[i].angle);
 		printf("norm %f ", cylindersTmp[i].norm);
 		printf("\n");
