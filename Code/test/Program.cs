@@ -67,7 +67,7 @@ namespace test
             List<Minutia> minutiae = new List<Minutia>();
             for (int i = 0; i < 100; i++)
             {
-                minutia.X = i+1;
+                minutia.X = i*5+1;
                 minutia.Y =(int)Math.Sin((i+1));
                 minutia.Angle = (float)(i*0.3);
                 minutiae.Add(minutia);

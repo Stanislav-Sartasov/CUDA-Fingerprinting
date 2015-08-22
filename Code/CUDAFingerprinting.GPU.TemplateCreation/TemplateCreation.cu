@@ -86,10 +86,10 @@ __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondM
 		);
 }
 
-__device__ bool isValidPoint(Minutia* middleMinutia, Point* hullGPU, int* hullLenghtGPU)
+__device__ bool isValidPoint(Minutia* middleMinutia)
 {
 	return  getPointDistance(Point((*middleMinutia).x, (*middleMinutia).y), *getPoint(middleMinutia)) < constsGPU[0].radius &&
-		isPointInsideHull(*getPoint(middleMinutia), hullGPU, *hullLenghtGPU);
+		isPointInsideHull(*getPoint(middleMinutia), hullGPU, hullLenghtGPU[0]);
 }
 
 __device__ float sum(Minutia** neighborhood, Minutia* middleMinutia, int lenghtNeigborhood)
@@ -153,18 +153,19 @@ __global__ void createCylinders(CUDAArray<Minutia> minutiae, unsigned int* sum,
 }
 
 
-__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, Point* hullGPU, int* hullLenghtGPU)
+__global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks)
 {
 	int lenghtNeighborhood = 0;
 	if (defaultX() > 16 || defaultY() > 16 || defaultZ() > 6 || defaultMinutia() > minutiae.Width)
 	{
 		return;
 	}
-	if (isValidPoint(&minutiae.At(0, defaultMinutia()), hullGPU, hullLenghtGPU))
+	if (isValidPoint(&minutiae.At(0, defaultMinutia())))
 	{
 		char tempValue =
 			(stepFunction(sum(getNeighborhood(&minutiae, &lenghtNeighborhood), &(minutiae.At(0, defaultMinutia())), lenghtNeighborhood)));
-		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()), ((tempValue)* ((threadIdx.z + 1) % 2)) + threadIdx.z << linearizationIndex() % 32);
+		tempValue = ((tempValue)* ((threadIdx.z + 1) % 2)) + threadIdx.z;
+		atomicOr(valuesAndMasks.AtPtr(defaultMinutia(), curIndex()),tempValue  << linearizationIndex() % 32);
 	}
 	else
 	{
@@ -209,20 +210,10 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	int extLenght;
 	extLenght = hullLenght * 2;
 
-	Point* hullGPU;
-	int* hullLenghtGPU;
-
-	cudaMalloc((void**)&hullGPU, sizeof(Point)*(extLenght));
+	cudaMemcpyToSymbol(hullGPU, extHull, sizeof(Point)*extLenght);
 	cudaCheckError();
 
-	cudaMemcpy(hullGPU, extHull, sizeof(Point)*(extLenght), cudaMemcpyHostToDevice);
-	cudaCheckError();
-	free(extHull);
-
-	cudaMalloc((void**)&hullLenghtGPU, sizeof(int));
-	cudaCheckError();
-
-	cudaMemcpy(hullLenghtGPU, &extLenght, sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpyToSymbol(hullLenghtGPU, &extLenght, sizeof(int));
 	cudaCheckError();
 
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
@@ -257,7 +248,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	CUDAArray <unsigned int> cudaValuesAndMasks = CUDAArray<unsigned int>(valuesAndMasks, 2 * myConst[0].numberCell / 32, validMinutiaeLenght);
 	free(valuesAndMasks);
 
-	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks, hullGPU, hullLenghtGPU);
+	createValuesAndMasks << < dim3(validMinutiaeLenght, myConst[0].heightCuboid), dim3(myConst[0].baseCuboid, myConst[0].baseCuboid, 2) >> >(cudaMinutiae, cudaValuesAndMasks);
 	cudaCheckError();
 	unsigned int* sumArr = (unsigned int*)malloc(2 * validMinutiaeLenght * sizeof(unsigned int));
 
@@ -278,7 +269,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	createSum << <dim3(validMinutiaeLenght, 2), myConst[0].numberCell / 32 >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
 
-
+	cudaValuesAndMasks.Dispose();
 	CylinderMulti* cudaCylinders;
 	cudaMalloc((void**)&cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2);
 	cudaCheckError();
@@ -331,8 +322,7 @@ int main()
 	CylinderMulti* cylinders = NULL;
 	int lenght;
 	createTemplate(minutiae, l, &cylinders, &lenght);
-
+	cudaDeviceReset();
 	printf("%d", lenght);
-	getchar();
 	free(minutiae);
 }

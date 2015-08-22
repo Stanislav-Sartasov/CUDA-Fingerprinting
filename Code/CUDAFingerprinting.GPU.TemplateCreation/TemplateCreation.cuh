@@ -51,6 +51,8 @@ public:
 };
 
 __constant__ Consts constsGPU[1];
+__constant__ Point hullGPU[200];
+__constant__ int hullLenghtGPU[1];
 
 __device__ float getPointDistance(Point A, Point B);
 __device__  Point* getPoint(Minutia *minutiae);
