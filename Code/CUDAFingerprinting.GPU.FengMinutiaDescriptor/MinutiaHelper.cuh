@@ -24,7 +24,9 @@
 
 __device__ float sqrLength(Minutia m1, Minutia m2);
 
-void fingerRead(char *dbPath, int dbSize, Minutia **mins, int *minutiaNum);
+void fingersBaseRead(char *dbPath, int dbSize, int pitch, Minutia *mins, int *minutiaNum);
+
+void fingerRead(char *filePath, Minutia *mins, int *minutiaNum);
 
 __device__ float normalizeAngle(float angle);
 

@@ -18,12 +18,12 @@ __device__ float normalizeAngle(float angle)
 	return angle;
 }
 
-void fingerRead(char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
+void fingersBaseRead(char *dbPath, int dbSize, int pitch, Minutia *mins, int *minutiaNum)
 {
 	FILE *finger;
 	char filePath[FILEPATH_LENGTH];
 	char fileNum[FILENAME_LENGTH];
-	int i, j;
+	int i, j = 0;
 
 	for (i = 0; i < dbSize; i++)
 	{
@@ -39,15 +39,33 @@ void fingerRead(char *dbPath, int dbSize, Minutia **mins, int *minutiaNum)
 		fscanf(finger, "%d", &(minutiaNum[i]));
 		for (j = 0; j < minutiaNum[i]; j++)
 		{
-			fscanf(finger, "%d %d %f", &(mins[i][j].x), &(mins[i][j].y), &(mins[i][j].angle));
+			fscanf(finger, "%d %d %f", &(mins[i*pitch + j].x), &(mins[i*pitch + j].y), &(mins[i*pitch + j].angle));
 		}
-
 		fclose(finger);
 		/*
 		for (j = 0; j < minutiaNum[i]; j++)
 		{
-			printf("%d %d %f\n", mins[i][j].x, mins[i][j].y, mins[i][j].angle);
+			printf("%d %d %f\n", mins[i*pitch + j].x, mins[i*pitch + j].y, mins[i*pitch + j].angle);
 		}
-		printf("__\n");*/
+		printf("__%d\n",i);*/
 	}
+}
+
+void fingerRead(char *filePath, Minutia *mins, int *minutiaNum)
+{
+	FILE *finger;
+	int i;
+	finger = fopen(filePath, "r");
+	fscanf(finger, "%d", minutiaNum);
+	for (i = 0; i < *minutiaNum; i++)
+	{
+		fscanf(finger, "%d %d %f", &(mins[i].x), &(mins[i].y), &(mins[i].angle));
+	}
+	/*
+	for (int j = 0; j < *minutiaNum; j++)
+	{
+		printf("%d %d %f\n", mins[j].x, mins[j].y, mins[j].angle);
+	}
+	*/
+	fclose(finger);
 }
