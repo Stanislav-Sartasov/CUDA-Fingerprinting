@@ -18,7 +18,7 @@ __device__ void transformate(Minutia* src, Minutia center, Minutia* dst, int j)
 	dst[j].x = x;
 	dst[j].y = y;
 }
-/*
+
 __device__ void matchingPoints(Descriptor desc1, Descriptor desc2, int* m, int* M, int i, int j, int width, int height)
 {
 	float eps = 0.1;
@@ -131,4 +131,4 @@ int main()
 
 	return 0;
 }
-#endif*/
+#endif

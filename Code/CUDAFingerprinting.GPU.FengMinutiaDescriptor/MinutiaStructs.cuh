@@ -1,8 +1,6 @@
 #ifndef CUDAFINGERPRINTING_MINUTIASTRUCTS
 #define CUDAFINGERPRINTING_MINUTIASTRUCTS
 
-#include "CUDAArray.cuh"
-
 struct Minutia
 {
 	float angle;
@@ -15,6 +13,13 @@ struct Descriptor
 	Minutia* minutias;
 	Minutia center;
 	int length;
+};
+
+struct Tuple
+{
+	float value;
+	int idx1;
+	int idx2;
 };
 
 #endif
