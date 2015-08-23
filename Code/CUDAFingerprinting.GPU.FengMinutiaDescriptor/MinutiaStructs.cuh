@@ -1,6 +1,7 @@
 #ifndef CUDAFINGERPRINTING_MINUTIASTRUCTS
 #define CUDAFINGERPRINTING_MINUTIASTRUCTS
 
+
 struct Minutia
 {
 	float angle;
@@ -10,7 +11,7 @@ struct Minutia
 
 struct Descriptor
 {
-	Minutia* minutias;
+	Minutia minutias[128];
 	Minutia center;
 	int length;
 };
