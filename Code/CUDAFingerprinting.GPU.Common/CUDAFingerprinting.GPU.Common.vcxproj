@@ -26,6 +26,7 @@
     <ClInclude Include="CUDAArray.cuh" />
     <ClInclude Include="constsmacros.h" />
     <ClInclude Include="ImageLoading.cuh" />
+    <ClInclude Include="Lock.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageLoading.cu" />

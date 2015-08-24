@@ -5,6 +5,7 @@
 #include "math_constants.h"
 #include "VectorHelper.cuh"
 #include "CUDAArray.cuh"
+#include <stdio.h>
 
 struct Consts
 {
@@ -19,6 +20,7 @@ struct Consts
 	float sigmoidParametrPsi;
 	char omega;
 	char minNumberMinutiae;
+	char maxValidMinutiaeLenght;
 };
 
 struct Minutia
@@ -55,7 +57,7 @@ __constant__ Point hullGPU[200];
 __constant__ int hullLenghtGPU[1];
 
 __device__ float getPointDistance(Point A, Point B);
-__device__  Point* getPoint(Minutia *minutiae);
+__device__  Point* getPoint(Minutia *minutiae,int i,int j);
 __device__ Minutia** getNeighborhood(CUDAArray<Minutia> *minutiaArr, int *lenghtNeighborhood);
 __device__  float angleHeight();
 __device__ float gaussian1D(float x);
