@@ -120,8 +120,10 @@ __device__ bool isMatchable(Minutia m1, Minutia m2, Minutia kernel1, Minutia ker
 	dist2 = length(m2, kernel2);
 	isOnSameDistance = abs(dist1 - dist2) < COMPARE_RADIUS;
 
-	a1 = normalizeAngle(kernel1.angle - kernel2.angle);
-	a2 = normalizeAngle(m1.angle - m2.angle);
+	a1 = kernel1.angle - kernel2.angle;
+	normalizeAngle(&a1);
+	a2 = m1.angle - m2.angle;
+	normalizeAngle(&a2);
 	isOnSameDirection = abs(a1 - a2) < epsAngle;
 
 	chordk = (float)sin(abs(a1 / 2)) * dist1 * 2;

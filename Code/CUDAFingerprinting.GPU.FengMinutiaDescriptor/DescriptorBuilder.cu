@@ -28,10 +28,8 @@ __global__ void buildDescriptors(Minutia *mins, int pitch, int *minutiaNum, Desc
 			temp_j = atomicAdd(&(desc[num*pitch + i].length), 1);
 			desc[num*pitch + i].center = mins[num*pitch + i];
 			normalizeAngle(&(desc[num*pitch + i].center.angle));
-			//desc[num*pitch + i].center.angle = (float)(floor(desc[num*pitch + i].center.angle / (2 * M_PI)) * 2 * M_PI);
 			desc[num*pitch + i].minutias[temp_j] = mins[num*pitch + j];
 			normalizeAngle(&(desc[num*pitch + i].minutias[temp_j].angle));
-			//desc[num*pitch + i].minutias[temp_j].angle = (float)(floor(desc[num*pitch + i].minutias[temp_j].angle / (2 * M_PI)) * 2 * M_PI);
 		}
 	}/*/
 	__syncthreads();
