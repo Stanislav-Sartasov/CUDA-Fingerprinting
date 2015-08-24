@@ -183,7 +183,6 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	myConst[0].sigmoidParametrPsi = 0.01;
 	myConst[0].omega = 50;
 	myConst[0].minNumberMinutiae = 2;
-	myConst[0].maxValidMinutiaeLenght = 100;
 
 	cudaMemcpyToSymbol(constsGPU, myConst, sizeof(Consts));
 	cudaCheckError();

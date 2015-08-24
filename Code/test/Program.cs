@@ -62,17 +62,23 @@ namespace test
                     }
                 }
             }*/
+            double[,] imgDoubles = ImageHelper.LoadImage<double>("d://DB2_bmp//DB2_bmp//1_1.bmp");
+            double[,] a = CreatTemplateTest(imgDoubles);
+            int[,] bytes = Thinner.Thin(a, a.GetLength(1), a.GetLength(0)).Select2D(x => (int)x);
+            PixelwiseOrientationField field = new PixelwiseOrientationField(bytes, 16);
+            List<Minutia> minutias = MinutiaDetector.GetMinutias(bytes, field);
 
-            Minutia minutia = new Minutia();
+            Console.WriteLine(minutias.Count);
+          /*  Minutia minutia = new Minutia();
             List<Minutia> minutiae = new List<Minutia>();
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
-                minutia.X = i*5+1;
+                minutia.X = i+1;
                 minutia.Y =(int)Math.Sin((i+1));
                 minutia.Angle = (float)(i*0.3);
                 minutiae.Add(minutia);
-            }
-            TemplateCreator creator = new TemplateCreator(minutiae);
+            }*/
+            TemplateCreator creator = new TemplateCreator(minutias);
             Template[] t = { creator.CreateTemplate() };
             Console.WriteLine(t[0].Cylinders.Length);
             Console.ReadKey();

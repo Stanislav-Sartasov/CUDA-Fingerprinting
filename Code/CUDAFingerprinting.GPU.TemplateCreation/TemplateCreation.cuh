@@ -20,7 +20,6 @@ struct Consts
 	float sigmoidParametrPsi;
 	char omega;
 	char minNumberMinutiae;
-	char maxValidMinutiaeLenght;
 };
 
 struct Minutia
