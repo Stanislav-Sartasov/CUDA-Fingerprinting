@@ -171,7 +171,6 @@ __global__ void getSum( CUDAArray<Minutia> minutiaArr, CUDAArray<float> sumArr)
 
 void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght)
 {
-	cudaSetDevice(0);
 	Consts *myConst = (Consts*)malloc(sizeof(Consts));
 	myConst[0].radius = 70;
 	myConst[0].baseCuboid = 16;
@@ -211,13 +210,13 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 
 	cudaMemcpyToSymbol(hullLenghtGPU, &extLenght, sizeof(int));
 	cudaCheckError();
-
+	
 	bool* isValidMinutiae = (bool*)malloc(lenght*sizeof(bool));
 	CUDAArray<bool> cudaIsValidMinutiae = CUDAArray<bool>(isValidMinutiae, lenght, 1);
 
 	getValidMinutiae << <1, lenght >> >(cudaMinutiae, cudaIsValidMinutiae);
 	cudaCheckError();
-
+	
 	cudaMinutiae.Dispose();
 	cudaIsValidMinutiae.GetData(isValidMinutiae);
 	cudaIsValidMinutiae.Dispose();
@@ -239,7 +238,7 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	unsigned int* valuesAndMasks = (unsigned int*)malloc(validMinutiaeLenght*sizeof(unsigned int) * 2 * myConst[0].numberCell / 32);
 	memset(valuesAndMasks, 0, validMinutiaeLenght*sizeof(unsigned int) * 2 * myConst[0].numberCell / 32);
 	CUDAArray<float> cudaSum = CUDAArray<float>(1, validMinutiaeLenght*myConst[0].baseCuboid*myConst[0].baseCuboid);	
-
+	
 	getSum << <dim3(validMinutiaeLenght, myConst[0].baseCuboid, myConst[0].baseCuboid), 100 >> >(cudaMinutiae, cudaSum);
 	cudaCheckError();
 	CUDAArray <unsigned int> cudaValuesAndMasks = CUDAArray<unsigned int>(valuesAndMasks, 2 * myConst[0].numberCell / 32, validMinutiaeLenght);
@@ -307,11 +306,12 @@ void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cy
 	*cylindersLenght = validCylindersLenght;
 	cudaFree(hullGPU);
 	cudaFree(hullLenghtGPU);
-
+	
 }
 
 int main()
 {
+	cudaSetDevice(0);
 	int l = 100;
 	Minutia* minutiae = (Minutia*)malloc(sizeof(Minutia) * l);
 	Minutia tmp;
