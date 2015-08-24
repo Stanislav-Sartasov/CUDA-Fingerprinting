@@ -3,6 +3,7 @@
 
 #include "MinutiaStructs.cuh"
 #include "math.h"
+#include "constsmacros.h"
 
 #ifndef M_PI
 #define M_PI				3.14159265358979323846f
@@ -29,5 +30,9 @@ void fingersBaseRead(char *dbPath, int dbSize, int pitch, Minutia *mins, int *mi
 void fingerRead(char *filePath, Minutia *mins, int *minutiaNum);
 
 __device__ void normalizeAngle(float *angle);
+
+__device__ void cudaReductionSum(float* a, int i, int x);
+
+__device__ void cudaReductionSum2D(float* a, int i, int j, int x, int y);
 
 #endif

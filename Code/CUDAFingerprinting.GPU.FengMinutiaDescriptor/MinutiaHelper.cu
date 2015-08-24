@@ -67,3 +67,37 @@ void fingerRead(char *filePath, Minutia *mins, int *minutiaNum)
 	*/
 	fclose(finger);
 }
+
+__device__ void cudaReductionSum(float* a, int i, int x)
+{
+	i /= 2;
+
+	while (i != 0)
+	{
+		if (x < i)
+		{
+			a[x] = a[x + i];
+		}
+
+		__syncthreads();
+		i /= 2;
+	}
+}
+
+__device__ void cudaReductionSum2D(float* a, int i, int j, int x, int y)
+{
+	j /= i*j;
+
+	while (j != 0)
+	{
+		if (x*i + y < j)
+		{
+			*((a + x*i) + y) = *((a + x*i) + y + j);
+		}
+
+		__syncthreads();
+		i /= 2;
+	}
+}
+
+//__device__ void cudaSumBlock()
