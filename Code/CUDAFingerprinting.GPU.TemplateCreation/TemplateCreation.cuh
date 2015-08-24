@@ -5,6 +5,7 @@
 #include "math_constants.h"
 #include "VectorHelper.cuh"
 #include "CUDAArray.cuh"
+#include "CylinderHelper.cuh"
 #include <stdio.h>
 
 struct Consts
@@ -30,28 +31,6 @@ struct Minutia
 	int y;
 };
 
-struct CylinderMulti
-{
-public:
-	unsigned int values[48];
-	float angle;
-	float norm;
-
-	CylinderMulti()
-	{
-
-	}
-
-	__device__ CylinderMulti(unsigned int *givenValues, float givenAngle, float givenNorm) :
-		angle(givenAngle), norm(givenNorm)
-	{
-		for (int i = 0; i < 48; i++)
-		{
-			values[i] = *(givenValues + i*4);
-		}
-	}
-};
-
 __constant__ Consts constsGPU[1];
 __constant__ Point hullGPU[200];
 __constant__ int hullLenghtGPU[1];
@@ -67,11 +46,11 @@ __inline__ __device__ bool equalsMinutae(Minutia* firstMinutia, Minutia* secondM
 __device__ bool isValidPoint(Minutia* middleMinutia, Point* hullGPU, int* hullLenghtGPU);
 __device__ float sum(Minutia** neighborhood, Minutia* middleMinutia);
 __device__ char stepFunction(float value);
-void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, int* cylindersLenght);
+void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght);
 __global__ void createValuesAndMasks(CUDAArray<Minutia> minutiae, CUDAArray<unsigned int> valuesAndMasks, Point* hullGPU, int* hullLenghtGPU);
 __global__ void getValidMinutiae(CUDAArray<Minutia> minutiae, CUDAArray<bool> isValidMinutiae);
 __global__ void getPoints(CUDAArray<Minutia> minutiae, CUDAArray<Point> points);
-__global__ void createCylinders(CUDAArray<Minutia> minutiae, unsigned int* sum, CUDAArray<unsigned int> valuesAndMasks, CylinderMulti* cylinders);
+__global__ void createCylinders(CUDAArray<Minutia> minutiae, unsigned int* sum, CUDAArray<unsigned int> valuesAndMasks, Cylinder* cylinders);
 __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, unsigned int* sum);
 
 #define defaultX() (threadIdx.x+1)

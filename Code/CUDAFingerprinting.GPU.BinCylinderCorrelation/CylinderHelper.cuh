@@ -12,6 +12,7 @@ public:
 	float angle;
 	float norm;
 	unsigned int templateIndex;
+	bool isDevice;
 
 	Cylinder(unsigned int givenValuesCount)
 	{
@@ -19,11 +20,30 @@ public:
 		valuesCount = givenValuesCount;
 	}
 
-	__device__ __host__ Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
+	__host__ Cylinder(unsigned int *givenValues, unsigned int givenValuesCount, float givenAngle, float givenNorm, unsigned int givenTemplateIndex) :
 		valuesCount(givenValuesCount), angle(givenAngle), norm(givenNorm), templateIndex(givenTemplateIndex)
 	{
 		values = (unsigned int *)malloc(givenValuesCount * sizeof(unsigned int));
 		memcpy(values, givenValues, givenValuesCount * sizeof(unsigned int));
+		isDevice = false;
+	}
+
+	__device__ Cylinder(unsigned int *givenValues, float givenAngle, float givenNorm, unsigned int givenValuesCount) :
+		angle(givenAngle), norm(givenNorm), valuesCount(givenValuesCount)
+	{
+		values = givenValues;
+		isDevice = true;
+	}
+
+	void deviceToHost()
+	{
+		if (isDevice)
+		{
+			unsigned int* tmp = (unsigned int *)malloc(valuesCount * sizeof(unsigned int));
+			cudaMemcpy(tmp, values, valuesCount * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+			values = tmp;
+			isDevice = false;
+		}
 	}
 };
 

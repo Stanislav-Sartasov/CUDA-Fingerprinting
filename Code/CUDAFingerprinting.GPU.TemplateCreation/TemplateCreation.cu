@@ -10,6 +10,7 @@
 #include "math.h"
 #include "device_functions_decls.h"
 #include "ConvexHullModified.cu"
+#include "CylinderHelper.cuh"
 #include <stdio.h>
 
 __device__  Point* getPoint(Minutia *minutiae, int i, int j)
@@ -117,9 +118,9 @@ __global__ void createSum(CUDAArray<unsigned int> valuesAndMasks, unsigned int* 
 }
 
 __global__ void createCylinders(CUDAArray<Minutia> minutiae, unsigned int* sum,
-	CUDAArray<unsigned int> valuesAndMasks, CylinderMulti* cylinders)
+	CUDAArray<unsigned int> valuesAndMasks, Cylinder* cylinders)
 {
-	CylinderMulti tmpCylinder = CylinderMulti(valuesAndMasks.AtPtr(blockIdx.x, blockIdx.y* constsGPU[0].numberCell / 32), minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum[blockIdx.x * 2 + blockIdx.y])));
+	Cylinder tmpCylinder = Cylinder(valuesAndMasks.AtPtr(blockIdx.x, blockIdx.y* constsGPU[0].numberCell / 32), minutiae.At(0, blockIdx.x).angle, sqrt((float)(sum[blockIdx.x * 2 + blockIdx.y])), constsGPU[0].numberCell / 32);
 
 	cylinders[blockIdx.x * 2 + blockIdx.y] = tmpCylinder;
 }
@@ -168,7 +169,7 @@ __global__ void getSum( CUDAArray<Minutia> minutiaArr, CUDAArray<float> sumArr)
 	}
 }
 
-void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, int* cylindersLenght)
+void createTemplate(Minutia* minutiae, int lenght, Cylinder** cylinders, int* cylindersLenght)
 {
 	cudaSetDevice(0);
 	Consts *myConst = (Consts*)malloc(sizeof(Consts));
@@ -237,10 +238,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	validMinutiae = (Minutia*)realloc(validMinutiae, validMinutiaeLenght*sizeof(Minutia));
 	cudaMinutiae = CUDAArray<Minutia>(validMinutiae, validMinutiaeLenght, 1);
 	unsigned int* valuesAndMasks = (unsigned int*)malloc(validMinutiaeLenght*sizeof(unsigned int) * 2 * myConst[0].numberCell / 32);
-	for (int i = 0; i < validMinutiaeLenght * 2 * myConst[0].numberCell / 32; i++)
-	{
-		valuesAndMasks[i] = 0;
-	}
+	memset(valuesAndMasks, 0, validMinutiaeLenght*sizeof(unsigned int) * 2 * myConst[0].numberCell / 32);
 	CUDAArray<float> cudaSum = CUDAArray<float>(1, validMinutiaeLenght*myConst[0].baseCuboid*myConst[0].baseCuboid);	
 
 	getSum << <dim3(validMinutiaeLenght, myConst[0].baseCuboid, myConst[0].baseCuboid), 100 >> >(cudaMinutiae, cudaSum);
@@ -254,10 +252,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	cudaSum.Dispose();
 	unsigned int* sumArr = (unsigned int*)malloc(2 * validMinutiaeLenght * sizeof(unsigned int));
 
-	for (int i = 0; i < 2 * validMinutiaeLenght; i++)
-	{
-		sumArr[i] = 0;
-	}
+	memset(sumArr, 0, 2 * validMinutiaeLenght * sizeof(unsigned int));
 
 	unsigned int* cudaSumArr;
 	cudaMalloc((void**)&cudaSumArr, 2 * validMinutiaeLenght * sizeof(unsigned int));
@@ -271,20 +266,25 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 	createSum << <dim3(validMinutiaeLenght, 2), myConst[0].numberCell / 32 >> >(cudaValuesAndMasks, cudaSumArr);
 	cudaCheckError();
 
-	CylinderMulti* cudaCylinders;
-	cudaMalloc((void**)&cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2);
+	Cylinder* cudaCylinders;
+	cudaMalloc((void**)&cudaCylinders, sizeof(Cylinder)*validMinutiaeLenght * 2);
 	cudaCheckError();
 	createCylinders << <dim3(validMinutiaeLenght, 2), 1 >> >(cudaMinutiae, cudaSumArr, cudaValuesAndMasks, cudaCylinders);
 	cudaCheckError();
-
-	cudaValuesAndMasks.Dispose();
-	CylinderMulti *cylindersTmp = (CylinderMulti*)malloc(sizeof(CylinderMulti) * validMinutiaeLenght * 2);
-	cudaMemcpy(cylindersTmp, cudaCylinders, sizeof(CylinderMulti)*validMinutiaeLenght * 2, cudaMemcpyDeviceToHost);
+	
+	Cylinder *cylindersTmp = (Cylinder*)malloc(sizeof(Cylinder) * validMinutiaeLenght * 2);
+	cudaMemcpy(cylindersTmp, cudaCylinders, sizeof(Cylinder)*validMinutiaeLenght * 2, cudaMemcpyDeviceToHost);
 	cudaFree(cudaCylinders);
+	for (int i = 0; i < validMinutiaeLenght * 2; i++)
+	{
+		cylindersTmp[i].deviceToHost();
+	}
+	cudaValuesAndMasks.Dispose();
+
 	unsigned int* sum = (unsigned int*)malloc(2 * validMinutiaeLenght * sizeof(unsigned int));
 	cudaMemcpy(sum, cudaSumArr, 2 * validMinutiaeLenght * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 	cudaCheckError();
-	CylinderMulti* validCylinders = (CylinderMulti*)malloc(2 * validMinutiaeLenght*sizeof(CylinderMulti));
+	Cylinder* validCylinders = (Cylinder*)malloc(2 * validMinutiaeLenght*sizeof(Cylinder));
 	unsigned int	maxSum = 0;
 	for (int i = 1; i < validMinutiaeLenght * 2; i += 2)
 	{
@@ -302,7 +302,7 @@ void createTemplate(Minutia* minutiae, int lenght, CylinderMulti** cylinders, in
 		}
 	}
 	cudaFree(cudaSumArr);
-	validCylinders = (CylinderMulti*)realloc(validCylinders, validCylindersLenght*sizeof(CylinderMulti));
+	validCylinders = (Cylinder*)realloc(validCylinders, validCylindersLenght*sizeof(Cylinder));
 	free(cylindersTmp);
 	*cylinders = validCylinders;
 	*cylindersLenght = validCylindersLenght;
@@ -323,7 +323,7 @@ int main()
 		tmp.angle = i*0.3;
 		minutiae[i] = tmp;
 	}
-	CylinderMulti* cylinders = NULL;
+	Cylinder* cylinders = NULL;
 	int lenght;
 	createTemplate(minutiae, l, &cylinders, &lenght);
 	cudaDeviceReset();
