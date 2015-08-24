@@ -11,7 +11,6 @@ __global__ void buildDescriptors(Minutia *mins, int pitch, int *minutiaNum, Desc
 {
 	int i, j, temp_j, num;
 	float length;
-	__shared__ int k;
 	num = blockIdx.x;
 	i = blockIdx.y;
 	j = threadIdx.x;
@@ -28,10 +27,13 @@ __global__ void buildDescriptors(Minutia *mins, int pitch, int *minutiaNum, Desc
 		{
 			temp_j = atomicAdd(&(desc[num*pitch + i].length), 1);
 			desc[num*pitch + i].center = mins[num*pitch + i];
+			normalizeAngle(&(desc[num*pitch + i].center.angle));
+			//desc[num*pitch + i].center.angle = (float)(floor(desc[num*pitch + i].center.angle / (2 * M_PI)) * 2 * M_PI);
 			desc[num*pitch + i].minutias[temp_j] = mins[num*pitch + j];
-			//atomicAdd(&(desc[num*pitch + i].length), 1);
+			normalizeAngle(&(desc[num*pitch + i].minutias[temp_j].angle));
+			//desc[num*pitch + i].minutias[temp_j].angle = (float)(floor(desc[num*pitch + i].minutias[temp_j].angle / (2 * M_PI)) * 2 * M_PI);
 		}
-	}/*
+	}/*/
 	__syncthreads();
 	if (num == 0 && j == 0 && i == 0)
 	{

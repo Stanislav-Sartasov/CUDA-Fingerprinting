@@ -14,7 +14,8 @@ __device__ void transformate(Minutia* src, Minutia center, Minutia* dst, int j)
 	int x = (int)round(dx * cosAngle + dy * sinAngle) + center.x;
 	int y = (int)round(-dx * sinAngle + dy * cosAngle) + center.y;
 
-	dst[j].angle = normalizeAngle(src[j].angle + angle);
+	dst[j].angle = src[j].angle + angle;
+	normalizeAngle(&(dst[j].angle));
 	dst[j].x = x;
 	dst[j].y = y;
 }

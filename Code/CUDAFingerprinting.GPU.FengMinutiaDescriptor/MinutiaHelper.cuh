@@ -28,6 +28,6 @@ void fingersBaseRead(char *dbPath, int dbSize, int pitch, Minutia *mins, int *mi
 
 void fingerRead(char *filePath, Minutia *mins, int *minutiaNum);
 
-__device__ float normalizeAngle(float angle);
+__device__ void normalizeAngle(float *angle);
 
 #endif
