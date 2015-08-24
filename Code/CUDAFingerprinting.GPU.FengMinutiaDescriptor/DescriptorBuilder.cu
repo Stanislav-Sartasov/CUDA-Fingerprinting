@@ -31,17 +31,17 @@ __global__ void buildDescriptors(Minutia *mins, int pitch, int *minutiaNum, Desc
 			desc[num*pitch + i].minutias[temp_j] = mins[num*pitch + j];
 			normalizeAngle(&(desc[num*pitch + i].minutias[temp_j].angle));
 		}
-	}/*/
+	}
 	__syncthreads();
 	if (num == 0 && j == 0 && i == 0)
 	{
-		for (i = 0; i < minutiaNum[0]; i++)
+		for (i = 0; i < 10; i++)
 		{
 			printf("desc num %d, desc length %d\n", i, desc[i].length);
 			for (j = 0; j < desc[i].length; j++)
 			{
-				printf("%d %d %f\n", desc[i].minutias[j].x, desc[i].minutias[j].y, desc[i].minutias[j].angle);
+				//printf("%d %d %f\n", desc[i].minutias[j].x, desc[i].minutias[j].y, desc[i].minutias[j].angle);
 			}
 		}
-	}*/
+	}
 }

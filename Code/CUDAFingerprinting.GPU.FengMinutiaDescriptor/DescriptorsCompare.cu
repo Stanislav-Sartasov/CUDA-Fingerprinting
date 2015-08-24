@@ -1,5 +1,6 @@
 #include "cuda_runtime.h"
 #include "MinutiaHelper.cuh"
+#include <stdio.h>
 
 //#include "device_launch_parameters.h"
 
@@ -44,12 +45,12 @@ __device__ void matchingPoints(Descriptor desc1, Descriptor desc2, int* m, int* 
 	}
 }
 
-__global__ void compareDescriptors(Descriptor* input, Descriptor** current, Descriptor** temp0, Descriptor** temp1, 
-	float*** s, int height, int width) //block 16*16*2
+__global__ void compareDescriptors(Descriptor* input, Descriptor* current, Descriptor* temp0, Descriptor* temp1, 
+	float* s, int height, int width, int pitch) //block 16*16*2
 { 
 	__shared__ int cache_m[DESC_BLOCK_SIZE][DESC_BLOCK_SIZE][2];
 	__shared__ int cache_M[DESC_BLOCK_SIZE][DESC_BLOCK_SIZE][2];
-	
+
 	int row = defaultRow();
 	int column = defaultColumn();
 	int x = defaultDescriptorRow();
@@ -59,27 +60,42 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Desc
 	int cacheIdxX = threadIdx.y;
 	int cacheIdxY = threadIdx.x;
 	int cacheIdxZ = threadIdx.z;
-	
-	float eps = 0.1f;
 
+	float eps = 0.1f;
+	
+	
+	if (row == 0 && column == 0 && k == 0 && cacheIdxZ == 0)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			printf("%d\n", input[i].length);
+			for (int j = 0; j < input[i].length; j++)
+			{
+				//printf("%d %d %f\n", input[i].minutias[j].x, input[i].minutias[j].y, input[i].minutias[j].angle);
+			}
+		}
+		
+	}
+	/*
 	if ((cacheIdxX == 0) && (cacheIdxZ == 0))
 	{
-		transformate(input[x].minutias, current[k][y].center, temp0[k][y].minutias, column);
+		transformate(input[x].minutias, current[k*pitch + y].center, temp0[k*pitch + y].minutias, column);
 	}
 	else if ((cacheIdxX == 0) && (cacheIdxZ == 1))
 	{
-		transformate(current[k][y].minutias, input[x].center, temp1[k][y].minutias, column);
+		transformate(current[k*pitch + y].minutias, input[x].center, temp1[k*pitch + y].minutias, column);
 	}
 	__syncthreads();
-		
+	
+
 	if (cacheIdxZ == 0)
 	{
-		matchingPoints(temp0[k][y], current[k][y], &cache_m[cacheIdxX][cacheIdxY][0],
+		matchingPoints(temp0[k*pitch + y], current[k*pitch + y], &cache_m[cacheIdxX][cacheIdxY][0],
 			&cache_M[cacheIdxX][cacheIdxY][0], row, column, width, height);
 	}
 	else
 	{
-		matchingPoints(temp1[k][y], input[x], &cache_m[cacheIdxX][cacheIdxY][1],
+		matchingPoints(temp1[k*pitch + y], input[x], &cache_m[cacheIdxX][cacheIdxY][1],
 			&cache_M[cacheIdxX][cacheIdxY][1], row, column, width, height);
 	}
 
@@ -122,14 +138,7 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor** current, Desc
 
 	if ((cacheIdxX == 0) && (cacheIdxY == 0) && (cacheIdxZ == 0))
 	{
-		s[k][blockIdx.y][blockIdx.x] = (cache_m[0][0][0] + 1.0f)*(cache_m[0][0][1] + 1.0f) / (cache_M[0][0][0] + 1.0f) / (cache_M[0][0][1] + 1.0f);
-	}
+		s[k*MAX_DESC_SIZE + blockDim.y*blockIdx.y + blockIdx.x] = (cache_m[0][0][0] + 1.0f)*(cache_m[0][0][1] + 1.0f) / (cache_M[0][0][0] + 1.0f) / (cache_M[0][0][1] + 1.0f);
+	}*/
 }
 
-#ifdef DEBUG
-int main()
-{
-
-	return 0;
-}
-#endif

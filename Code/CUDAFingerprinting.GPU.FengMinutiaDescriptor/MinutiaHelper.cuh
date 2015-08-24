@@ -19,9 +19,9 @@
 #define FILENAME_LENGTH		5
 #define FILEPATH_LENGTH		100
 
-#define defaultDescriptorRow() blockIdx.y / DESC_PER_BLOCK;
-#define defaultDescriptorColumn() blockIdx.x / DESC_PER_BLOCK;
-#define defaultFinger() blockIdx.x / DESC_PER_BLOCK / MAX_DESC_SIZE
+#define defaultDescriptorRow() blockIdx.y / DESC_PER_BLOCK
+#define defaultDescriptorColumn() blockIdx.x / DESC_PER_BLOCK
+#define defaultFinger() blockIdx.z
 
 __device__ float sqrLength(Minutia m1, Minutia m2);
 
