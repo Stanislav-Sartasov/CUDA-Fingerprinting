@@ -43,12 +43,12 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             return new PointF(
                 (float)
                     (minutia.X + BaseCell *
-                     (Math.Cos(minutia.Angle) * (i - (BaseCuboid + 1) / 2.0d) +
-                      Math.Sin(minutia.Angle) * (j - (BaseCuboid + 1) / 2.0d))),
+                     (Math.Cos(minutia.Angle) * (i - (BaseCuboid + 1) / 2.0f) +
+                      Math.Sin(minutia.Angle) * (j - (BaseCuboid + 1) / 2.0f))),
                 (float)
                     (minutia.Y + BaseCell *
-                     (-Math.Sin(minutia.Angle) * (i - (BaseCuboid + 1) / 2.0d) +
-                      Math.Cos(minutia.Angle) * (j - (BaseCuboid + 1) / 2.0d)))
+                     (-Math.Sin(minutia.Angle) * (i - (BaseCuboid + 1) / 2.0f) +
+                      Math.Cos(minutia.Angle) * (j - (BaseCuboid + 1) / 2.0f)))
                 );
         }
 
@@ -112,7 +112,7 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
             return (
                 firstMinutia.X == secondMinutia.X &&
                 firstMinutia.Y == secondMinutia.Y &&
-                Math.Abs(firstMinutia.Angle - secondMinutia.Angle) < double.Epsilon
+                Math.Abs(firstMinutia.Angle - secondMinutia.Angle) < float.Epsilon
                 );
         }
 
@@ -133,6 +133,7 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
 
         public Template CreateTemplate()
         {
+            int c = 0;
             List<Cylinder> listCylinders = new List<Cylinder>();
             foreach (var middleMinutia in _minutiaeList)
             {
@@ -143,8 +144,10 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                     listCylinders.Add(cylinders[0]);
                     listCylinders.Add(cylinders[1]);
                 }
+                c += 2;
             }
             uint maxCount = GetMaxCount(listCylinders);
+            Console.WriteLine(c);
             for (int i = 1; i < listCylinders.Count; i += 2)
             {
                 if (CylinderHelper.GetOneBitsCount(listCylinders[i].Values) >= 0.75 * maxCount)
@@ -204,7 +207,14 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                                 GetNeighborhood(GetPoint(i, j, minutia), minutia),
                                 minutia
                                 )
-                            ));
+                                ));
+                        }
+                    }
+                    else
+                    {
+                        for (int k = 1; k <= HeightCuboid; k++)
+                        {
+                            mask.SetValue(i, j, k, 0);
                         }
                     }
                 }
