@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-
-namespace CUDAFingerprinting.Common
+namespace CUDAFingerprinting.Common.OrientationField
 {
     public class Block
     {

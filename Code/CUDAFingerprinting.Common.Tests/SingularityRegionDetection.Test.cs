@@ -1,9 +1,15 @@
-﻿using System;
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CUDAFingerprinting.Common;
 using System.Drawing;
 
-namespace CUDAFingerprinting.Common.SingularityRegionDetection.Test
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CUDAFingerprinting.Common.Tests
 {
     [TestClass]
     public class SingularityRegionDetectionTests
@@ -16,26 +22,40 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection.Test
 
             PixelwiseOrientationField field = new PixelwiseOrientationField(intBmp, 8);
 
-            field.SaveAboveToFile(image, "Orientation.bmp", true);
-
             int width = intBmp.GetLength(0);
             int height = intBmp.GetLength(1);
-            
-            var dAr = field.Orientation;
 
-            System.Console.WriteLine(dAr.GetLength(0));
-            System.Console.WriteLine(dAr.GetLength(1));
+            var orient = field.Orientation;
 
-            SingularityRegionDetection D = new SingularityRegionDetection(dAr);
+            System.IO.StreamWriter file = new System.IO.StreamWriter(@"D:\Orientation.txt");
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    file.Write((int)(orient[i, j] * 10000));
+                    file.Write(" ");
+                }
+                file.WriteLine();
+            }
 
-            double[,] Result = D.Detect(dAr);
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    orient[i, j] = (orient[i, j] * 10000) / 10000;
+                }
+            }
+
+            SingularityRegionDetection D = new SingularityRegionDetection(orient);
+
+            double[,] Result = D.Detect(orient);
             double[,] revertedResult = new double[height, width];
             
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
                 {
-                    revertedResult[height - 1 -j, i] = Result[i, j];
+                    revertedResult[height - 1 - j, i] = Result[i, j];
                 }
             }
 

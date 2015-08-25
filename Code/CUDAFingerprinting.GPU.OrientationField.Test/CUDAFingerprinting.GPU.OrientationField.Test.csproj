@@ -34,10 +34,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUDAFingerprinting.Common">
-      <HintPath>..\bin\Debug\CUDAFingerprinting.Common.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
@@ -61,21 +61,33 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="OrientationFieldRegularizationTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\1.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\Debug\CUDAFingerprinting.GPU.OrientationField.dll">
-      <Link>CUDAFingerprinting.GPU.OrientationField.dll</Link>
-    </Content>
-    <None Include="Resources\1_1.png" />
+    <None Include="Resources\1_1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj">
+      <Project>{6fd094cc-0f63-47bd-a377-f054ae615517}</Project>
+      <Name>CUDAFingerprinting.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\27_8.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Release\CUDAFingerprinting.GPU.OrientationField.dll">
+      <Link>CUDAFingerprinting.GPU.OrientationField.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

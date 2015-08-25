@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CUDAFingerprinting.Common;
 using System.Drawing;
 using System.Numerics;
 
-namespace CUDAFingerprinting.Common.SingularityRegionDetection
+namespace CUDAFingerprinting.Common
 {
     public class SingularityRegionDetection
     {
@@ -72,7 +67,7 @@ namespace CUDAFingerprinting.Common.SingularityRegionDetection
                     }
 
 
-                    str[x, height - 1 - y] = 1 - cNum.Magnitude / denom;
+                    str[width - 1 - x, height - 1 - y] = 1 - cNum.Magnitude / denom;
                       
                 }
             }

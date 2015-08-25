@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConvexHull\ConvexHull.cs" />
+    <Compile Include="ConvexHull\ConvexHullModified.cs" />
     <Compile Include="ConvolutionHelper.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="ImageHelper.cs" />
@@ -55,16 +57,20 @@
     <Compile Include="KernelHelper.cs" />
     <Compile Include="LocalRidgeFrequency.cs" />
     <Compile Include="Minutia.cs" />
+    <Compile Include="MorphologicalOperators.cs" />
     <Compile Include="Normalization.cs" />
     <Compile Include="OrientationField\OrientationField.cs" />
     <Compile Include="OrientationField\OrientationFieldExtensions.cs" />
     <Compile Include="OrientationField\PixelwiseOrientationField.cs" />
+    <Compile Include="OrientationField\OrientationFieldRegularization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\BinarySerializationHelper.cs" />
     <Compile Include="Serialization\XmlSerializationHelper.cs" />
     <Compile Include="SingularityRegionDetection.cs" />
     <Compile Include="SymmetryHelper.cs" />
+    <Compile Include="VectorHelper.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

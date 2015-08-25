@@ -9,7 +9,6 @@ namespace CUDAFingerprinting.Common
 {
     public static class ImageHelper
     {
-        [Obsolete]
         public static void MarkMinutiae(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
@@ -33,13 +32,21 @@ namespace CUDAFingerprinting.Common
             bmp2.Save(path, ImageFormat.Png);   
         }
 
-        [Obsolete]
         public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae, string path)
         {
             MarkMinutiae(new Bitmap(sourcePath), minutiae, path);
         }
 
-        [Obsolete]
+        public static void MarkMinutiae(Bitmap source, List<Minutia> minutiae)
+        {
+            MarkMinutiae(source, minutiae, GetTemporaryImageFileName());
+        }
+
+        public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae)
+        {
+            MarkMinutiae(sourcePath, minutiae, GetTemporaryImageFileName());
+        }
+
         public static void MarkMinutiaeWithDirections(Bitmap source, List<Minutia> minutiae, string path)
         {
             var bmp2 = new Bitmap(source.Width, source.Height);
@@ -74,68 +81,26 @@ namespace CUDAFingerprinting.Common
             bmp2.Save(path, ImageFormat.Png);
         }
 
-        [Obsolete]
+        public static void MarkMinutiaeWithDirections(Bitmap source, List<Minutia> minutiae)
+        {
+            MarkMinutiaeWithDirections(source, minutiae, GetTemporaryImageFileName());
+        }
         public static void MarkMinutiaeWithDirections(string sourcePath, List<Minutia> minutiae, string path)
         {
             MarkMinutiaeWithDirections(new Bitmap(sourcePath), minutiae, path);
         }
 
-        [Obsolete]
-        public static void MarkMinutiae(string sourcePath, List<Minutia> minutiae, List<Minutia> minutiae2, string path)
-        {
-            var bmp = new Bitmap(sourcePath);
-            var bmp2 = new Bitmap(bmp.Width, bmp.Height);
-            for (int x = 0; x < bmp2.Width; x++)
-            {
-                for (int y = 0; y < bmp2.Height; y++)
-                {
-                    bmp2.SetPixel(x, y, bmp.GetPixel(x, y));
-                }
-            }
-            var gfx = Graphics.FromImage(bmp2);
-
-            foreach (var pt in minutiae)
-            {
-                gfx.DrawEllipse(Pens.Red, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.FillEllipse(Brushes.Red, pt.X - 2, pt.Y - 2, 5, 5);
-            }
-
-            foreach (var pt in minutiae2)
-            {
-                gfx.DrawEllipse(Pens.Blue, pt.X - 2, pt.Y - 2, 5, 5);
-                gfx.FillEllipse(Brushes.Blue, pt.X - 2, pt.Y - 2, 5, 5);
-            }
-
-            gfx.Save();
-
-            bmp2.Save(path, ImageFormat.Png);
-
-        }
-
         // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
         // For the simplicity of geometric transformations everywhere in the project
         // the origin point is BOTTOM left angle.
-        public static double[,] LoadImage(Bitmap bmp)
+        public static T[,] LoadImage<T>(Bitmap bmp)
         {
-            double[,] imgBytes = new double[bmp.Height, bmp.Width];
+            var imgBytes = new T[bmp.Height, bmp.Width];
             for (int x = 0; x < bmp.Width; x++)
             {
                 for (int y = 0; y < bmp.Height; y++)
                 {
-                    imgBytes[bmp.Height-1 - y, x] = bmp.GetPixel(x, y).R;
-                }
-            }
-            return imgBytes;
-        }
-
-        public static float[,] LoadImageToFloats(Bitmap bmp)
-        {
-            float[,] imgBytes = new float[bmp.Height, bmp.Width];
-            for (int x = 0; x < bmp.Width; x++)
-            {
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    imgBytes[bmp.Height - 1 - y, x] = bmp.GetPixel(x, y).R;
+                    imgBytes[bmp.Height - 1 - y, x] = (T)Convert.ChangeType(bmp.GetPixel(x, y).R, typeof(T));
                 }
             }
             return imgBytes;
@@ -144,78 +109,26 @@ namespace CUDAFingerprinting.Common
         // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
         // For the simplicity of geometric transformations everywhere in the project
         // the origin point is BOTTOM left angle.
-        public static int[,] LoadImageAsInt(Bitmap bmp)
+        public static T[,] LoadImage<T>(string path)
         {
-            int[,] imgBytes = new int[bmp.Height, bmp.Width];
-            for (int x = 0; x < bmp.Width; x++)
-            {
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    // the flipping of the image
-                    imgBytes[bmp.Height-1 - y, x] = bmp.GetPixel(x, y).R;
-                }
-            }
-            return imgBytes;
+            return LoadImage<T>(new Bitmap(path));
         }
 
-        // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
-        // For the simplicity of geometric transformations everywhere in the project
-        // the origin point is BOTTOM left angle.
-        public static double[,] LoadImage(string path)
-        {
-            return LoadImage(new Bitmap(path));
-        }
-
-        public static float[,] LoadImageToFloats(string path)
-        {
-            return LoadImageToFloats(new Bitmap(path));
-        }
-
-        // IMPORTANT NOTE: The image is stored with (0,0) being top left angle
-        // For the simplicity of geometric transformations everywhere in the project
-        // the origin point is BOTTOM left angle.
-        public static int[,] LoadImageAsInt(string path)
-        {
-            return LoadImageAsInt(new Bitmap(path));
-        }
-
-        public static void SaveArray(int[,] data, string path, bool applyNormalization = false)
+        public static void SaveArray<T>(T[,] data, string path, bool applyNormalization = false)
         {
             SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
         }
 
-        public static void SaveArray(float[,] data, string path, bool applyNormalization = false)
+        public static Bitmap SaveArrayToBitmap<T>(T[,] data, bool applyNormalization = false)
         {
-            SaveArrayToBitmap(data, applyNormalization).Save(path, GetImageFormatFromExtension(path));
-        }
-
-        public static Bitmap SaveArrayToBitmap(int[,] data, bool applyNormalization = false)
-        {
+            var doubleData = data.Select2D(val => (double)Convert.ChangeType(val, typeof(double)));
             int x = data.GetLength(1);
             int y = data.GetLength(0);
-            var bmp = new Bitmap(x, y);
-            data.Select2D((value, row, column) =>
-            {
-                value = Math.Abs(value);
-                // todo: make a proper normalization
-                if(applyNormalization)
-                    value = (value < 0) ? 0 : (value > 255 ? 255 : value);
-                // note: notice the flipping
-                lock(bmp)bmp.SetPixel(column, y-1-row, Color.FromArgb(value, value, value));
-                return value;
-            });
-            return bmp;
-        }
-
-        public static Bitmap SaveArrayToBitmap(double[,] data, bool applyNormalization = false)
-        {
-            int x = data.GetLength(1);
-            int y = data.GetLength(0);
-            var max = data.Max2D();
-            var min = data.Min2D();
+            var max = doubleData.Max2D();
+            var min = doubleData.Min2D();
 
             var bmp = new Bitmap(x, y);
-            data.Select2D((value, row, column) =>
+            doubleData.Select2D((value, row, column) =>
             {
                 var gray = applyNormalization?(int)((value - min) / (max - min) * 255):(int)value;
                 lock(bmp)
@@ -225,28 +138,26 @@ namespace CUDAFingerprinting.Common
             return bmp;  
         }
 
-        public static Bitmap SaveArrayToBitmap(float[,] data, bool applyNormalization = false)
+        public static T[,] ReducePixelsShadesOfGray<T>(T[,] data)
         {
-            int x = data.GetLength(1);
-            int y = data.GetLength(0);
-            var max = data.Max2D();
-            var min = data.Min2D();
-
-            var bmp = new Bitmap(x, y);
-            data.Select2D((value, row, column) =>
+            return data.Select2D(value =>
             {
-                var gray = applyNormalization ? (int)((value - min) / (max - min) * 255) : (int)value;
-                lock (bmp)
-                    bmp.SetPixel(column, bmp.Height - 1 - row, Color.FromArgb(gray, gray, gray));
-                return value;
+                double doubleValue = (double) Convert.ChangeType(value, typeof (double));
+                doubleValue = doubleValue < 0 ? 0 : doubleValue > 255 ? 255 : doubleValue;
+                return (T)Convert.ChangeType(doubleValue, typeof(T));
             });
-            return bmp;
+            
         }
 
-        public static void SaveArrayAndOpen(double[,] data, string path, bool applyNormalization = false)
+        public static void SaveArrayAndOpen<T>(T[,] data, string path, bool applyNormalization = false)
         {
             SaveArray(data, path, applyNormalization);
             Process.Start(path);
+        }
+
+        public static void SaveArrayAndOpen<T>(T[,] data, bool applyNormalization = false)
+        {
+            SaveArrayAndOpen(data, GetTemporaryImageFileName(), applyNormalization);
         }
 
         public static void SaveArray(double[,] data, string path, bool applyNormalization = false)
@@ -265,6 +176,11 @@ namespace CUDAFingerprinting.Common
                 case ".PNG": return ImageFormat.Png;
                 default: throw new NotSupportedException();
             }
+        }
+
+        public static string GetTemporaryImageFileName()
+        {
+            return Path.GetTempPath() + Guid.NewGuid() + ".bmp";
         }
     }
 }

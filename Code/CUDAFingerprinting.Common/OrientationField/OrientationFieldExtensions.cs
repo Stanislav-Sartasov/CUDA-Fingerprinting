@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 
-namespace CUDAFingerprinting.Common
+namespace CUDAFingerprinting.Common.OrientationField
 {
     public static class OrientationFieldExtensions
     {
@@ -15,6 +12,11 @@ namespace CUDAFingerprinting.Common
             bmp.Save(name, ImageHelper.GetImageFormatFromExtension(name));
             if(openFileAfterSaving)
                 Process.Start(name);
+        }
+
+        public static void SaveToFile(this OrientationField field)
+        {
+            SaveToFile(field, ImageHelper.GetTemporaryImageFileName(), true);
         }
 
         public static Bitmap SaveToBitmap(this OrientationField field)
@@ -27,7 +29,7 @@ namespace CUDAFingerprinting.Common
                 return SaveAboveToBitmap(field, bmp);
             }
         }
-        public static Bitmap SaveAboveToBitmap(this OrientationField field, Bitmap undercoat)
+        public static Bitmap SaveAboveToBitmap(this Common.OrientationField.OrientationField field, Bitmap undercoat)
         {
             var size = field.BlockSize;
             int lineLength = field.BlockSize / 2;
@@ -122,6 +124,12 @@ namespace CUDAFingerprinting.Common
                 Process.Start(name);
         }
 
+        // a shorter method to be used in tests
+        public static void SaveAboveToFile(this OrientationField field, Bitmap undercoat)
+        {
+            SaveAboveToFile(field, undercoat, ImageHelper.GetTemporaryImageFileName(), true);
+        }
+
 
 		public static void SaveAboveToFile(this PixelwiseOrientationField field, Bitmap undercoat, string name, bool openFileAfterSaving = false)
 		{
@@ -130,5 +138,11 @@ namespace CUDAFingerprinting.Common
 			if (openFileAfterSaving)
 				Process.Start(name);
 		}
+
+        // a shorter method to be used in tests
+        public static void SaveAboveToFile(this PixelwiseOrientationField field, Bitmap undercoat)
+        {
+            SaveAboveToFile(field, undercoat, ImageHelper.GetTemporaryImageFileName(), true);
+        }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
-
-namespace CUDAFingerprinting.Common
+﻿namespace CUDAFingerprinting.Common.OrientationField
 {
 	public class PixelwiseOrientationField
 	{
@@ -68,6 +62,9 @@ namespace CUDAFingerprinting.Common
 			return this._orientation[x, y];
 		}
 
-	
+    public void NewOrientation(double [,] O)
+    {
+      _orientation = O;
+    }
 	}
 }

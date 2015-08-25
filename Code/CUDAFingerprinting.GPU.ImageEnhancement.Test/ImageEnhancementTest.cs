@@ -32,7 +32,7 @@ namespace CUDAFingerprinting.GPU.Tests
         public void EnhanceTest()
         {
             var bmp = Resources.SampleFinger2;
-            float[,] array = ImageHelper.LoadImageToFloats(bmp);
+            float[,] array = ImageHelper.LoadImage<float>(bmp);
             
             float[] orientLin = new float[bmp.Width * bmp.Height];
             OrientationFieldInPixels(orientLin, array, array.GetLength(1), array.GetLength(0));

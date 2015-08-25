@@ -14,7 +14,7 @@ namespace CUDAFingerprinting.GPU.Tests
         public void NormalizationTest()
         {
             var bmp = Resources.SampleFinger1;
-            float[,] array = ImageHelper.LoadImageToFloats(bmp);
+            float[,] array = ImageHelper.LoadImage<float>(bmp);
             float[] result = new float[bmp.Width * bmp.Height];
             Normalize(array, result, bmp.Width, bmp.Height, 100, 1000);
             float[,] ar = result.Make2D(bmp.Height, bmp.Width);
