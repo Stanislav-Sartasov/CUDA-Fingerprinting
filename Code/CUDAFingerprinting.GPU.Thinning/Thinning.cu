@@ -17,7 +17,7 @@
  if(e!=cudaSuccess) {                                              \
    printf("Cuda failure %s:%d: '%s'\n",__FILE__,__LINE__,cudaGetErrorString(e));           \
    exit(0); \
-  }                                                                 \
+   }                                                                 \
 }
 #else
 #define DBGM(msg) ;
@@ -55,7 +55,7 @@ __host__ void InitPatterns()
 	PTTRN(p, 3, 0, 0) = PixelType::AT_LEAST_ONE_EMPTY; PTTRN(p, 3, 0, 1) = PixelType::EMPTY;  PTTRN(p, 3, 0, 2) = PixelType::AT_LEAST_ONE_EMPTY;
 	PTTRN(p, 3, 1, 0) = PixelType::FILLED;			   PTTRN(p, 3, 1, 1) = PixelType::CENTER; PTTRN(p, 3, 1, 2) = PixelType::FILLED;
 	PTTRN(p, 3, 2, 0) = PixelType::FILLED;			   PTTRN(p, 3, 2, 1) = PixelType::FILLED; PTTRN(p, 3, 2, 2) = PixelType::FILLED;
-													    	//PixelType.FILLED
+	//PixelType.FILLED
 	//e
 	PTTRN(p, 4, 0, 0) = PixelType::ANY;    PTTRN(p, 4, 0, 1) = PixelType::EMPTY;  PTTRN(p, 4, 0, 2) = PixelType::EMPTY;
 	PTTRN(p, 4, 1, 0) = PixelType::FILLED; PTTRN(p, 4, 1, 1) = PixelType::CENTER; PTTRN(p, 4, 1, 2) = PixelType::EMPTY;
@@ -96,7 +96,7 @@ __host__ void InitPatterns()
 	PTTRN(p, 13, 0, 0) = PixelType::EMPTY; PTTRN(p, 13, 0, 1) = PixelType::EMPTY;  PTTRN(p, 13, 0, 2) = PixelType::FILLED;
 	PTTRN(p, 13, 1, 0) = PixelType::EMPTY; PTTRN(p, 13, 1, 1) = PixelType::CENTER; PTTRN(p, 13, 1, 2) = PixelType::FILLED;
 	PTTRN(p, 13, 2, 0) = PixelType::EMPTY; PTTRN(p, 13, 2, 1) = PixelType::EMPTY;  PTTRN(p, 13, 2, 2) = PixelType::FILLED;
-	
+
 	cudaMemcpyToSymbol(constP, p, patternsArraySize);
 	cudaCheckError();
 
@@ -106,9 +106,9 @@ __host__ void InitPatterns()
 __device__ double GetPixel(double* array, int x, int y, int width, int height)
 {
 	return (x < 0 || y < 0 || x >= width || y >= height) ?
-		WHITE :
-		array[y * width + x] > 128.0 ?
-			WHITE :
+	WHITE :
+		  array[y * width + x] > 128.0 ?
+	  WHITE :
 			BLACK;
 }
 
@@ -199,6 +199,7 @@ __device__ int MatchPattern(double* array, int x, int y, int width, int height)
 	return -1;
 }
 
+//for newOnePass will be better 2
 #define BLOCK_DIM 8
 
 __global__ void onePass(double* array, double* buffer, int width, int height, bool* wereNotChangesInBlock)
@@ -218,7 +219,7 @@ __global__ void onePass(double* array, double* buffer, int width, int height, bo
 	}
 	__syncthreads();
 	bool fl = true;
-	
+
 	for (int i = 0; i < BLOCK_DIM; i++)
 	{
 		for (int j = 0; j < BLOCK_DIM; j++)
@@ -236,112 +237,120 @@ __global__ void onePass(double* array, double* buffer, int width, int height, bo
 	}
 	wereNotChangesInBlock[blockIdx.y * gridDim.x + blockIdx.x] = fl;
 }
-
+/*
+//for newOnePass(
+//          newOnePass() is worse than onePass(maybe caused by synchronization)
+//          not recommented for use on GeForce GT 540M
+//      )
 __device__ bool MatchPattern(double* array, int x, int y, int width, int height, int i)
 {
-	if (GetPixel(array, x, y, width, height) != WHITE)
-	{
-		bool yInPattern = false;
-		int yWhiteCounter = 0;
-		bool bad = false;
-		for (int dY = -1; dY < 2; dY++)
-		{
-			if (bad)
-			{
-				break;
-			}
-			for (int dX = -1; dX < 2; dX++)
-			{
-				if (PATTERN(i, 1 + dX, 1 + dY) == PixelType::AT_LEAST_ONE_EMPTY)
-				{
-					yInPattern = true;
-					yWhiteCounter += GetPixel(array, x + dX, y + dY, width, height) == WHITE ? 1 : 0;
-					continue;
-				}
-				if (!AreEqual(GetPixel(array, x + dX, y + dY, width, height), PATTERN(i, 1 + dX, 1 + dY)))
-				{
-					bad = true;
-					break;
-				}
-			}
-		}
-		if (!(bad ||
-			(yInPattern && yWhiteCounter == 0) ||
-			(i == 2 && !AreEqual(GetPixel(array, x + 2, y, width, height), PixelType::FILLED)) ||
-			(i == 3 && !AreEqual(GetPixel(array, x, y + 2, width, height), PixelType::FILLED))))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
+if (GetPixel(array, x, y, width, height) != WHITE)
+{
+bool yInPattern = false;
+int yWhiteCounter = 0;
+bool bad = false;
+for (int dY = -1; dY < 2; dY++)
+{
+if (bad)
+{
+break;
+}
+for (int dX = -1; dX < 2; dX++)
+{
+if (PATTERN(i, 1 + dX, 1 + dY) == PixelType::AT_LEAST_ONE_EMPTY)
+{
+yInPattern = true;
+yWhiteCounter += GetPixel(array, x + dX, y + dY, width, height) == WHITE ? 1 : 0;
+continue;
+}
+if (!AreEqual(GetPixel(array, x + dX, y + dY, width, height), PATTERN(i, 1 + dX, 1 + dY)))
+{
+bad = true;
+break;
+}
+}
+}
+if (!(bad ||
+(yInPattern && yWhiteCounter == 0) ||
+(i == 2 && !AreEqual(GetPixel(array, x + 2, y, width, height), PixelType::FILLED)) ||
+(i == 3 && !AreEqual(GetPixel(array, x, y + 2, width, height), PixelType::FILLED))))
+{
+return true;
+}
+else
+{
+return false;
+}
+}
+else
+{
+return false;
+}
 }
 
 __global__ void newOnePass(double* array, double* buffer, int width, int height, bool* wereNotChangesInBlock)
 {
-	__shared__ bool wereNotChanges[BLOCK_DIM][BLOCK_DIM];
-	__shared__ bool isPatternI[BLOCK_DIM][BLOCK_DIM][14];
+__shared__ bool wereNotChanges[BLOCK_DIM][BLOCK_DIM];
+__shared__ bool isPatternI[BLOCK_DIM][BLOCK_DIM][14];
 
-	//x coord of image
-	int x = blockIdx.x * BLOCK_DIM + threadIdx.x;
-	//y coord of image
-	int y = blockIdx.y * BLOCK_DIM + threadIdx.y;
-	//pattern id
-	int pId = threadIdx.z;
+//x coord of image
+int x = blockIdx.x * BLOCK_DIM + threadIdx.x;
+//y coord of image
+int y = blockIdx.y * BLOCK_DIM + threadIdx.y;
+//pattern id
+int pId = threadIdx.z;
 
-	isPatternI[threadIdx.y][threadIdx.x][threadIdx.z] = MatchPattern(array, x, y, width, height, pId);
-	__syncthreads();
-	bool isPattern = false;
-	for (int i = 0; i < 14; i++)
-	{
-		if (isPatternI[threadIdx.y][threadIdx.x][i])
-		{
-			isPattern = true;
-			break;
-		}
-	}
-	__syncthreads();
-
-	wereNotChanges[threadIdx.y][threadIdx.x] = true;
-
-	if (isPattern)
-	{
-		SetPixel(buffer, x, y, width, height, WHITE);
-		wereNotChanges[threadIdx.y][threadIdx.x] = false;
-	}
-	__syncthreads();
-	bool fl = true;
-
-	for (int i = 0; i < BLOCK_DIM; i++)
-	{
-		for (int j = 0; j < BLOCK_DIM; j++)
-		{
-			if (!wereNotChanges[i][j])
-			{
-				fl = false;
-				break;
-			}
-		}
-		if (!fl)
-		{
-			break;
-		}
-	}
-	wereNotChangesInBlock[blockIdx.y * gridDim.x + blockIdx.x] = fl;
+isPatternI[threadIdx.y][threadIdx.x][threadIdx.z] = MatchPattern(array, x, y, width, height, pId);
+__syncthreads();
+bool isPattern = false;
+for (int i = 0; i < 14; i++)
+{
+if (isPatternI[threadIdx.y][threadIdx.x][i])
+{
+isPattern = true;
+break;
 }
+}
+__syncthreads();
 
+wereNotChanges[threadIdx.y][threadIdx.x] = true;
+
+if (isPattern)
+{
+SetPixel(buffer, x, y, width, height, WHITE);
+wereNotChanges[threadIdx.y][threadIdx.x] = false;
+}
+__syncthreads();
+bool fl = true;
+
+for (int i = 0; i < BLOCK_DIM; i++)
+{
+for (int j = 0; j < BLOCK_DIM; j++)
+{
+if (!wereNotChanges[i][j])
+{
+fl = false;
+break;
+}
+}
+if (!fl)
+{
+break;
+}
+}
+wereNotChangesInBlock[blockIdx.y * gridDim.x + blockIdx.x] = fl;
+}
+*/
+
+//best results of profiler on my GeForce GT 540M:
+//for newOnePass, BLOCK_DIM(max 8)         = 2 : 227 ms
+//for onePass,    BLOCK_DIM(min 2, max 32) = 8 : 122 ms
 __host__ double** Thin(double** arr, int width, int height)
 {
 #ifdef DEBUG
 	int stepC = 0;
 #endif
-	double* arr1D = copy2DArrayTo1D(arr, width, height);	
+	double* arr1D = copy2DArrayTo1D(arr, width, height);
 	InitPatterns();
 	bool isSkeleton;
 	double* buffer = copy1DArray(arr1D, width * height);
@@ -352,10 +361,10 @@ __host__ double** Thin(double** arr, int width, int height)
 		int blocksColumnSize = ceilMod(height, BLOCK_DIM);
 		//allocate memory on host
 		bool* wereNotChangesInBlock = (bool*)malloc(
-				sizeof(bool) * 
-				blocksColumnSize *
-				blocksRowSize);
-		
+			sizeof(bool) *
+			blocksColumnSize *
+			blocksRowSize);
+
 		double* devA;
 		double* devBuffer;
 		bool* devWereNotChangesInBlock;
@@ -371,20 +380,20 @@ __host__ double** Thin(double** arr, int width, int height)
 		cudaMemcpy(devBuffer, buffer, sizeof(double) * height * width, cudaMemcpyHostToDevice);
 		cudaCheckError();
 
-		cudaMalloc((void**)&devWereNotChangesInBlock, 
-				sizeof(bool) * 
-				blocksColumnSize *
-				blocksRowSize);
+		cudaMalloc((void**)&devWereNotChangesInBlock,
+			sizeof(bool) *
+			blocksColumnSize *
+			blocksRowSize);
 		cudaCheckError();
 		isSkeleton = true;
 		dim3 gridSize = dim3(blocksRowSize, blocksColumnSize);
-		dim3 blockSize = dim3(BLOCK_DIM, BLOCK_DIM, 14);
+		dim3 blockSize = dim3(BLOCK_DIM, BLOCK_DIM);
 		//call kernel function
-		//with parallel processing of patterns
-		newOnePass <<<gridSize, blockSize>>>(devA, devBuffer, width, height, devWereNotChangesInBlock);
 		//without parallel processing of patterns
-		//blockSize = dim3(BLOCK_DIM, BLOCK_DIM, 1);
-		//onePass << <gridSize, blockSize >> >(devA, devBuffer, width, height, devWereNotChangesInBlock);
+		onePass << <gridSize, blockSize >> >(devA, devBuffer, width, height, devWereNotChangesInBlock);
+		//with parallel processing of patterns
+		//blockSize = dim3(BLOCK_DIM, BLOCK_DIM, 14);
+		//newOnePass <<<gridSize, blockSize>>>(devA, devBuffer, width, height, devWereNotChangesInBlock);
 
 		//getting results & free device memory
 		cudaMemcpy(buffer, devBuffer, sizeof(double) * height * width, cudaMemcpyDeviceToHost);
@@ -393,12 +402,12 @@ __host__ double** Thin(double** arr, int width, int height)
 		cudaCheckError();
 		cudaFree(devA);
 		cudaCheckError();
-		cudaMemcpy(wereNotChangesInBlock, 
-				devWereNotChangesInBlock, 
-				sizeof(bool) * 
-				blocksColumnSize *
-				blocksRowSize,
-				cudaMemcpyDeviceToHost);
+		cudaMemcpy(wereNotChangesInBlock,
+			devWereNotChangesInBlock,
+			sizeof(bool) *
+			blocksColumnSize *
+			blocksRowSize,
+			cudaMemcpyDeviceToHost);
 		cudaCheckError();
 		cudaFree(devWereNotChangesInBlock);
 		cudaCheckError();
@@ -427,9 +436,9 @@ __host__ double** Thin(double** arr, int width, int height)
 			stepC++;
 			int* res = OverlapArrays(
 				doubleToIntArray(buffer, width, height),
-				img, 
+				img,
 				widthDBG, heightDBG
-			);
+				);
 			saveBmp(path, res, widthDBG, heightDBG);
 			free(img);
 			free(res);
