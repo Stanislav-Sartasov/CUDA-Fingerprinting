@@ -33,4 +33,9 @@ struct Lock
 	{
 		atomicExch(mutex, 0);
 	}
+
+	~Lock(void)
+	{
+		cudaFree(mutex);
+	}
 };
