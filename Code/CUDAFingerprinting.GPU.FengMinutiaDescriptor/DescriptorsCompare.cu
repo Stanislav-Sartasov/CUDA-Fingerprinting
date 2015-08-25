@@ -68,7 +68,7 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor* current, Descr
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			printf("%d\n", input[i].length);
+			printf("%d, adress %d\n", input[i].length, &(input[i].length));
 			for (int j = 0; j < input[i].length; j++)
 			{
 				//printf("%d %d %f\n", input[i].minutias[j].x, input[i].minutias[j].y, input[i].minutias[j].angle);

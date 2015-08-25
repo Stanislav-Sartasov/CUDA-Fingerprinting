@@ -9,6 +9,25 @@
 #include <string.h>
 
 
+__global__ void k(int *p)
+{
+	printf("nums\n");
+	for (int i = 262; i < 272; i++)
+	{
+		printf("adr %d\n", &(p[i]));
+	}
+}
+
+__global__ void l(Descriptor *p)
+{
+	printf("descs\n");
+	for (int i = 0; i < 10; i++)
+	{
+		printf("adr %d\n", &(p[i]));
+	}
+}
+
+
 int main()
 {
 	cudaSetDevice(0);
@@ -38,14 +57,15 @@ int main()
 	cudaMemcpy(dev_fingerMinutiaNum, &fingerMinutiaNum, sizeOfInt, cudaMemcpyHostToDevice);
 
 	Descriptor *dev_fingerDesc;
-	cudaMalloc((void**)&dev_fingerDesc, sizeOfDesc);
+	cudaMalloc((void**)&dev_fingerDesc, MAX_DESC_SIZE * sizeOfDesc);
+
 
 	cudaEvent_t start, stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 	cudaEventRecord(start, 0);
 
-	//buildDescriptors <<<dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >>>(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
+	buildDescriptors <<<dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >>>(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
 
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
@@ -67,7 +87,8 @@ int main()
 	int dbSize = 1000;
 	int *dbMinutiaNum = (int*)malloc(dbSize*sizeOfInt);
 	int *dev_dbMinutiaNum;
-	cudaMalloc((void**)&dev_dbMinutiaNum, dbSize*sizeOfInt);
+	cudaMalloc((void**)&dev_dbMinutiaNum, sizeOfInt*dbSize);
+
 	char *dbPath = "D:\\FingersBase";
 
 
@@ -76,19 +97,9 @@ int main()
 	Minutia *dev_dbMins;
 	cudaMalloc((void**)&dev_dbMins, dbSize * minPitch);
 
-	cudaError_t c;
 	fingersBaseRead(dbPath, dbSize, MAX_DESC_SIZE, dbMins, dbMinutiaNum); // done
-	//buildDescriptors << <dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >> >(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
-	c = cudaGetLastError();
-	printf("%s %d, %d\n", cudaGetErrorString(c), sizeOfInt, dbSize);
-	c = cudaDeviceSynchronize();
-	printf("%s %d, %d\n", cudaGetErrorString(c), sizeOfInt, dbSize);
 	cudaMemcpy(dev_dbMins, dbMins, minPitch*dbSize, cudaMemcpyHostToDevice);
-	buildDescriptors << <dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >> >(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
 	cudaMemcpy(dev_dbMinutiaNum, dbMinutiaNum, dbSize * sizeOfInt, cudaMemcpyHostToDevice);
-	printf("%s %d, %d\n", cudaGetErrorString(c), sizeOfInt, dbSize);
-	//buildDescriptors << <dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >> >(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
-
 	
 
 	Descriptor *dev_dbDesc;
@@ -96,7 +107,7 @@ int main()
 
 	cudaEventRecord(start, 0);
 
-	//buildDescriptors <<<dim3(dbSize, MAX_DESC_SIZE), MAX_DESC_SIZE >>>(dev_dbMins, MAX_DESC_SIZE, dev_dbMinutiaNum, dev_dbDesc, dbSize);
+	buildDescriptors <<<dim3(dbSize, MAX_DESC_SIZE), MAX_DESC_SIZE >>>(dev_dbMins, MAX_DESC_SIZE, dev_dbMinutiaNum, dev_dbDesc, dbSize);
 
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
@@ -115,13 +126,11 @@ int main()
 	float *s;
 	cudaMalloc((void**)&s, MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
 	printf(".1fms\n", et);
-	compareDescriptors << < dim3(MAX_DESC_SIZE / DESC_PER_BLOCK, MAX_DESC_SIZE / DESC_PER_BLOCK, dbSize),
-		dim3(DESC_BLOCK_SIZE, DESC_BLOCK_SIZE, 2) >>> (
-		dev_fingerDesc, dev_dbDesc, temp0, temp1, s, height, width, MAX_DESC_SIZE);
+	//compareDescriptors << < dim3(MAX_DESC_SIZE / DESC_PER_BLOCK, MAX_DESC_SIZE / DESC_PER_BLOCK, dbSize),
+		//dim3(DESC_BLOCK_SIZE, DESC_BLOCK_SIZE, 2) >>> (
+		//dev_fingerDesc, dev_dbDesc, temp0, temp1, s, height, width, MAX_DESC_SIZE);
 	printf("3.1fms\n");
 	///////
-
-
 	cudaFree(s);
 	cudaFree(temp0);
 	cudaFree(temp1);

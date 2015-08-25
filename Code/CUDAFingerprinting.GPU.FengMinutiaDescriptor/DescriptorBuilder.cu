@@ -33,12 +33,13 @@ __global__ void buildDescriptors(Minutia *mins, int pitch, int *minutiaNum, Desc
 		}
 	}
 	__syncthreads();
-	if (num == 0 && j == 0 && i == 0)
+	if (num == 800 && j == 0 && i == 0)
 	{
+		//printf("_min %d desc %d int* %d pitch %d\n", sizeof(Minutia), sizeof(Descriptor), sizeof(int*), pitch);
 		for (i = 0; i < 10; i++)
 		{
-			printf("desc num %d, desc length %d\n", i, desc[i].length);
-			for (j = 0; j < desc[i].length; j++)
+			printf("desc num %d, desc length %d, adress %d\n", i, desc[num*pitch + i].length, &(desc[num*pitch + i].length));
+			for (j = 0; j < desc[num*pitch + i].length; j++)
 			{
 				//printf("%d %d %f\n", desc[i].minutias[j].x, desc[i].minutias[j].y, desc[i].minutias[j].angle);
 			}
