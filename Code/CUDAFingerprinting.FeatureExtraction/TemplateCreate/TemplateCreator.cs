@@ -133,7 +133,6 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
 
         public Template CreateTemplate()
         {
-            int c = 0;
             List<Cylinder> listCylinders = new List<Cylinder>();
             foreach (var middleMinutia in _minutiaeList)
             {
@@ -144,10 +143,8 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                     listCylinders.Add(cylinders[0]);
                     listCylinders.Add(cylinders[1]);
                 }
-                c += 2;
             }
             uint maxCount = GetMaxCount(listCylinders);
-            Console.WriteLine(c);
             for (int i = 1; i < listCylinders.Count; i += 2)
             {
                 if (CylinderHelper.GetOneBitsCount(listCylinders[i].Values) >= 0.75 * maxCount)
@@ -191,7 +188,6 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
         {
             Cylinder3D value = new Cylinder3D();
             Cylinder3D mask = new Cylinder3D();
-
             for (int i = 1; i <= BaseCuboid; i++)
             {
                 for (int j = 1; j <= BaseCuboid; j++)
@@ -208,13 +204,6 @@ namespace CUDAFingerprinting.FeatureExtraction.TemplateCreate
                                 minutia
                                 )
                                 ));
-                        }
-                    }
-                    else
-                    {
-                        for (int k = 1; k <= HeightCuboid; k++)
-                        {
-                            mask.SetValue(i, j, k, 0);
                         }
                     }
                 }

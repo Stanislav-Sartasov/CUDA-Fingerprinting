@@ -73,10 +73,13 @@ namespace test
             List<Minutia> minutiae = new List<Minutia>();
             for (int i = 0; i < 10; i++)
             {
-                minutia.X = i;
-                minutia.Y =i;
-                minutia.Angle = (float)(i);
-                minutiae.Add(minutia);
+                for (int j = 0; j < 10; j++)
+                {
+                    minutia.X = i+11;
+                    minutia.Y = j+11;
+                    minutia.Angle = (float) (i);
+                    minutiae.Add(minutia);
+                }
             }
             TemplateCreator creator = new TemplateCreator(minutiae);
             Template[] t = { creator.CreateTemplate() };
