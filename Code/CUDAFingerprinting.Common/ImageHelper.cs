@@ -52,7 +52,6 @@ namespace CUDAFingerprinting.Common
             }
             var gfx = Graphics.FromImage(bmp2);
 
-            int fl = 1;
             foreach (var pt in minutiae)
             {
                 //minutia direction
