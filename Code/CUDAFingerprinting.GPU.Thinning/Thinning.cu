@@ -55,7 +55,7 @@ __host__ void InitPatterns()
 	PTTRN(p, 3, 0, 0) = PixelType::AT_LEAST_ONE_EMPTY; PTTRN(p, 3, 0, 1) = PixelType::EMPTY;  PTTRN(p, 3, 0, 2) = PixelType::AT_LEAST_ONE_EMPTY;
 	PTTRN(p, 3, 1, 0) = PixelType::FILLED;			   PTTRN(p, 3, 1, 1) = PixelType::CENTER; PTTRN(p, 3, 1, 2) = PixelType::FILLED;
 	PTTRN(p, 3, 2, 0) = PixelType::FILLED;			   PTTRN(p, 3, 2, 1) = PixelType::FILLED; PTTRN(p, 3, 2, 2) = PixelType::FILLED;
-	//PixelType.FILLED
+															//PixelType.FILLED
 	//e
 	PTTRN(p, 4, 0, 0) = PixelType::ANY;    PTTRN(p, 4, 0, 1) = PixelType::EMPTY;  PTTRN(p, 4, 0, 2) = PixelType::EMPTY;
 	PTTRN(p, 4, 1, 0) = PixelType::FILLED; PTTRN(p, 4, 1, 1) = PixelType::CENTER; PTTRN(p, 4, 1, 2) = PixelType::EMPTY;
@@ -237,6 +237,7 @@ __global__ void onePass(double* array, double* buffer, int width, int height, bo
 	}
 	wereNotChangesInBlock[blockIdx.y * gridDim.x + blockIdx.x] = fl;
 }
+
 /*
 //for newOnePass(
 //          newOnePass() is worse than onePass(maybe caused by synchronization)
@@ -244,101 +245,101 @@ __global__ void onePass(double* array, double* buffer, int width, int height, bo
 //      )
 __device__ bool MatchPattern(double* array, int x, int y, int width, int height, int i)
 {
-if (GetPixel(array, x, y, width, height) != WHITE)
-{
-bool yInPattern = false;
-int yWhiteCounter = 0;
-bool bad = false;
-for (int dY = -1; dY < 2; dY++)
-{
-if (bad)
-{
-break;
-}
-for (int dX = -1; dX < 2; dX++)
-{
-if (PATTERN(i, 1 + dX, 1 + dY) == PixelType::AT_LEAST_ONE_EMPTY)
-{
-yInPattern = true;
-yWhiteCounter += GetPixel(array, x + dX, y + dY, width, height) == WHITE ? 1 : 0;
-continue;
-}
-if (!AreEqual(GetPixel(array, x + dX, y + dY, width, height), PATTERN(i, 1 + dX, 1 + dY)))
-{
-bad = true;
-break;
-}
-}
-}
-if (!(bad ||
-(yInPattern && yWhiteCounter == 0) ||
-(i == 2 && !AreEqual(GetPixel(array, x + 2, y, width, height), PixelType::FILLED)) ||
-(i == 3 && !AreEqual(GetPixel(array, x, y + 2, width, height), PixelType::FILLED))))
-{
-return true;
-}
-else
-{
-return false;
-}
-}
-else
-{
-return false;
-}
+	if (GetPixel(array, x, y, width, height) != WHITE)
+	{
+		bool yInPattern = false;
+		int yWhiteCounter = 0;
+		bool bad = false;
+		for (int dY = -1; dY < 2; dY++)
+		{
+			if (bad)
+			{
+				break;
+			}
+			for (int dX = -1; dX < 2; dX++)
+			{
+				if (PATTERN(i, 1 + dX, 1 + dY) == PixelType::AT_LEAST_ONE_EMPTY)
+				{
+					yInPattern = true;
+					yWhiteCounter += GetPixel(array, x + dX, y + dY, width, height) == WHITE ? 1 : 0;
+					continue;
+				}
+				if (!AreEqual(GetPixel(array, x + dX, y + dY, width, height), PATTERN(i, 1 + dX, 1 + dY)))
+				{
+					bad = true;
+					break;
+				}
+			}
+		}
+		if (!(bad ||
+			(yInPattern && yWhiteCounter == 0) ||
+			(i == 2 && !AreEqual(GetPixel(array, x + 2, y, width, height), PixelType::FILLED)) ||
+			(i == 3 && !AreEqual(GetPixel(array, x, y + 2, width, height), PixelType::FILLED))))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 __global__ void newOnePass(double* array, double* buffer, int width, int height, bool* wereNotChangesInBlock)
 {
-__shared__ bool wereNotChanges[BLOCK_DIM][BLOCK_DIM];
-__shared__ bool isPatternI[BLOCK_DIM][BLOCK_DIM][14];
+	__shared__ bool wereNotChanges[BLOCK_DIM][BLOCK_DIM];
+	__shared__ bool isPatternI[BLOCK_DIM][BLOCK_DIM][14];
 
-//x coord of image
-int x = blockIdx.x * BLOCK_DIM + threadIdx.x;
-//y coord of image
-int y = blockIdx.y * BLOCK_DIM + threadIdx.y;
-//pattern id
-int pId = threadIdx.z;
+	//x coord of image
+	int x = blockIdx.x * BLOCK_DIM + threadIdx.x;
+	//y coord of image
+	int y = blockIdx.y * BLOCK_DIM + threadIdx.y;
+	//pattern id
+	int pId = threadIdx.z;
 
-isPatternI[threadIdx.y][threadIdx.x][threadIdx.z] = MatchPattern(array, x, y, width, height, pId);
-__syncthreads();
-bool isPattern = false;
-for (int i = 0; i < 14; i++)
-{
-if (isPatternI[threadIdx.y][threadIdx.x][i])
-{
-isPattern = true;
-break;
-}
-}
-__syncthreads();
+	isPatternI[threadIdx.y][threadIdx.x][threadIdx.z] = MatchPattern(array, x, y, width, height, pId);
+	__syncthreads();
+	bool isPattern = false;
+	for (int i = 0; i < 14; i++)
+	{
+		if (isPatternI[threadIdx.y][threadIdx.x][i])
+		{
+			isPattern = true;
+			break;
+		}
+	}
+	__syncthreads();
 
-wereNotChanges[threadIdx.y][threadIdx.x] = true;
+	wereNotChanges[threadIdx.y][threadIdx.x] = true;
+	
+	if (isPattern)
+	{
+		SetPixel(buffer, x, y, width, height, WHITE);
+		wereNotChanges[threadIdx.y][threadIdx.x] = false;
+	}
+	__syncthreads();
+	bool fl = true;
 
-if (isPattern)
-{
-SetPixel(buffer, x, y, width, height, WHITE);
-wereNotChanges[threadIdx.y][threadIdx.x] = false;
-}
-__syncthreads();
-bool fl = true;
-
-for (int i = 0; i < BLOCK_DIM; i++)
-{
-for (int j = 0; j < BLOCK_DIM; j++)
-{
-if (!wereNotChanges[i][j])
-{
-fl = false;
-break;
-}
-}
-if (!fl)
-{
-break;
-}
-}
-wereNotChangesInBlock[blockIdx.y * gridDim.x + blockIdx.x] = fl;
+	for (int i = 0; i < BLOCK_DIM; i++)
+	{
+		for (int j = 0; j < BLOCK_DIM; j++)
+		{
+			if (!wereNotChanges[i][j])
+			{
+				fl = false;
+				break;
+			}
+		}
+		if (!fl)
+		{
+			break;
+		}
+	}
+	wereNotChangesInBlock[blockIdx.y * gridDim.x + blockIdx.x] = fl;
 }
 */
 
