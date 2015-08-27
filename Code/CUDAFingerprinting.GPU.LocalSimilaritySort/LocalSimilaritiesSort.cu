@@ -100,7 +100,7 @@ CUDAArray<short> constructBuckets(T* similaritiesDatabase, short width, const LU
 
 	CUDAArray<T> gpuDB(similaritiesDatabase, width, templateOriginRow.databaseHeight);
 
-	dim3 blockSize(defaultThreadCount, defaultThreadCount);
+	dim3 blockSize(defaultThreadCount * defaultThreadCount);
 	dim3 gridSize(templateOriginRow.getLength());
 	quantify<<<gridSize, blockSize>>>(gpuDB, bucketMatrix, templateOriginRow);
 
@@ -154,41 +154,47 @@ __global__ void quantify(CUDAArray<float> src, CUDAArray<short> dst, LUT_OR temp
 
 	// allow only two threads address to the templateOriginRow
 	__shared__ size_t yOffset[2];
-	if ((threadIdx.x <= 1) && (threadIdx.y == 0))
+	if (threadIdx.x <= 1)
 		yOffset[threadIdx.x] = templateOriginRow[blockIdx.x + threadIdx.x];
 	__syncthreads();
-	
+
 	__shared__ int subBucketMatrix[quantLevels];
-	if (threadIdx.y < quantLevels / blockDim.x) 
-		subBucketMatrix[blockDim.x * threadIdx.y + threadIdx.x] = 0;
+	if (threadIdx.x < quantLevels) 
+		subBucketMatrix[threadIdx.x] = 0;
+
+	__shared__ short threadsPerRow; 
+	__shared__ bool hitTemplateEnd;
+	// use free warp while others initialize subBucketMatrix
+	if (threadIdx.x == quantLevels)
+		hitTemplateEnd = false;
+	if (threadIdx.x == quantLevels + 32)
+		threadsPerRow = ceilMod(src.Width, 16) * 16;
 	__syncthreads();
 
-	size_t x;	//	database column
-	size_t y = yOffset[0] + threadIdx.y;	//	database row
+	size_t x = threadIdx.x % threadsPerRow;	//	database column
+	size_t y = yOffset[0] + threadIdx.x / threadsPerRow;	//	database row
 	
-	// traverse down
+	// traverse through template
 	do {
-		x = threadIdx.x;
+		//__syncthreads();
 
-		// traverse right
-		do {
-			if ((x < src.Width) && (y < yOffset[1])) {
-				int level = (int)(quantLevels * src.At(y, x));
-				level = min(level, 63);
-				atomicAdd(subBucketMatrix + level, 1);
-			}
-			x += blockDim.x;
-			__syncthreads();
-		} while (x - threadIdx.x < src.Width);
+		if ((x < src.Width) && (y < yOffset[1]))
+			atomicAdd(subBucketMatrix + (int)(quantLevels * src.At(y, x)), 1);
+		__syncthreads();
 
-		y += blockDim.y;
-	} while (y - threadIdx.y < yOffset[1]);
+		x += blockDim.x;
+		y += x / threadsPerRow;
+		x %= threadsPerRow;
+
+		if ((threadIdx.x == 0) && (y >= yOffset[1]))
+			hitTemplateEnd = true;
+
+		//__syncthreads();
+	} while (!hitTemplateEnd);
 	
 	// coalesced copy to global memory
-	if (threadIdx.y < quantLevels / blockDim.x) {
-		short index = blockDim.x * threadIdx.y + threadIdx.x;
-		dst.SetAt(blockIdx.x, index, subBucketMatrix[index]);
-	}
+	if (threadIdx.x < quantLevels)
+		dst.SetAt(blockIdx.x, threadIdx.x, subBucketMatrix[threadIdx.x]);
 	
 }
 
@@ -196,38 +202,48 @@ __global__ void quantify(CUDAArray<short> src, CUDAArray<short> dst, LUT_OR temp
 
 	// allow only two threads address to the templateOriginRow
 	__shared__ size_t yOffset[2];
-	if ((threadIdx.x <= 1) && (threadIdx.y == 0))
+	if (threadIdx.x <= 1)
 		yOffset[threadIdx.x] = templateOriginRow[blockIdx.x + threadIdx.x];
 	__syncthreads();
 
 	__shared__ int subBucketMatrix[quantLevels];
-	if (threadIdx.y < quantLevels / blockDim.x)
-		subBucketMatrix[blockDim.x * threadIdx.y + threadIdx.x] = 0;
+	if (threadIdx.x < quantLevels)
+		subBucketMatrix[threadIdx.x] = 0;
+
+	__shared__ short threadsPerRow;
+	__shared__ bool hitTemplateEnd;
+	// use free warp while others initialize subBucketMatrix
+	if (threadIdx.x == quantLevels)
+		hitTemplateEnd = false;
+	if (threadIdx.x == quantLevels + 32)
+		threadsPerRow = ceilMod(src.Width, 16) * 16;
 	__syncthreads();
 
-	size_t x;	//	database column
-	size_t y = yOffset[0] + threadIdx.y;	//	database row
+	size_t x = threadIdx.x % threadsPerRow;	//	database column
+	size_t y = yOffset[0] + threadIdx.x / threadsPerRow;	//	database row
 
-	// traverse down
+	// traverse through template
 	do {
-		x = threadIdx.x;
+		//__syncthreads();
 
-		// traverse right
-		do {
-			if ((x < src.Width) && (y < yOffset[1]))
-				atomicAdd(subBucketMatrix + src.At(y, x), 1);
-			x += blockDim.x;
-			__syncthreads();
-		} while (x - threadIdx.x < src.Width);
+		if ((x < src.Width) && (y < yOffset[1]))
+			atomicAdd(subBucketMatrix + src.At(y, x), 1);
+		__syncthreads();
 
-		y += blockDim.y;
-	} while (y - threadIdx.y < yOffset[1]);
+		x += blockDim.x;
+		y += x / threadsPerRow;
+		x %= threadsPerRow;
+
+		if ((threadIdx.x == 0) && (y >= yOffset[1]))
+			hitTemplateEnd = true;
+
+		//__syncthreads();
+	} while (!hitTemplateEnd);
 
 	// coalesced copy to global memory
-	if (threadIdx.y < quantLevels / blockDim.x) {
-		short index = blockDim.x * threadIdx.y + threadIdx.x;
-		dst.SetAt(blockIdx.x, index, subBucketMatrix[index]);
-	}
+	if (threadIdx.x < quantLevels)
+		dst.SetAt(blockIdx.x, threadIdx.x, subBucketMatrix[threadIdx.x]);
+
 }
 
 __global__ void cudaComputeGlobalScores(float* globalScores, CUDAArray<short> bucketMatrix, short queryTemplateSize, short* templateSizes, LUT_NP numberOfValuesToPick) {
@@ -311,7 +327,19 @@ int main() {
 	auto error = cudaSetDevice(0);
 
 	float *scores = new float[templatesNumber];
+
+	cudaEvent_t beg, end;
+	error = cudaEventCreate(&beg);
+	error = cudaEventCreate(&end);
+	error = cudaEventRecord(beg);
 	getGlobalScoresFloat(scores, linDB, templatesNumber, templateSizes, queryTemplateSize);
+	error = cudaEventRecord(end);
+	cudaEventSynchronize(end);
+	float time;
+	error = cudaEventElapsedTime(&time, beg, end);
+	cudaEventDestroy(beg);
+	cudaEventDestroy(end);
+
 	for (int i = 0; i < templatesNumber; ++i)
 		printf("%f\n", scores[i]);
 
