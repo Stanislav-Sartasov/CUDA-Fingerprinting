@@ -10,13 +10,14 @@
 #include <cmath>
 
 #ifdef _DEBUG
+#include <Windows.h>
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
 #endif
 
-const char INPUT_FILE_TEMPLATE_TAGS[] = "C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprintig.GPU.LocalSimilaritySort\\tags.txt";
-const char INPUT_FILE_NP_VALS[] = "C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprintig.GPU.LocalSimilaritySort\\np.txt";
+//const char INPUT_FILE_TEMPLATE_TAGS[] = "C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprintig.GPU.LocalSimilaritySort\\tags.txt";
+//const char INPUT_FILE_NP_VALS[] = "C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprintig.GPU.LocalSimilaritySort\\np.txt";
 const short quantLevels = 64;
 
 
@@ -53,11 +54,11 @@ void getGlobalScoresShort(float* globalScores, short* similaritiesDatabase, int 
 	LUT_OR templateOriginRow;
 	LUT_NP numberOfValuesToPick;
 
-	//if (templateOriginRow.read(INPUT_FILE_TEMPLATE_TAGS) == -1)
-	templateOriginRow.fill(templatesNumber, templateSizes);
+	if (templateOriginRow.read("origins.txt") == -1)
+		templateOriginRow.fill(templatesNumber, templateSizes);
 
-	//if (numberOfValuesToPick.read(INPUT_FILE_NP_VALS) == -1)
-	numberOfValuesToPick.fill();
+	if (numberOfValuesToPick.read("npvals.txt") == -1)
+		numberOfValuesToPick.fill();
 
 	CUDAArray<short> bucketMatrix = constructBuckets(similaritiesDatabase, queryTemplateSize, templateOriginRow);
 	
@@ -73,10 +74,10 @@ void getGlobalScoresFloat(float* globalScores, float* similaritiesDatabase, int 
 	LUT_OR templateOriginRow;
 	LUT_NP numberOfValuesToPick;
 
-	if (templateOriginRow.read(INPUT_FILE_TEMPLATE_TAGS) == -1)
+	if (templateOriginRow.read("origins.txt") == -1)
 		templateOriginRow.fill(templatesNumber, templateSizes);
 
-	if (numberOfValuesToPick.read(INPUT_FILE_NP_VALS) == -1)
+	if (numberOfValuesToPick.read("npvals.txt") == -1)
 		numberOfValuesToPick.fill();
 
 	CUDAArray<short> bucketMatrix = constructBuckets(similaritiesDatabase, queryTemplateSize, templateOriginRow);

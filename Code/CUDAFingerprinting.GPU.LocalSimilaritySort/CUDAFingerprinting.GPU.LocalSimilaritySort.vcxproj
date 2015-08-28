@@ -72,7 +72,7 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)CUDAFingerprinting.GPU.Common\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <TargetExt>.exe</TargetExt>
-    <TargetName>$(ProjectName).newMany</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -172,6 +172,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="LocalSimilaritiesSort.cuh" />
     <ClInclude Include="LookUpTable.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="npvals.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
