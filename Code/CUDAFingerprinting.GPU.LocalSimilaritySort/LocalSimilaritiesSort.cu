@@ -280,76 +280,76 @@ __global__ void cudaComputeGlobalScores(float* globalScores, CUDAArray<short> bu
 
 }
 
-int main() {
-
-	/*int templatesNumber = 180;
-	short templateSizes[180];
-	int width = 0;
-	for (int i = 0; i < templatesNumber; ++i) {
-	templateSizes[i] = 60 + rand() % 40;
-	width += templateSizes[i];
-	}
-	short queryTemplateSize = 60 + rand() % 40;
-	float** DB = new float*[queryTemplateSize];
-	for (int i = 0; i < queryTemplateSize; ++i) {
-	DB[i] = new float[width];
-	for (int j = 0; j < width; ++j)
-	DB[i][j] = (rand() % 256) / 256.0;
-	}
-
-	// auto linDB = linearizeDoublePointer(DB, 0, queryTemplateSize, width);
-	*/
-
-	std::ifstream fin_database("C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.LocalSimilaritySort\\database.txt");
-	std::ifstream fin_tempalteSizes("C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.LocalSimilaritySort\\templateSizes.txt");
-
-	int templatesNumber;
-	short *templateSizes;
-	int height, queryTemplateSize;
-	float *linDB;
-
-	fin_tempalteSizes >> templatesNumber;
-
-	templateSizes = new short[templatesNumber];
-
-	for (int i = 0; i < templatesNumber; ++i)
-		fin_tempalteSizes >> templateSizes[i];
-
-	fin_database >> height >> queryTemplateSize;
-
-	linDB = new float[height * queryTemplateSize];
-
-	for (int i = 0; i < height; ++i) {
-		int hOffset = i * queryTemplateSize;
-		for (int j = 0; j < queryTemplateSize; ++j)
-			fin_database >> linDB[hOffset + j];
-	}
-
-	auto error = cudaSetDevice(0);
-
-	float *scores = new float[templatesNumber];
-
-	cudaEvent_t beg, end;
-	error = cudaEventCreate(&beg);
-	error = cudaEventCreate(&end);
-	error = cudaEventRecord(beg);
-	getGlobalScoresFloat(scores, linDB, templatesNumber, templateSizes, queryTemplateSize);
-	error = cudaEventRecord(end);
-	cudaEventSynchronize(end);
-	float time;
-	error = cudaEventElapsedTime(&time, beg, end);
-	cudaEventDestroy(beg);
-	cudaEventDestroy(end);
-
-	for (int i = 0; i < templatesNumber; ++i)
-		printf("%f\n", scores[i]);
-
-	cudaDeviceReset();
-	/*for (int i = 0; i < queryTemplateSize; ++i)
-	delete[] DB[i];*/
-	delete[] templateSizes;
-	delete[] linDB;
-	delete[] scores;
-
-	return 0;
-}
+//int main() {
+//
+//	/*int templatesNumber = 180;
+//	short templateSizes[180];
+//	int width = 0;
+//	for (int i = 0; i < templatesNumber; ++i) {
+//	templateSizes[i] = 60 + rand() % 40;
+//	width += templateSizes[i];
+//	}
+//	short queryTemplateSize = 60 + rand() % 40;
+//	float** DB = new float*[queryTemplateSize];
+//	for (int i = 0; i < queryTemplateSize; ++i) {
+//	DB[i] = new float[width];
+//	for (int j = 0; j < width; ++j)
+//	DB[i][j] = (rand() % 256) / 256.0;
+//	}
+//
+//	// auto linDB = linearizeDoublePointer(DB, 0, queryTemplateSize, width);
+//	*/
+//
+//	std::ifstream fin_database("C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.LocalSimilaritySort\\database.txt");
+//	std::ifstream fin_tempalteSizes("C:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.LocalSimilaritySort\\templateSizes.txt");
+//
+//	int templatesNumber;
+//	short *templateSizes;
+//	int height, queryTemplateSize;
+//	float *linDB;
+//
+//	fin_tempalteSizes >> templatesNumber;
+//
+//	templateSizes = new short[templatesNumber];
+//
+//	for (int i = 0; i < templatesNumber; ++i)
+//		fin_tempalteSizes >> templateSizes[i];
+//
+//	fin_database >> height >> queryTemplateSize;
+//
+//	linDB = new float[height * queryTemplateSize];
+//
+//	for (int i = 0; i < height; ++i) {
+//		int hOffset = i * queryTemplateSize;
+//		for (int j = 0; j < queryTemplateSize; ++j)
+//			fin_database >> linDB[hOffset + j];
+//	}
+//
+//	auto error = cudaSetDevice(0);
+//
+//	float *scores = new float[templatesNumber];
+//
+//	cudaEvent_t beg, end;
+//	error = cudaEventCreate(&beg);
+//	error = cudaEventCreate(&end);
+//	error = cudaEventRecord(beg);
+//	getGlobalScoresFloat(scores, linDB, templatesNumber, templateSizes, queryTemplateSize);
+//	error = cudaEventRecord(end);
+//	cudaEventSynchronize(end);
+//	float time;
+//	error = cudaEventElapsedTime(&time, beg, end);
+//	cudaEventDestroy(beg);
+//	cudaEventDestroy(end);
+//
+//	for (int i = 0; i < templatesNumber; ++i)
+//		printf("%f\n", scores[i]);
+//
+//	cudaDeviceReset();
+//	/*for (int i = 0; i < queryTemplateSize; ++i)
+//	delete[] DB[i];*/
+//	delete[] templateSizes;
+//	delete[] linDB;
+//	delete[] scores;
+//
+//	return 0;
+//}
