@@ -31,7 +31,7 @@ struct Minutia
 struct CylinderMulti
 {
 public:
-	unsigned int values[48];
+	unsigned int *values;
 	float angle;
 	float norm;
 
@@ -43,10 +43,7 @@ public:
 	__device__ CylinderMulti(unsigned int *givenValues, float givenAngle, float givenNorm) :
 		angle(givenAngle), norm(givenNorm)
 	{
-		for (int i = 0; i < 48; i++)
-		{
-			values[i] = *(givenValues + i*4);
-		}
+		values = givenValues;
 	}
 };
 
