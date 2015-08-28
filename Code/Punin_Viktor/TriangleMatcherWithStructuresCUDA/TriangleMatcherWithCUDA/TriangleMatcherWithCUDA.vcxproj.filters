@@ -2,6 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="TrianglesMatcherWithCUDA.cu">
+      <Filter>Sources</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
@@ -10,5 +13,10 @@
     <Filter Include="Sources">
       <UniqueIdentifier>{8bf69d5a-e6c1-43f1-8df0-1ee570604424}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TrianglesMatcherWithCUDA.cuh">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
