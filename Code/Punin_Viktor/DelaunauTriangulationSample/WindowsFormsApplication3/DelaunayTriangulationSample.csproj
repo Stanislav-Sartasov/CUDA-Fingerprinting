@@ -55,6 +55,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Point.cs" />
+    <Compile Include="Classes\PolarPoint.cs" />
+    <Compile Include="Classes\Section.cs" />
+    <Compile Include="Classes\Triangle.cs" />
+    <Compile Include="Classes\Triangulation.cs" />
+    <Compile Include="Classes\Vector.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
