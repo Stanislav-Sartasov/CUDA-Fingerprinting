@@ -1,4 +1,3 @@
-
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "MinutiaHelper.cuh"
@@ -9,13 +8,25 @@
 #include <string.h>
 
 
-__global__ void k(int *p)
+__global__ void t(int *p)
 {
-	printf("nums\n");
-	for (int i = 262; i < 272; i++)
+	printf("matrx\n");
+	for (int i = 0; i < 1; i++)
 	{
-		printf("adr %d\n", &(p[i]));
+		for (int j = 0; j < 100; j++)
+		{
+			printf("%d\n", p[j]);
+		}
 	}
+}
+
+__global__ void k(Descriptor *p, Descriptor *b)
+{
+	printf("\n");
+	printf("%d %d %f\n", p[0].center.x, p[0].center.y, p[0].center.angle);
+	printf("\n");
+	printf("%d %d %f\n", b[0].center.x, b[0].center.y, b[0].center.angle);
+	printf("\n");
 }
 
 __global__ void l(Descriptor *p)
@@ -23,14 +34,36 @@ __global__ void l(Descriptor *p)
 	printf("descs\n");
 	for (int i = 0; i < 10; i++)
 	{
-		printf("adr %d\n", &(p[i]));
+		printf("len: %d\n", (p[i].length));
+		printf("center: %d %d %f\n", p[i].center.x, p[i].center.y, p[i].center.angle);
+		for (int j = 0; j < p[i].length; j++)
+		{
+			printf("%d %d %f\n", p[i].minutias[j].x, p[i].minutias[j].y, p[i].minutias[j].angle);
+		}
+	}
+}
+//__constant__ Descriptor fingerDesc[MAX_DESC_SIZE];
+
+__global__ void count(int* s_m1, int* s_M1, int* s_m2, int* s_M2, float* s)
+{
+	for (int k = 0; k < 1; ++k)
+	{
+		for (int i = 0; i < 30; ++i)
+		{
+			for (int j = 0; j < 30; ++j)
+			{
+				s[i * MAX_DESC_SIZE + j] = (1.0 + s_m1[i * MAX_DESC_SIZE + j]) * (1.0 + s_m2[i * MAX_DESC_SIZE + j]) /
+					(1.0 + s_M1[i * MAX_DESC_SIZE + j]) / (1.0 + s_M2[i * MAX_DESC_SIZE + j]);
+				//printf("%d %d\n", s_m1[i * MAX_DESC_SIZE + j], s_M1[i * MAX_DESC_SIZE + j]);
+			}
+			//printf("\n");
+		}
 	}
 }
 
-
 int main()
 {
-	cudaSetDevice(0);
+	cudaSetDevice(0); 
 	int i, j;
 	int sizeOfMin = sizeof(Minutia);
 	int sizeOfDesc = sizeof(Descriptor);
@@ -54,10 +87,15 @@ int main()
 	cudaMalloc((void**)&dev_fingerMins, minPitch);
 	fingerRead(fingerPath, fingerMins, &fingerMinutiaNum);
 	cudaMemcpy(dev_fingerMins, fingerMins, minPitch, cudaMemcpyHostToDevice);
+
+	//buildFingerDescriptors(fingerMins, &fingerMinutiaNum, fingerDesc);
+
+	//cudaMemcpyToSymbol(dev_fingerMins, fingerMins, minPitch);
 	cudaMemcpy(dev_fingerMinutiaNum, &fingerMinutiaNum, sizeOfInt, cudaMemcpyHostToDevice);
 
-	Descriptor *dev_fingerDesc;
+	Descriptor *dev_fingerDesc;  //TODO: try constant memory
 	cudaMalloc((void**)&dev_fingerDesc, MAX_DESC_SIZE * sizeOfDesc);
+//	cudaMemcpyToSymbol(dev_fingerDesc, fingerDesc, MAX_DESC_SIZE * sizeOfDesc);
 
 
 	cudaEvent_t start, stop;
@@ -66,6 +104,7 @@ int main()
 	cudaEventRecord(start, 0);
 
 	buildDescriptors <<<dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >>>(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
+	
 
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
@@ -77,9 +116,6 @@ int main()
 	
 
 	/////////end of work with input finger
-
-
-
 
 
 	
@@ -116,28 +152,53 @@ int main()
 
 		
 	///////end of work with fingers base
-
+	//l <<<1, 1>>> (dev_fingerDesc);
+	//k << <1, 1 >> > (dev_fingerDesc, dev_dbDesc);
 	///////compare descriptors
 	
-	Descriptor *temp0, *temp1;
-	cudaMalloc((void**)&temp0, MAX_DESC_SIZE*dbSize*sizeOfDesc);
-	cudaMalloc((void**)&temp1, MAX_DESC_SIZE*dbSize*sizeOfDesc);
 
 	float *s;
+	float* cpu_s = (float*)malloc(dbSize * MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
+
 	cudaMalloc((void**)&s, MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
+
 	printf(".1fms\n", et);
-	//compareDescriptors << < dim3(MAX_DESC_SIZE / DESC_PER_BLOCK, MAX_DESC_SIZE / DESC_PER_BLOCK, dbSize),
-		//dim3(DESC_BLOCK_SIZE, DESC_BLOCK_SIZE, 2) >>> (
-		//dev_fingerDesc, dev_dbDesc, temp0, temp1, s, height, width, MAX_DESC_SIZE);
+	cudaEventRecord(start, 0);
+	compareDescriptors << < (dbSize - 1)/ 32 + 1,
+		dim3(MAX_DESC_SIZE, 8) >> > (
+		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);
+	//l << <1, 1 >> > (dev_dbDesc);
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&et, start, stop);
+	printf("for cmp   %3.1fms \n", et);
+
+	//l << <1, 1 >> > (dev_fingerDesc);
+	//t << < 1, 1 >>> (s_m1);
 	printf("3.1fms\n");
 	///////
+	cudaMemcpy(cpu_s, s, MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float), cudaMemcpyDeviceToHost);
+	
+	FILE* f;
+	f = fopen("file.txt", "w");
+	for (int k = 100; k < 101; ++k)
+	{
+		for (int i = 0; i < 30; ++i)
+		{
+			for (int j = 0; j < 30; ++j)
+			{
+				fprintf(f, "%f ", cpu_s[i * MAX_DESC_SIZE + j]);
+			}
+			fprintf(f, "\n");
+		}
+	}
+	
 	cudaFree(s);
-	cudaFree(temp0);
-	cudaFree(temp1);
 
+	free(cpu_s);
 	free(fingerMins);
-	cudaFree(dev_fingerMinutiaNum);
-	cudaFree(dev_fingerMins);
+//	cudaFree(dev_fingerMinutiaNum);
+	//cudaFree(dev_fingerMins);
 	cudaFree(dev_fingerDesc);
 	
 	free(dbMinutiaNum);

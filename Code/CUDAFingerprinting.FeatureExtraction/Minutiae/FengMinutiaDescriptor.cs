@@ -46,7 +46,7 @@ namespace CUDAFingerprinting.FeatureExtraction.Minutiae
             for (i = 0; i < desc1.Minutias.Count; i++)
             {
                 isExist = false;
-                //sort desc2 and binary search is better solution
+                //sort desc2 and binary search is better solution (or not)
                 for (j = 0; j < desc2.Minutias.Count; j++)
                 {
                     if ((MinutiaHelper.SqrLength(desc1.Minutias[i], desc2.Minutias[j]) < r*r)

@@ -3,7 +3,7 @@
 
 #include "MinutiaStructs.cuh"
 
-__global__ void compareDescriptors(Descriptor* input, Descriptor* current, Descriptor* temp0, Descriptor* temp1,
-	float* s, int height, int width, int pitch);
+__global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
+	int inputNum, int* currentNum);
 
 #endif

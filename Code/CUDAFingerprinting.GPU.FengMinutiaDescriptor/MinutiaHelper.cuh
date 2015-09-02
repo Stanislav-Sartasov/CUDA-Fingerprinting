@@ -23,13 +23,13 @@
 #define defaultDescriptorColumn() blockIdx.x / DESC_PER_BLOCK
 #define defaultFinger() blockIdx.z
 
-__device__ float sqrLength(Minutia m1, Minutia m2);
+__host__ __device__ float sqrLength(Minutia m1, Minutia m2);
 
 void fingersBaseRead(char *dbPath, int dbSize, int pitch, Minutia *mins, int *minutiaNum);
 
 void fingerRead(char *filePath, Minutia *mins, int *minutiaNum);
 
-__device__ void normalizeAngle(float *angle);
+__host__ __device__ void normalizeAngle(float *angle);
 
 __device__ void cudaReductionSum(float* a, int i, int x);
 
