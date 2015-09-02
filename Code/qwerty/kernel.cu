@@ -164,8 +164,8 @@ int main()
 
 	printf(".1fms\n", et);
 	cudaEventRecord(start, 0);
-	compareDescriptors << < (dbSize - 1)/ 32 + 1,
-		dim3(MAX_DESC_SIZE, 8) >> > (
+	compareDescriptors << < 4 * 4 * dbSize,
+		dim3(32, 32) >> > (
 		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);
 	//l << <1, 1 >> > (dev_dbDesc);
 	cudaEventRecord(stop, 0);

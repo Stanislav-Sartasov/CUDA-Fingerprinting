@@ -3,8 +3,8 @@
 #include <stdio.h>
 
 //#include "device_launch_parameters.h"
-
-__device__ void transformate(Descriptor* desc, /* float angle, float cosAngle, float sinAngle,*/ 
+/*
+__device__ void transformate(Descriptor* desc, 
 	Minutia center, Minutia* dst, int j)
 { 
 	int dx = (*desc).minutias[j].x - (*desc).center.x;
@@ -23,41 +23,87 @@ __device__ void transformate(Descriptor* desc, /* float angle, float cosAngle, f
 	(*dst).x = x;
 	(*dst).y = y;
 }
+	*/
 
-__device__ void matchingPoints(Minutia min, Descriptor* desc, int* m, int* M, int width, int height)
+__device__ void matchingPoints(Descriptor* desc1, Descriptor* desc2, int* m, int* M, int width, int height)
 {
-	float eps = 0.1;
+	int i;
+	float angle = (*desc2).center.angle - (*desc1).center.angle;
+	float cosAngle = cos(angle);
+	float sinAngle = sin(angle);
 
 	*m = 0;
 	*M = 0;
-
-	int j = 0;
-	bool isExist = false;
-	while ((j < (*desc).length) && !isExist)
-	{
-		if ((sqrLength((*desc).minutias[j], min) < COMPARE_RADIUS*COMPARE_RADIUS)
-			&& (abs((*desc).minutias[j].angle - min.angle) < eps))
-		{
-			isExist = true;
-		}
-		j++;
-	}
 	
-	if (isExist)
+	for (i = 0; i < (*desc1).length; i++)
 	{
-		*m = 1;
-		*M = 1;
-	}
-	else
-	{
-		if ((sqrLength(min, (*desc).center) < FENG_CONSTANT * DESCRIPTOR_RADIUS * DESCRIPTOR_RADIUS) &&
-			(min.x >= 0 && min.x < width && min.y >= 0 && min.y < height))
+		int dx = (*desc1).minutias[i].x - (*desc1).center.x;
+		int dy = (*desc1).minutias[i].y - (*desc1).center.y;
+
+		int x = (int)round(dx * cosAngle + dy * sinAngle) + (*desc2).center.x;
+		int y = (int)round(-dx * sinAngle + dy * cosAngle) + (*desc2).center.y;
+
+		Minutia min;
+		min.angle = (*desc1).minutias[i].angle + angle;
+		normalizeAngle(&(min.angle));
+		min.x = x;
+		min.y = y;
+		//printf("%d %d %f\n", min.x, min.y, min.angle);
+		//printf("%d %d %f\n", (*desc2).minutias[0].x, (*desc2).minutias[0].y, (*desc2).minutias[0].angle);
+
+		float eps = 0.1;
+		
+		int j = 0;
+		bool isExist = false;
+		while ((j < (*desc2).length) && !isExist)
 		{
-				*M = 1; 
+			if ((sqrLength((*desc2).minutias[j], min) < COMPARE_RADIUS*COMPARE_RADIUS)
+				&& (abs((*desc2).minutias[j].angle - min.angle) < eps))
+			{
+				isExist = true;
+			}
+			j++;
+		}
+
+		if (isExist)
+		{
+			++*m; 
+			++*M;
+		}
+		else
+		{
+			if ((sqrLength(min, (*desc2).center) < FENG_CONSTANT * DESCRIPTOR_RADIUS * DESCRIPTOR_RADIUS) &&
+				(min.x >= 0 && min.x < width && min.y >= 0 && min.y < height))
+			{
+				++*M;
+			}
 		}
 	}
+	//printf("%d %d\n", *m, *M);
 }
 
+__global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
+	int inputNum, int* currentNum)
+{
+	int x = defaultColumn();
+	int k = blockIdx.z;
+	int y = defaultRow();
+
+	if (x < inputNum && y < currentNum[k])
+	//if (k == 0 && x == 1 && y == 0)
+	{
+		int m1, M1, m2, M2;
+
+		matchingPoints(&input[x], &current[k*pitch + y], &m1, &M1, width, height);
+
+		matchingPoints(&current[k*pitch + y], &input[x], &m2, &M2, width, height);
+
+		//printf("%d %d %d %d", m1, M1, m2, M2);
+
+		s[k*MAX_DESC_SIZE*MAX_DESC_SIZE + x*MAX_DESC_SIZE + y] = (1.0 + m1) * (1.0 + m2) / (1.0 + M1) / (1.0 + M2);
+	}
+}
+/*
 __global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
 	int inputNum, int* currentNum) ///block 128*2
 {
@@ -136,7 +182,7 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor* current, int h
 	}
 }
 
-
+*/
 
 /*
 __global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
