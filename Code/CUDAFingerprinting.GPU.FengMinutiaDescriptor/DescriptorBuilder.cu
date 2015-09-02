@@ -35,6 +35,7 @@ __global__ void buildDescriptors(Minutia *mins, int pitch, int *minutiaNum, Desc
 	}
 
 	__syncthreads();
+	
 }
 
 void buildFingerDescriptors(Minutia *mins, int *minutiaNum, Descriptor *desc)
