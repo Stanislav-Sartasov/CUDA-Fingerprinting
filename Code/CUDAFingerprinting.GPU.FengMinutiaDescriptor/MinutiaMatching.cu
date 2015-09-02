@@ -4,6 +4,62 @@
 #include <math.h>
 #include <stdlib.h>
 
+
+__global__ void topElements(float* arrayOfMatrix, int pitch, int inMatrixPitch, float* top, int topSize/*32*/) //arrayOfMatrix - 1000x128x128, top - 1000 x topSize
+{
+	int num = blockIdx.x;
+	int part = threadIdx.x;
+	int bd = blockDim.x; //512
+	int i, j, k, cmp1, cmp2, temp;
+	for (i = 0; i < topSize; i++)
+	{
+		for (j = i; j < topSize; j++)
+		{
+			if (arrayOfMatrix[num*pitch + part*topSize + i] < arrayOfMatrix[num*pitch + part*topSize + j])
+			{
+				temp = arrayOfMatrix[num*pitch + part*topSize + i];
+				arrayOfMatrix[num*pitch + part*topSize + i] = arrayOfMatrix[num*pitch + part*topSize + j];
+				arrayOfMatrix[num*pitch + part*topSize + j] = temp;
+			}
+		}
+	}
+	__syncthreads();
+	int border = bd;
+	while (border > topSize)
+	{
+		if (2*part < border)
+		{
+			cmp1 = 0;
+			cmp2 = 0;
+			while (cmp1 < topSize - 1 && cmp2 < topSize - 1)
+			{
+				if (arrayOfMatrix[num*pitch + part*topSize + cmp1] > arrayOfMatrix[num*pitch + (part)*topSize + cmp2])
+				{
+					cmp1++;
+				}
+				else
+				{
+					for (k = topSize - 1; k > cmp1; k--)
+					{
+						arrayOfMatrix[num*pitch + part*topSize + k] = arrayOfMatrix[num*pitch + part*topSize + k-1];
+					}
+					arrayOfMatrix[num*pitch + part*topSize + cmp1] = arrayOfMatrix[num*pitch + part*topSize + cmp2];
+					cmp1++;
+					cmp2++;
+				}
+			}
+		}
+		border /= 2;
+		__syncthreads();
+
+	}
+	if (part < topSize)//TODO
+	{
+		top[num*topSize + part] = arrayOfMatrix[num*topSize + part];
+	}
+
+}
+
 __global__ void makeNormalSize(float*** s, float*** sn) ///block 8*8
 {
 	__shared__ float sum[DESC_PER_BLOCK][DESC_PER_BLOCK];
