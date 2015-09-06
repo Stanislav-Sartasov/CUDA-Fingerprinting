@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.Common", "CUDAFingerprinting.GPU.Common\CUDAFingerprinting.GPU.Common.vcxproj", "{FF7EFCD3-BE2A-43B4-AF3E-91469400E6A8}"
 EndProject
@@ -71,6 +71,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.PoincareDetection", "CUDAFingerprinting.GPU.PoincareDetection\CUDAFingerprinting.GPU.PoincareDetection.vcxproj", "{113B0094-49FF-4931-B647-2DA46B268E05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.PoincareDetection.Test", "CUDAFingerprinting.GPU.PoincareDetection.Test\CUDAFingerprinting.GPU.PoincareDetection.Test.csproj", "{68219B79-B237-40AE-B51F-F08E4E87C1E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.GPU.TemplateCreationTest", "CUDAFingerprinting.GPU.TemplateCreationTest\CUDAFingerprinting.GPU.TemplateCreationTest.csproj", "{CD3BFFD9-9B28-47C9-B145-936D104E2A08}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDAFingerprinting.GPU.TemplateCreation", "CUDAFingerprinting.GPU.TemplateCreation\CUDAFingerprinting.GPU.TemplateCreation.vcxproj", "{89AC63DF-6174-409A-BF54-60971B6A2BC6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common.Tests", "CUDAFingerprinting.Common.Tests\CUDAFingerprinting.Common.Tests.csproj", "{38A60AAB-F01A-4C84-9EEA-0B3D98B8AE89}"
 EndProject

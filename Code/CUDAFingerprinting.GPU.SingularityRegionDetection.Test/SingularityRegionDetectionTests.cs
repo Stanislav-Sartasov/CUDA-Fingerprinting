@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Runtime.InteropServices;
 using CUDAFingerprinting.Common;
 using System.IO;
+using CUDAFingerprinting.Common.OrientationField;
 
 namespace CUDAFingerprinting.GPU.SingularityRegionDetection.Test
 {

@@ -51,6 +51,7 @@
     <Compile Include="ConvexHull\ConvexHull.cs" />
     <Compile Include="ConvexHull\ConvexHullModified.cs" />
     <Compile Include="ConvolutionHelper.cs" />
+    <Compile Include="CylinderHelper.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="ImageHelper.cs" />
     <Compile Include="ImageSizeHelper.cs" />

@@ -4,6 +4,8 @@
 #include "CylinderHelper.cuh"
 #include "BinCorrelationHelper.cuh"
 
+__device__ float getAngleDiff(float angle1, float angle2);
+
 #define MAX_CYLINDERS_PER_TEMPLATE 256
 #define CYLINDER_CELLS_COUNT 8 // Hopefully this define is not necessary (constant memory again)
 

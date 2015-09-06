@@ -3,7 +3,7 @@
 #include <math.h>
 #include "VectorHelper.cuh"
 
-float pointDistance(Point A, Point B)
+__device__ __host__ float pointDistance(Point A, Point B)
 {
 	float diffX = B.x - A.x;
 	float diffY = B.y - A.y;

@@ -7,6 +7,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using CUDAFingerprinting.Common.OrientationField;
 
 namespace CUDAFingerprinting.GPU.MinutiaDetection.Tests
 {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.Common", "CUDAFingerprinting.Common\CUDAFingerprinting.Common.csproj", "{6FD094CC-0F63-47BD-A377-F054AE615517}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.TemplateMatching.Tests", "CUDAFingerprinting.TemplateMatching.Tests\CUDAFingerprinting.TemplateMatching.Tests.csproj", "{68B2AF01-67F4-4DF1-AD22-E379F1B0540B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUDAFingerprinting.ImageProcessing.Tests", "CUDAFingerprinting.ImageProcessing.Tests\CUDAFingerprinting.ImageProcessing.Tests.csproj", "{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{18620592-26AB-4AD3-965B-9C4A42D282A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,6 +153,20 @@ Global
 		{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}.Release|Win32.ActiveCfg = Release|Any CPU
 		{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}.Release|x64.ActiveCfg = Release|Any CPU
 		{35EC1A3A-9884-4CF1-AE64-94C3E73665B6}.Release|x86.ActiveCfg = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|Win32.ActiveCfg = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|x64.ActiveCfg = Release|Any CPU
+		{18620592-26AB-4AD3-965B-9C4A42D282A4}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

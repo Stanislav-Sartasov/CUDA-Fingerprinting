@@ -13,5 +13,6 @@ extern "C"
 void initConvexHull(int givenFieldHeight, int givenFieldWidth, int givenMaxPointCount);
 bool* processConvexHull(Point* points, float omega, int actualPointCount);
 void terminateConvexHull();
+Point* extendHull(Point* hull, int hullLength, float omega);
 
 #endif CUDAFINGERPRINTING_CONVEXHULLMODIFIED

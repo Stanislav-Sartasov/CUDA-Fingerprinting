@@ -10,7 +10,7 @@ struct Point
 	__device__ __host__ Point(float x, float y) : x(x), y(y) {}
 };
 
-float pointDistance(Point A, Point B);
+__device__ __host__  float pointDistance(Point A, Point B);
 float norm(Point v);
 
 // Vector product of 2 vectors (only z coordinate, given vectors are supposed to be arranged on a plane)

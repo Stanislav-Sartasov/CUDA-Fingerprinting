@@ -43,6 +43,7 @@ namespace CUDAFingerprinting.TemplateMatching.MCC
     {
         public static double CalculateCylinderNorm(uint[] cylinder)
         {
+            //not for bit-based implementation
             int sum = 0;
             for (int i = 0; i < cylinder.Length; i++)
             {

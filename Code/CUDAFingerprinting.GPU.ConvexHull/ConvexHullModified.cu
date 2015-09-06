@@ -37,7 +37,7 @@ int fieldHeight;
 
 #define BLOCK_DIM 32
 
-Point* hull;
+__device__ Point* hull;
 // Is it possible to store this in constant memory? 
 // As for now it's not passed properly as a parameter 
 // (global var usage bad practice & impossible from another file)
@@ -317,7 +317,7 @@ int parsePoints(char* path, Point** points)
 }
 
 
-int main()
+/*int main()
 {
 	char pathPointDb[MAX_FILE_NAME_LENGTH] = "C:\\Users\\resaglow\\convex_hull_db.txt";
 	Point* points = nullptr;
@@ -330,4 +330,4 @@ int main()
 	terminateConvexHull();
 
 	return 0;
-}
+}*/
