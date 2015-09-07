@@ -180,9 +180,9 @@ int main()
 
 	printf(".1fms\n", et);
 	cudaEventRecord(start, 0);
-	compareDescriptors << < 4 * 4 * dbSize,
+	/*compareDescriptors << < 4 * 4 ,
 		dim3(32, 32) >> > (
-		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);
+		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);*/
 	//l << <1, 1 >> > (dev_dbDesc);
 	sh <<<1, 1>>>(s);
 	cudaEventRecord(stop, 0);
@@ -207,6 +207,7 @@ int main()
 				fprintf(f, "%f ", cpu_s[i * MAX_DESC_SIZE + j]);
 			}
 			fprintf(f, "\n");
+		}
 	}
 	
 
@@ -218,7 +219,7 @@ int main()
 	
 	cudaEventRecord(start, 0);
 
-	topElements<<<dbSize, 512>>>(s, MAX_DESC_SIZE*MAX_DESC_SIZE, MAX_DESC_SIZE, top, topSize);
+	topElements<<<dim3(dbSize,2), 512>>>(s, MAX_DESC_SIZE*MAX_DESC_SIZE, MAX_DESC_SIZE, top, topSize);
 
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);

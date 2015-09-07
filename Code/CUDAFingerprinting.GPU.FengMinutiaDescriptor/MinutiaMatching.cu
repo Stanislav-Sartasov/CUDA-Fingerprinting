@@ -8,14 +8,22 @@
 __global__ void topElements(float* arrayOfMatrix, int pitch, int inMatrixPitch, float* top, int topSize/*32*/) //arrayOfMatrix - 1000x128x128, top - 1000 x topSize
 {
 	int num = blockIdx.x;
+	int half = blockIdx.y;
 	int part = threadIdx.x;
 	int bd = blockDim.x; //512
 	int i, j, k, cmp1, cmp2, temp;
 	int macroPart = num*pitch + part*topSize;
-	//__shared__ float matrix[MAX_DESC_SIZE*MAX_DESC_SIZE];
+	__shared__ float matrix[MAX_DESC_SIZE*MAX_DESC_SIZE/2];
 	for (i = 0; i < topSize; i++)
 	{
-		//matrix[part*topSize + i] = arrayOfMatrix[macroPart + i];
+		if (part < bd / 2 && half == 0)
+		{
+			matrix[part*topSize + i] = arrayOfMatrix[macroPart + i];
+		}
+		if (part >= bd / 2 && half == 1)
+		{
+			matrix[part*topSize + i] = arrayOfMatrix[macroPart + i];
+		}
 	}
 	for (i = 0; i < topSize; i++)
 	{

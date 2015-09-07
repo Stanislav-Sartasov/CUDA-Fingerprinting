@@ -26,7 +26,7 @@ __device__ void transformate(Descriptor* desc,
 	*/
 
 __device__ void matchingPoints(Descriptor* desc1, Descriptor* desc2, int* m, int* M, int width, int height)
-{/*
+{
 	int i;
 	float angle = (*desc2).center.angle - (*desc1).center.angle;
 	float cosAngle = cos(angle);
@@ -78,7 +78,7 @@ __device__ void matchingPoints(Descriptor* desc1, Descriptor* desc2, int* m, int
 				++*M;
 			}
 		}
-	}*/
+	}
 	//printf("%d %d\n", *m, *M);
 }
 
