@@ -1,12 +1,28 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "MinutiaHelper.cuh"
+#include "MinutiaMatching.cuh"
 #include "DescriptorBuilder.cuh"
 #include "DescriptorsCompare.cuh"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
+__global__ void sh(float *s)
+{
+	for (int i = 0; i < 1000; i++)
+		for (int j = 0; j < 128; j++)
+			for (int k = 0; k < 128; k++)
+			{
+				s[128 * 128 * i + 128 * j + k] = (128 * j + k);
+			}
+}
+
+__global__ void sortParts(float *s, int partSize)
+{
+
+}
 
 __global__ void t(int *p)
 {
@@ -158,7 +174,7 @@ int main()
 	
 
 	float *s;
-	float* cpu_s = (float*)malloc(dbSize * MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
+	float* cpu_s = (float*)malloc(MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
 
 	cudaMalloc((void**)&s, MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
 
@@ -168,6 +184,7 @@ int main()
 		dim3(32, 32) >> > (
 		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);
 	//l << <1, 1 >> > (dev_dbDesc);
+	sh <<<1, 1>>>(s);
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&et, start, stop);
@@ -190,12 +207,40 @@ int main()
 				fprintf(f, "%f ", cpu_s[i * MAX_DESC_SIZE + j]);
 			}
 			fprintf(f, "\n");
-		}
 	}
 	
-	cudaFree(s);
 
+	int topSize = 32;
+	float *top;
+	cudaMalloc((void**)&top, topSize*dbSize*sizeof(float));
+	float* cpu_top = (float*)malloc(topSize*dbSize*sizeof(float));
+
+	
+	cudaEventRecord(start, 0);
+
+	topElements<<<dbSize, 512>>>(s, MAX_DESC_SIZE*MAX_DESC_SIZE, MAX_DESC_SIZE, top, topSize);
+
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&et, start, stop);
+	printf("for topSearch   %3.1fms \n", et);
+
+	cudaMemcpy(cpu_top, top, topSize*dbSize*sizeof(float), cudaMemcpyDeviceToHost);
+	FILE* ff;
+	ff = fopen("D:\\file1.txt", "w");
+	for (int k = 0; k < 100; ++k)
+	{
+		for (int j = 0; j < 32; ++j)
+		{
+			fprintf(ff, "%f ", cpu_top[k * topSize + j]);
+		}
+		fprintf(ff, "\n");
+	}
+	printf("%d", 128 * 128 * sizeof(float) / 1024);
+	cudaFree(s);
 	free(cpu_s);
+	cudaFree(top);
+	free(cpu_top);
 	free(fingerMins);
 //	cudaFree(dev_fingerMinutiaNum);
 	//cudaFree(dev_fingerMins);

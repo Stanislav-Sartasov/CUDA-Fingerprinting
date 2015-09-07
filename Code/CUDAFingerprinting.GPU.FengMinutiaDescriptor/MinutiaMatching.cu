@@ -11,29 +11,38 @@ __global__ void topElements(float* arrayOfMatrix, int pitch, int inMatrixPitch, 
 	int part = threadIdx.x;
 	int bd = blockDim.x; //512
 	int i, j, k, cmp1, cmp2, temp;
+	int macroPart = num*pitch + part*topSize;
+	//__shared__ float matrix[MAX_DESC_SIZE*MAX_DESC_SIZE];
 	for (i = 0; i < topSize; i++)
 	{
-		for (j = i; j < topSize; j++)
+		//matrix[part*topSize + i] = arrayOfMatrix[macroPart + i];
+	}
+	for (i = 0; i < topSize; i++)
+	{
+		for (j = i+1; j < topSize; j++)
 		{
-			if (arrayOfMatrix[num*pitch + part*topSize + i] < arrayOfMatrix[num*pitch + part*topSize + j])
+			//if (arrayOfMatrix[macroPart + i] < arrayOfMatrix[macroPart + j])
 			{
-				temp = arrayOfMatrix[num*pitch + part*topSize + i];
-				arrayOfMatrix[num*pitch + part*topSize + i] = arrayOfMatrix[num*pitch + part*topSize + j];
-				arrayOfMatrix[num*pitch + part*topSize + j] = temp;
+				//temp = arrayOfMatrix[num*pitch + part*topSize + i];
+				//arrayOfMatrix[num*pitch + part*topSize + i] = arrayOfMatrix[num*pitch + part*topSize + j];
+				//arrayOfMatrix[num*pitch + part*topSize + j] = temp;
 			}
 		}
 	}
-	__syncthreads();
+
+	/*__syncthreads();
 	int border = bd;
-	while (border > topSize)
+	int part2;
+	while (border > 1)
 	{
 		if (2*part < border)
 		{
 			cmp1 = 0;
 			cmp2 = 0;
-			while (cmp1 < topSize - 1 && cmp2 < topSize - 1)
+			part2 = (border-part-1);
+			while (cmp1 < topSize && cmp2 < topSize)
 			{
-				if (arrayOfMatrix[num*pitch + part*topSize + cmp1] > arrayOfMatrix[num*pitch + (part)*topSize + cmp2])
+				if (arrayOfMatrix[num*pitch + part*topSize + cmp1] >= arrayOfMatrix[num*pitch + part2*topSize + cmp2])
 				{
 					cmp1++;
 				}
@@ -43,7 +52,7 @@ __global__ void topElements(float* arrayOfMatrix, int pitch, int inMatrixPitch, 
 					{
 						arrayOfMatrix[num*pitch + part*topSize + k] = arrayOfMatrix[num*pitch + part*topSize + k-1];
 					}
-					arrayOfMatrix[num*pitch + part*topSize + cmp1] = arrayOfMatrix[num*pitch + part*topSize + cmp2];
+					arrayOfMatrix[num*pitch + part*topSize + cmp1] = arrayOfMatrix[num*pitch + part2*topSize + cmp2];
 					cmp1++;
 					cmp2++;
 				}
@@ -52,10 +61,10 @@ __global__ void topElements(float* arrayOfMatrix, int pitch, int inMatrixPitch, 
 		border /= 2;
 		__syncthreads();
 
-	}
-	if (part < topSize)//TODO
+	}*/
+	if (part < topSize)
 	{
-		top[num*topSize + part] = arrayOfMatrix[num*topSize + part];
+		//top[num*topSize + part] = arrayOfMatrix[num*pitch + part];
 	}
 
 }
