@@ -1,29 +1,10 @@
 #include "cuda_runtime.h"
 #include "MinutiaHelper.cuh"
+#include "DescriptorBuilder.cuh"
 #include <stdio.h>
+#include <stdlib.h>
 
 //#include "device_launch_parameters.h"
-/*
-__device__ void transformate(Descriptor* desc, 
-	Minutia center, Minutia* dst, int j)
-{ 
-	int dx = (*desc).minutias[j].x - (*desc).center.x;
-	int dy = (*desc).minutias[j].y - (*desc).center.y;
-
-	float angle = center.angle - (*desc).center.angle;
-
-	float cosAngle = cos(angle);
-	float sinAngle = sin(angle);
-
-	int x = (int)round(dx * cosAngle + dy * sinAngle) + center.x;
-	int y = (int)round(-dx * sinAngle + dy * cosAngle) + center.y;
-
-	(*dst).angle = (*desc).minutias[j].angle + angle;
-	normalizeAngle(&((*dst).angle));
-	(*dst).x = x;
-	(*dst).y = y;
-}
-	*/
 
 __device__ void matchingPoints(Descriptor* desc1, Descriptor* desc2, int* m, int* M, int width, int height)
 {
@@ -48,8 +29,6 @@ __device__ void matchingPoints(Descriptor* desc1, Descriptor* desc2, int* m, int
 		normalizeAngle(&(min.angle));
 		min.x = x;
 		min.y = y;
-		//printf("%d %d %f\n", min.x, min.y, min.angle);
-		//printf("%d %d %f\n", (*desc2).minutias[0].x, (*desc2).minutias[0].y, (*desc2).minutias[0].angle);
 
 		float eps = 0.1;
 		
@@ -79,7 +58,6 @@ __device__ void matchingPoints(Descriptor* desc1, Descriptor* desc2, int* m, int
 			}
 		}
 	}
-	//printf("%d %d\n", *m, *M);
 }
 
 __global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
@@ -88,9 +66,8 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor* current, int h
 	int x = defaultColumn();
 	int k = blockIdx.z;
 	int y = defaultRow();
-	//printf("sdfsdfsdf\n");
+
 	if (x < inputNum && y < currentNum[k])
-	//if (k == 0 && x == 1 && y == 0)
 	{
 		int m1, M1, m2, M2;
 
@@ -98,179 +75,104 @@ __global__ void compareDescriptors(Descriptor* input, Descriptor* current, int h
 
 		matchingPoints(&current[k*pitch + y], &input[x], &m2, &M2, width, height);
 
-		//printf("%d %d %d %d", m1, M1, m2, M2);
 
 		s[k*MAX_DESC_SIZE*MAX_DESC_SIZE + x*MAX_DESC_SIZE + y] = (1.0 + m1) * (1.0 + m2) / (1.0 + M1) / (1.0 + M2);
 	}
 }
-/*
-__global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
-	int inputNum, int* currentNum) ///block 128*2
+
+void dbCompare() //in progress
 {
-	__shared__ int cache_m[MAX_DESC_SIZE][8];
-	__shared__ int cache_M[MAX_DESC_SIZE][8];
-	__shared__ Minutia temp[MAX_DESC_SIZE][8];
-	
-	for (int t = 32 * blockIdx.x; t < blockIdx.x + 32; t += 4)
-	{
-		int k = t + (threadIdx.y / 2);
-			if (k < 100)
-				for (int x = 0; x < inputNum; x++)
-				{
-					for (int j = 0; j < currentNum[k]; j++)
-					{
-						cache_m[threadIdx.x][threadIdx.y] = 0;
-						cache_M[threadIdx.x][threadIdx.y] = 0;
+	cudaSetDevice(0);
+	int i, j;
+	int sizeOfMin = sizeof(Minutia);
+	int sizeOfDesc = sizeof(Descriptor);
+	int sizeOfInt = sizeof(int);
+	int minPitch = MAX_DESC_SIZE * sizeOfMin;
+	int height = 364;
+	int width = 265;
 
-						temp[threadIdx.x][threadIdx.y].x = 0;
-						temp[threadIdx.x][threadIdx.y].y = 0;
-						temp[threadIdx.x][threadIdx.y].angle = 0;
+	printf("1000x128 blocks with 128 threads each\n");
+	printf("1000 lists of minutia database into base of lists of descriptors\n");
 
-						int y = k*pitch + j;
+	/////////work with input finger
+	int fingerMinutiaNum;
+	int *dev_fingerMinutiaNum;
+	cudaMalloc((void**)&dev_fingerMinutiaNum, sizeOfInt);
+	char *fingerPath = "D:\\inputFinger.txt";
 
-						__syncthreads();
+	Minutia *fingerMins = (Minutia*)malloc(minPitch);
 
-						if (threadIdx.y % 2 == 0 && threadIdx.x < input[x].length)
-						{
-							transformate(&input[x], current[y].center, &temp[threadIdx.x][threadIdx.y], threadIdx.x);
+	Minutia *dev_fingerMins;
+	cudaMalloc((void**)&dev_fingerMins, minPitch);
+	fingerRead(fingerPath, fingerMins, &fingerMinutiaNum);
+	cudaMemcpy(dev_fingerMins, fingerMins, minPitch, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_fingerMinutiaNum, &fingerMinutiaNum, sizeOfInt, cudaMemcpyHostToDevice);
 
-						}
-						if (threadIdx.y % 2 == 1 && threadIdx.x < current[y].length)
-						{
-							transformate(&current[y], input[x].center, &temp[threadIdx.x][threadIdx.y], threadIdx.x);
-						}
-						__syncthreads();
+	Descriptor *dev_fingerDesc;  //TODO: try constant memory
+	cudaMalloc((void**)&dev_fingerDesc, MAX_DESC_SIZE * sizeOfDesc);
 
-						if (threadIdx.y % 2 == 0 && threadIdx.x < input[x].length)
-						{
-							matchingPoints(temp[threadIdx.x][threadIdx.y], &current[y], &cache_m[threadIdx.x][threadIdx.y],
-								&cache_M[threadIdx.x][threadIdx.y], width, height);
-						}
-						if (threadIdx.y % 2 == 1 && threadIdx.x < current[y].length)
-						{
-							matchingPoints(temp[threadIdx.x][threadIdx.y], &input[x], &cache_m[threadIdx.x][threadIdx.y],
-								&cache_M[threadIdx.x][threadIdx.y], width, height);
-						}
+	buildDescriptors << <dim3(1, MAX_DESC_SIZE), MAX_DESC_SIZE >> >(dev_fingerMins, 1, dev_fingerMinutiaNum, dev_fingerDesc, 1);
+	/////////end of work with input finger
 
-						__syncthreads();
+	/////////  work with fingers base
+	int dbSize = 1000;
+	int *dbMinutiaNum = (int*)malloc(dbSize*sizeOfInt);
+	int *dev_dbMinutiaNum;
+	cudaMalloc((void**)&dev_dbMinutiaNum, sizeOfInt*dbSize);
 
-						int i = MAX_DESC_SIZE / 2;
-						while (i != 0)
-						{
-							if (threadIdx.x < i)
-							{
-								cache_m[threadIdx.x][threadIdx.y] += cache_m[threadIdx.x + i][threadIdx.y];
-							}
-							else
-							{
-								cache_M[threadIdx.x - i][threadIdx.y] += cache_M[threadIdx.x][threadIdx.y];
-							}
+	char *dbPath = "D:\\FingersBase";
 
-							__syncthreads();
-							i /= 2;
-						}
+	Minutia *dbMins = (Minutia*)malloc(dbSize * minPitch);
 
-						if (threadIdx.x == 0 && threadIdx.y % 2 == 0)
-						{
-							s[k*MAX_DESC_SIZE*MAX_DESC_SIZE + x*MAX_DESC_SIZE + y] =
-								(1.0 + cache_m[0][threadIdx.y]) * (1.0 + cache_m[0][threadIdx.y + 1])
-								/ (1.0 + cache_M[0][threadIdx.y]) / (1.0 + cache_M[0][threadIdx.y + 1]);
-						}
-						__syncthreads();
-					}
-				}
-	}
+	Minutia *dev_dbMins;
+	cudaMalloc((void**)&dev_dbMins, dbSize * minPitch);
+
+	fingersBaseRead(dbPath, dbSize, MAX_DESC_SIZE, dbMins, dbMinutiaNum); // done
+	cudaMemcpy(dev_dbMins, dbMins, minPitch*dbSize, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_dbMinutiaNum, dbMinutiaNum, dbSize * sizeOfInt, cudaMemcpyHostToDevice);
+
+
+	Descriptor *dev_dbDesc;
+	cudaMalloc((void**)&dev_dbDesc, MAX_DESC_SIZE*dbSize*sizeOfDesc);
+
+
+	buildDescriptors << <dim3(dbSize, MAX_DESC_SIZE), MAX_DESC_SIZE >> >(dev_dbMins, MAX_DESC_SIZE, dev_dbMinutiaNum, dev_dbDesc, dbSize);
+
+	///////end of work with fingers base
+
+	///////compare descriptors
+
+
+	float *s;
+	float* cpu_s = (float*)malloc(MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
+
+	cudaMalloc((void**)&s, MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float));
+
+	compareDescriptors << < 4 * 4 * dbSize,
+		dim3(32, 32) >> > (
+		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);
+
+	cudaMemcpy(cpu_s, s, MAX_DESC_SIZE*MAX_DESC_SIZE*dbSize*sizeof(float), cudaMemcpyDeviceToHost);
+
+	int topSize = 128;
+	float *top;
+	cudaMalloc((void**)&top, topSize*dbSize*sizeof(float));
+	float* cpu_top = (float*)malloc(topSize*dbSize*sizeof(float));
+
+	cudaMemcpy(cpu_top, top, topSize*dbSize*sizeof(float), cudaMemcpyDeviceToHost);
+
+	cudaFree(s);
+	free(cpu_s);
+	cudaFree(top);
+	free(cpu_top);
+	free(fingerMins);
+	cudaFree(dev_fingerMinutiaNum);
+	cudaFree(dev_fingerMins);
+	cudaFree(dev_fingerDesc);
+
+	free(dbMinutiaNum);
+	free(dbMins);
+	cudaFree(dev_dbMinutiaNum);
+	cudaFree(dev_dbMins);
+	cudaFree(dev_dbDesc);
 }
-
-*/
-
-/*
-__global__ void compareDescriptors(Descriptor* input, Descriptor* current, int height, int width, int pitch, float* s,
-	int inputNum, int* currentNum) ///block 32*2 maybe warp size be better
-{
-	__shared__ int cache_m[MAX_DESC_SIZE][2];
-	__shared__ int cache_M[MAX_DESC_SIZE][2];
-	__shared__ Minutia temp[MAX_DESC_SIZE][2];
-
-	int k = blockIdx.x;
-	if (k < 10)
-		for (int x = 0; x < inputNum; x++)
-			for (int j = 0; j < currentNum[k]; j++)
-			{
-				int y = k*pitch + j;
-				for (int t = 0; t < 4; t++)
-				{
-					int a = 4 * threadIdx.x + t;
-					cache_m[a][threadIdx.y] = 0;
-					cache_M[a][threadIdx.y] = 0;
-
-					temp[a][threadIdx.y].x = 0;
-					temp[a][threadIdx.y].y = 0;
-					temp[a][threadIdx.y].angle = 0;
-
-					
-
-					__syncthreads();
-
-					if (threadIdx.y == 0 && a < input[x].length)
-					{
-						transformate(&input[x], current[y].center, &temp[a][0], a);
-					}
-					if (threadIdx.y == 1 && a < current[y].length)
-					{
-						transformate(&current[k*pitch + y], input[x].center, &temp[a][1], a);
-					}
-					__syncthreads();
-
-					if (threadIdx.y == 0 && a < input[x].length)
-					{
-						matchingPoints(temp[a][0], &current[y], &cache_m[a][0],
-							&cache_M[a][0], width, height);
-					}
-					if (threadIdx.y == 1 && a < current[y].length)
-					{
-						matchingPoints(temp[a][1], &input[x], &cache_m[a][1],
-							&cache_M[a][1], width, height);
-					}
-
-					__syncthreads();
-				}
-
-				int a = 4 * threadIdx.x;
-				for (int t = 3; t > 0; t--)
-				{
-					cache_m[a][threadIdx.y] += cache_m[a + t][threadIdx.y];
-					cache_M[a][threadIdx.y] += cache_M[a + t][threadIdx.y];
-				}
-				
-				int i = MAX_DESC_SIZE / 2;
-				while (i != 0)
-				{
-					if (a < i)
-					{
-						for (int t = 3; t > 0; t--)
-						{
-							cache_m[a][threadIdx.y] += cache_m[a + i + t][threadIdx.y];
-						}
-					}
-					else
-					{
-						for (int t = 3; t > 0; t--)
-						{
-							cache_M[a - i][threadIdx.y] += cache_M[a + t][threadIdx.y];
-						}
-					}
-
-					__syncthreads();
-					i /= 2;
-				}
-				if (threadIdx.x == 0 && threadIdx.y == 0)
-				{
-						s[k*MAX_DESC_SIZE*MAX_DESC_SIZE + x*MAX_DESC_SIZE + y] =
-							(1.0 + cache_m[0][0]) * (1.0 + cache_m[0][1]) / (1.0 + cache_M[0][0]) / (1.0 + cache_M[0][1]);
-
-				}
-				__syncthreads();
-			}
-}
-	*/

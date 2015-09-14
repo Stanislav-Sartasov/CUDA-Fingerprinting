@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace CUDAFingerprinting.GPU.FengMinutiaDescriptor.Tests
 {
-    public class Test
+    public class DescCompareTest
     {
+         
     }
 }

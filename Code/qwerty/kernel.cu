@@ -180,11 +180,11 @@ int main()
 
 	printf(".1fms\n", et);
 	cudaEventRecord(start, 0);
-	/*compareDescriptors << < 4 * 4 ,
+	compareDescriptors << < 4 * 4 * dbSize,
 		dim3(32, 32) >> > (
-		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);*/
+		dev_fingerDesc, dev_dbDesc, height, width, MAX_DESC_SIZE, s, fingerMinutiaNum, dev_dbMinutiaNum);
 	//l << <1, 1 >> > (dev_dbDesc);
-	sh <<<1, 1>>>(s);
+	//sh <<<1, 1>>>(s);
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&et, start, stop);
@@ -211,7 +211,7 @@ int main()
 	}
 	
 
-	int topSize = 32;
+	int topSize = 128;
 	float *top;
 	cudaMalloc((void**)&top, topSize*dbSize*sizeof(float));
 	float* cpu_top = (float*)malloc(topSize*dbSize*sizeof(float));
@@ -219,7 +219,7 @@ int main()
 	
 	cudaEventRecord(start, 0);
 
-	topElements<<<dim3(dbSize,2), 512>>>(s, MAX_DESC_SIZE*MAX_DESC_SIZE, MAX_DESC_SIZE, top, topSize);
+	topElements<<<dbSize, 128>>>(s, MAX_DESC_SIZE*MAX_DESC_SIZE, MAX_DESC_SIZE, top, topSize);
 
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
@@ -258,10 +258,10 @@ int main()
 
 
 
-	/*
+	
 	int count;
 	cudaGetDeviceCount(&count);
-
+	cudaDeviceProp prop;
 	for (int i = 0; i < count; i++)
 	{
 		cudaGetDeviceProperties(&prop, i);
@@ -273,7 +273,7 @@ int main()
 		printf("clockRate %d\n", prop.clockRate);
 		printf("asyncEngines %d\n", prop.asyncEngineCount);
 		printf("multyKernels %d\n", prop.concurrentKernels);
-		printf("maxGridSize %d\n", prop.maxGridSize);
+		printf("maxGridSize %d\n", prop.sharedMemPerBlock);
 		
-	}*/
+	}
 }
