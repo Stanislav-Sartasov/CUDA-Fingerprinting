@@ -60,6 +60,7 @@
     <Compile Include="Minutia.cs" />
     <Compile Include="MorphologicalOperators.cs" />
     <Compile Include="Normalization.cs" />
+    <Compile Include="NovelSinglePass.cs" />
     <Compile Include="OrientationField\OrientationField.cs" />
     <Compile Include="OrientationField\OrientationFieldExtensions.cs" />
     <Compile Include="OrientationField\PixelwiseOrientationField.cs" />
