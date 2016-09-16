@@ -10,9 +10,11 @@ using System.Xml.Linq;
 using CUDAFingerprinting.Common;
 using Microsoft.Win32;
 
+//Need remake painting, searching edges
+
 namespace CUDAFingerprinting.RidgeLine
 {
-    enum Directions { Forward, Back}
+    /*enum Directions { Forward, Back}
     enum MinutiaTypes { NotMinutia, LineEnding, Intersection}
     class Minutia
     {
@@ -98,9 +100,14 @@ namespace CUDAFingerprinting.RidgeLine
                 _section[_wings - k] = xs*BuildUp + ys;
                 _section[_wings + k] = xe*BuildUp + ye;
             }
-        } 
+        }
 
-        private int[] FindEdges() 
+        private int[] SearchingEdges()
+        {
+            
+        }
+
+        /*private int[] FindEdges() 
         {
             int lPoint = _wings;
             int rPoint = _wings;
@@ -229,7 +236,13 @@ namespace CUDAFingerprinting.RidgeLine
             return x*BuildUp + y;
         }
 
-        private void Paint(int[] edges1, int[] edges2)
+        private void newPaint()
+        {
+            
+        }
+
+
+        /*private void Paint(int[] edges1, int[] edges2)
         {
             List<int> lX = new List<int>() { edges1[0] / BuildUp, edges1[1] / BuildUp, edges2[0] / BuildUp, edges2[1] / BuildUp};
             List<int> lY = new List<int>() { edges1[0] % BuildUp, edges1[1] % BuildUp, edges2[0] % BuildUp, edges2[1] % BuildUp};
@@ -422,5 +435,5 @@ namespace CUDAFingerprinting.RidgeLine
             return Minutias.Exists(x => Math.Sqrt(Math.Pow(x.X - minutia.X, 2) + Math.Pow(x.Y - minutia.Y, 2)) < delta && minutia.Type == x.Type);
         }
     }
-
+*/
 }

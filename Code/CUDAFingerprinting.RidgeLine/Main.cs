@@ -15,13 +15,13 @@ namespace CUDAFingerprinting.RidgeLine
             var bmp = Resources.SampleFinger4;
             var image = ImageHelper.LoadImageAsInt(bmp);
 
-            var detectingMinutias = new RidgeLine(image, 4, 4);  //(image, step, size_wings)
+            var detectingMinutias = new RidgeOnLine(image, 2, 4);  //(image, step, size_wings)
 
             for (int i = 0; i < image.GetLength(1); i++)
             {
                 for (int j = 0; j < image.GetLength(0); j++)
                 {
-                    detectingMinutias.FindMinutiaLine(i * 1000 + j, 5.0, 50);  
+                    detectingMinutias.FindMinutia(i, j, 5.0);  
                 }
                 //if (i%10 == 0)
                 //{
@@ -35,18 +35,19 @@ namespace CUDAFingerprinting.RidgeLine
             foreach (var minutia in detectingMinutias.GetMinutiaList())
             {
                 Common.Minutia temp = new Common.Minutia();
-                temp.X = minutia.X;
-                temp.Y = 364 - minutia.Y;
-                temp.Angle = minutia.Angle;
+                temp.X = minutia.Item1.X;
+                temp.Y = 364 - minutia.Item1.Y;
+                temp.Angle = minutia.Item1.Angle;
 
-                Console.WriteLine("x = {0}; y = {1}; Type = {2}; Angle = {3}", minutia.X, minutia.Y, minutia.Type, minutia.Angle);
-                if (minutia.Type == MinutiaTypes.LineEnding) MinutiaE.Add(temp);
-                if (minutia.Type == MinutiaTypes.Intersection) MinutiaI.Add(temp);
+                Console.WriteLine("x = {0}; y = {1}; Type = {2}; Angle = {3}", temp.X, temp.Y, minutia.Item2, temp.Angle);
+                if (minutia.Item2 == MinutiaTypes.LineEnding) MinutiaE.Add(temp);
+                if (minutia.Item2 == MinutiaTypes.Intersection) MinutiaI.Add(temp);
             }
 
             var bmpVis = new Bitmap(MakeBmp(detectingMinutias._visited));
             bmpVis.Save("Vis.bmp");
             ImageHelper.MarkMinutiae("Vis.bmp", MinutiaE, MinutiaI, "withMinutia.bmp");
+            Console.ReadKey();
         }
 
         static Bitmap MakeBmp(bool[,] visited, string name = "visit.bmp")
