@@ -21,7 +21,7 @@ namespace CUDAFingerprinting.RidgeLine
             {
                 for (int j = 0; j < image.GetLength(0); j++)
                 {
-                    detectingMinutias.FindMinutia(i, j, 5.0, 50);  
+                    detectingMinutias.FindMinutia(i, j, 5.0);  
                 }
                 //if (i%10 == 0)
                 //{

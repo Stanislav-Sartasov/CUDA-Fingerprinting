@@ -14,6 +14,7 @@ namespace CUDAFingerprinting.RidgeLine
     class RidgeOnLine
     {
         private const double Pi4 = Math.PI/4;
+        private int _countTest; //for testing
 
         private List<Tuple<Minutia, MinutiaTypes>> _minutias;
         private int[,] _image;
@@ -28,20 +29,15 @@ namespace CUDAFingerprinting.RidgeLine
         private double _sectionsAngle; //?
         private int _sectionsCenter;
 
-        private void AddMinutia(int x, int y, double angle, MinutiaTypes type)
+        private void AddMinutia(Minutia newMinutia, MinutiaTypes type)
         {
-            Minutia newMinutia = new Minutia
-            {
-                X = x,
-                Y = y,
-                Angle = angle
-            };
-
             _minutias.Add(new Tuple<Minutia, MinutiaTypes>(newMinutia, type));
         }
 
         public RidgeOnLine(int[,] image, int step, int lengthWings)
         {
+            _countTest = 0;
+
             _image = image;
             _orientation = new PixelwiseOrientationField(image, 16); //will try change blockSize
             _step = step;
@@ -52,7 +48,7 @@ namespace CUDAFingerprinting.RidgeLine
             _minutias = new List<Tuple<Minutia, MinutiaTypes>>();
         }
 
-        private void NewSection(Tuple<int, int> point)  //maybe need remake this func...
+        private void NewSection(Tuple<int, int> point)  
         {
             for (int index = 0; index < _section.Length; index++)
             {
@@ -97,7 +93,6 @@ namespace CUDAFingerprinting.RidgeLine
                 else
                 {
                     leftE = true;
-                    _sectionsCenter += i;
                 }
 
                 _sectionsCenter = (lEnd + rEnd) / 2;
@@ -141,7 +136,7 @@ namespace CUDAFingerprinting.RidgeLine
             return new Tuple<int, int>(x, y);
         }
 
-        private void Paint(Tuple<int, int>[] edge, int edgesCenter) //in process
+        private void Paint(Tuple<int, int>[] edge, int edgesCenter)
         {
             List<Tuple<int, int>> queue = new List<Tuple<int, int>>();
             List<Tuple<int, int>> stopPixels = new List<Tuple<int, int>>();
@@ -185,20 +180,20 @@ namespace CUDAFingerprinting.RidgeLine
             }
         }
 
-        private MinutiaTypes CheckStopCriteria(int threshold = 100) 
+        private MinutiaTypes CheckStopCriteria(int threshold = 20) 
         {
             int x = _section[_sectionsCenter].Item1;
             int y = _section[_sectionsCenter].Item2;
 
             if (_visited[y, x])
             {
-                MakeTestBmp(x, y); 
+                //MakeTestBmp(x, y); 
                 return MinutiaTypes.Intersection;
             }
 
             if (_image[y, x] > threshold)
             {
-                MakeTestBmp(x, y);
+                //MakeTestBmp(x, y);
                 return MinutiaTypes.LineEnding;
             }
 
@@ -224,13 +219,14 @@ namespace CUDAFingerprinting.RidgeLine
 
             bmp.SetPixel(x, 364 - y, Color.Red); //What the 364??
 
-            bmp.Save("Test1.bmp");
+            bmp.Save("Test" + _countTest + ".bmp");
+            _countTest++;
         }
 
         private void FollowLine(Tuple<int, int> point, Directions direction)
         {
             NewSection(point);
-            if (_section[_lengthWings].Item1 == -1) return; //?
+            if (_section[_sectionsCenter].Item1 == -1) return;
 
             _direction = direction;
 
@@ -244,7 +240,7 @@ namespace CUDAFingerprinting.RidgeLine
                 y = point.Item2;
                 angle = _orientation.GetOrientation(x, y);
 
-                var oldSection = new Tuple<int, int>[9];
+                var oldSection = new Tuple<int, int>[_lengthWings * 2 + 1];
                 for (int i = 0; i < _section.Length; i++)
                 {
                     oldSection[i] = _section[i];
@@ -260,7 +256,7 @@ namespace CUDAFingerprinting.RidgeLine
                 if (point.Item1 == -1) return;
 
                 NewSection(point);
-                if (_section[_lengthWings].Item1 == -1) return; //?
+                if (_section[_sectionsCenter].Item1 == -1) return; //?
 
                 minutiaType = CheckStopCriteria();
                 if (minutiaType == MinutiaTypes.NotMinutia) Paint(oldSection, oldCenter);
@@ -270,7 +266,16 @@ namespace CUDAFingerprinting.RidgeLine
             x = point.Item1;
             y = point.Item2;
 
-            AddMinutia(x, y, angle, minutiaType); //Add check minutia
+            var possMinutia = new Minutia();
+            possMinutia.X = x;
+            possMinutia.Y = y;
+            possMinutia.Angle = angle;
+
+            if (!IsDuplicate(possMinutia, minutiaType))
+            {
+                AddMinutia(possMinutia, minutiaType); //need add check of false minutias
+                MakeTestBmp(x, y);
+            }    
         }
 
         public List<Tuple<Minutia, MinutiaTypes>> GetMinutiaList()
@@ -284,12 +289,14 @@ namespace CUDAFingerprinting.RidgeLine
             _visited[y, x] = true;
 
             FollowLine(new Tuple<int, int>(x, y), Directions.Forward);
-            FollowLine(new Tuple<int, int>(x, y), Directions.Back);
+            _diffAngle = false;
 
+
+            FollowLine(new Tuple<int, int>(x, y), Directions.Back);
             _diffAngle = false;
         }
 
-        private void CheckAndDeleteFalseMinutia(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 50)
+        private void CheckAndDeleteFalseMinutia(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 3)
         {
             var i =
                 _minutias.FindIndex(x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta);
@@ -297,11 +304,11 @@ namespace CUDAFingerprinting.RidgeLine
             _minutias.RemoveAt(i);
         }
 
-        private bool IsDuplicate(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 50)
+        private bool IsDuplicate(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 5)
         {
             return
                 _minutias.Exists(
-                    x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta);
+                    x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta && x.Item2 == minutiaTypes);
         }
     }
 }
