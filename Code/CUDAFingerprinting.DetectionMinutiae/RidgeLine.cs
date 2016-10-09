@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using CUDAFingerprinting.Common;
@@ -16,18 +17,19 @@ namespace CUDAFingerprinting.DetectionMinutiae
         enum MinutiaeType {NotMinutiae, LineEnding, Intersection}
         enum Directions { Forward, Back }
 
-	    private int[,] _image;
-	    private bool[,] _visited;
+	    private static int[,] _image;
+	    private static bool[,] _visited;
         /*private int _lengthOfWings;*/
-        private List<Tuple<int, int>> _wings;
+        private static List<Tuple<int, int>> _wings;
 	    private int _step;
         private Directions _direction;
         private PixelwiseOrientationField _orientationField;
 	    private List<Tuple<Minutia, MinutiaeType>> _minutiaeList;
 
 	    private bool _diffAngle;
+		private static int _mid = _wings.Count / 2;
 
-        public RidgeLine(int[,] image, int step)
+		public RidgeLine(int[,] image, int step)
         {
 	        _image = image;
 			_orientationField = new PixelwiseOrientationField(image, 8);
@@ -83,16 +85,11 @@ namespace CUDAFingerprinting.DetectionMinutiae
 		    return x < 0 || y < 0 || _image.GetLength(0) <= x || _image.GetLength(1) <= y;
 	    }
 
-        private MinutiaeType TypeOfMinutiae()   
-        {
-            return MinutiaeType.NotMinutiae;
-        }
-
 	    private Tuple<int, int> MakeStep(int px = -1, int py = -1, bool forPaint = false)
 	    {
-			int mid = _wings.Count() / 2;
-		    int x = forPaint ? px : _wings[mid].Item1;
-			int y = forPaint ? py : _wings[mid].Item2;
+			//int mid = _wings.Count() / 2;
+		    int x = forPaint ? px : _wings[_mid].Item1;
+			int y = forPaint ? py : _wings[_mid].Item2;
 
 		    int step = forPaint ? 1 : _step;
 		    double wingAngle = _orientationField.GetOrientation(x, y);
@@ -131,12 +128,42 @@ namespace CUDAFingerprinting.DetectionMinutiae
 
 	        do
 	        {
+		        mx = _wings[_mid].Item1;
+		        my = _wings[_mid].Item2;
+		        //angle = _orientationField.GetOrientation(mx, my);
 
+		        Tuple<int, int> afterStep = MakeStep();
+				if (afterStep.Item1 == -1) return;
 
-		        
+				minutiae = TryDetectMinutiae();
+
+		        List<Tuple<int, int>> newWings = SearchNewWings(mx, my);
+				if (newWings.Count == 0) return;
+
+				Paint(newWings);
+		        _wings = newWings;
 	        } while (minutiae == MinutiaeType.NotMinutiae);
 
+			mx = _wings[_mid].Item1;
+			my = _wings[_mid].Item2;
+			angle = _orientationField.GetOrientation(mx, my) + ((int) directions) + (_diffAngle ? Math.PI : 0);
+
+	        Minutia possiblyMinutia = new Minutia();
+
+	        possiblyMinutia.X = mx;
+	        possiblyMinutia.Y = my;
+			possiblyMinutia.Angle = (float) angle;
+
+	        if (!IsDuplicate(possiblyMinutia, minutiae))
+	        {
+		        AddMinutiae(possiblyMinutia, minutiae);
+	        }
         }
+
+	    private void AddMinutiae(Minutia newMinutiae, MinutiaeType type)
+	    {
+			_minutiaeList.Add(new Tuple<Minutia, MinutiaeType>(newMinutiae, type));
+		}
 
 	    private void Paint(List<Tuple<int, int>> finish)
 	    {
@@ -185,9 +212,23 @@ namespace CUDAFingerprinting.DetectionMinutiae
 		    }
 	    }
 
-	    static void DetectMinutiae()
-        {
-        }
+	    static MinutiaeType TryDetectMinutiae(int threshold = 40)
+	    {
+		    int x = _wings[_mid].Item1;
+		    int y = _wings[_mid].Item2;
+
+		    if (_visited[y, x])
+		    {
+			    return MinutiaeType.Intersection;
+		    }
+
+		    if (_image[y, x] > threshold)
+		    {
+			    return MinutiaeType.LineEnding;
+		    }
+
+			return MinutiaeType.NotMinutiae;
+	    }
 
 		private bool IsDuplicate(Minutia minutia, MinutiaeType minutiaTypes, double delta = 5)
 		{
@@ -195,5 +236,10 @@ namespace CUDAFingerprinting.DetectionMinutiae
 				_minutiaeList.Exists(
 					x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta && x.Item2 == minutiaTypes);
 		}
+
+	    static void Main(string[] args)
+	    {
+		    
+	    }
 	}
 }
