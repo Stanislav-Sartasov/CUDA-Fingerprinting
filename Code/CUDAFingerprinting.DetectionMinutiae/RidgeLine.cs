@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 	    private static int[,] _image;
 	    private static bool[,] _visited;
         /*private int _lengthOfWings;*/
-        private static List<Tuple<int, int>> _wings;
+        private static List<Tuple<int, int>> _wings;  //с динамического на статичный
 	    private int _step;
         private Directions _direction;
         private PixelwiseOrientationField _orientationField;
@@ -28,6 +29,11 @@ namespace CUDAFingerprinting.DetectionMinutiae
 
 	    private bool _diffAngle;
 		private static int _mid = _wings.Count / 2;
+
+	    public RidgeLine()
+	    {
+		    
+	    }
 
 		public RidgeLine(int[,] image, int step)
         {
@@ -39,10 +45,23 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			_minutiaeList = new List<Tuple<Minutia, MinutiaeType>>();
         }
 
-        private List<Tuple<int, int>> SearchNewWings(int x, int y)
+	    public void StartSearch(int x, int y, double duplicateDelta, int colorThreshold = 15)
+	    {
+		    if (_image[y,x] >= colorThreshold || _visited[y, x]) return;
+
+		    _visited[y, x] = true;
+
+		    _diffAngle = false;
+			Follow(x, y, Directions.Forward);
+
+		    _diffAngle = true;
+			Follow(x, y, Directions.Back);
+	    }
+
+        private List<Tuple<int, int>> SearchNewWings(int x, int y)  //переделать способ находжение крыльев с динамического на статичный 
         {
             /*int[] newWings = new int[_lengthOfWings * 2];*/
-            double angle = _orientationField.GetOrientation(x, y) + Pi4;
+            double angle = _orientationField.GetOrientation(x, y) + Pi4 * 2;
             List<Tuple<int, int>> listWings = new List<Tuple<int, int>>();
 	        if (OutOfRange(x, y)) return listWings;
 			listWings.Add(new Tuple<int, int>(x, y));
@@ -117,7 +136,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 		    return new Tuple<int, int>(x, y);
 	    }
 
-        private void Follow(int x, int y, Directions directions)
+        private void Follow(int x, int y, Directions direction)
         {
 	        List<Tuple<int, int>> dfltWings = SearchNewWings(x, y);
 			if (dfltWings.Count == 0) return;
@@ -125,6 +144,8 @@ namespace CUDAFingerprinting.DetectionMinutiae
 	        MinutiaeType minutiae;
 	        int mx, my;
 	        double angle;
+
+	        _direction = direction;
 
 	        do
 	        {
@@ -146,7 +167,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 
 			mx = _wings[_mid].Item1;
 			my = _wings[_mid].Item2;
-			angle = _orientationField.GetOrientation(mx, my) + ((int) directions) + (_diffAngle ? Math.PI : 0);
+			angle = _orientationField.GetOrientation(mx, my) + ((int) _direction) + (_diffAngle ? Math.PI : 0);
 
 	        Minutia possiblyMinutia = new Minutia();
 
@@ -236,10 +257,24 @@ namespace CUDAFingerprinting.DetectionMinutiae
 				_minutiaeList.Exists(
 					x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta && x.Item2 == minutiaTypes);
 		}
+    }
 
-	    static void Main(string[] args)
-	    {
-		    
-	    }
+	class Program
+	{
+		private static void Main(string[] args)
+		{
+			var bmp = Resources._4_8;
+			var image = ImageHelper.LoadImage<int>(bmp);
+
+			var detectingMinutiae = new RidgeLine();
+
+			for (int i = 0; i < image.GetLength(1); i++)
+			{
+				for (int j = 0; j < image.GetLength(0); j++)
+				{
+					detectingMinutiae.StartSearch(i, j, 5.0);
+				}
+			}
+		}
 	}
 }
