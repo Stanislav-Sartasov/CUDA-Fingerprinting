@@ -1,280 +1,320 @@
-﻿using System;
+﻿using CUDAFingerprinting.Common;
+using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
-using CUDAFingerprinting.Common;
 using CUDAFingerprinting.Common.OrientationField;
 
-namespace CUDAFingerprinting.DetectionMinutiae
+namespace CUDAFingerprinting.RidgeLine
 {
-    class RidgeLine
+    enum Directions {Forward, Back}
+    enum MinutiaTypes {NotMinutia, LineEnding, Intersection}
+
+    class RidgeOnLine
     {
         private const double Pi4 = Math.PI/4;
+        private int _countTest; //for testing
 
-        enum MinutiaeType {NotMinutiae, LineEnding, Intersection}
-        enum Directions { Forward, Back }
-
-	    private static int[,] _image;
-	    private static bool[,] _visited;
-        /*private int _lengthOfWings;*/
-        private static List<Tuple<int, int>> _wings;  //с динамического на статичный
-	    private int _step;
+        private List<Tuple<Minutia, MinutiaTypes>> _minutias;
+        private int[,] _image;
+        private PixelwiseOrientationField _orientation;
+        private bool[,] _visited;  
+        private int _step;
+        private int _lengthWings;
+        private bool _diffAngle;
         private Directions _direction;
-        private PixelwiseOrientationField _orientationField;
-	    private List<Tuple<Minutia, MinutiaeType>> _minutiaeList;
 
-	    private bool _diffAngle;
-		private static int _mid = _wings.Count / 2;
+        private Tuple<int, int>[] _section;
+        private double _sectionsAngle; //?
+        private int _sectionsCenter;
 
-	    public RidgeLine()
-	    {
-		    
-	    }
-
-		public RidgeLine(int[,] image, int step)
+        private void AddMinutia(Minutia newMinutia, MinutiaTypes type)
         {
-	        _image = image;
-			_orientationField = new PixelwiseOrientationField(image, 8);
-	        _step = step;
-	        _diffAngle = false;
-			_visited = new bool[image.GetLength(0), image.GetLength(1)];
-			_minutiaeList = new List<Tuple<Minutia, MinutiaeType>>();
+            _minutias.Add(new Tuple<Minutia, MinutiaTypes>(newMinutia, type));
         }
 
-	    public void StartSearch(int x, int y, double duplicateDelta, int colorThreshold = 15)
-	    {
-		    if (_image[y,x] >= colorThreshold || _visited[y, x]) return;
-
-		    _visited[y, x] = true;
-
-		    _diffAngle = false;
-			Follow(x, y, Directions.Forward);
-
-		    _diffAngle = true;
-			Follow(x, y, Directions.Back);
-	    }
-
-        private List<Tuple<int, int>> SearchNewWings(int x, int y)  //переделать способ находжение крыльев с динамического на статичный 
+        public RidgeOnLine(int[,] image, int step, int lengthWings)
         {
-            /*int[] newWings = new int[_lengthOfWings * 2];*/
-            double angle = _orientationField.GetOrientation(x, y) + Pi4 * 2;
-            List<Tuple<int, int>> listWings = new List<Tuple<int, int>>();
-	        if (OutOfRange(x, y)) return listWings;
-			listWings.Add(new Tuple<int, int>(x, y));
-			
-	        int sx = Convert.ToInt32(x + Math.Cos(angle));
-			int sy = Convert.ToInt32(y + Math.Sin(angle));
+            _countTest = 0;
 
-	        while (!OutOfRange(sx, sy))
-	        {
-				if (_image[sx, sy] > 30) break;
-
-		        listWings.Add(new Tuple<int, int>(sx, sy));
-
-		        sx = Convert.ToInt32(sx + Math.Cos(angle));
-		        sy = Convert.ToInt32(sy + Math.Sin(angle));
-	        }
-
-	        listWings.Reverse();
-
-			sx = Convert.ToInt32(x - Math.Cos(angle));
-			sy = Convert.ToInt32(y - Math.Sin(angle));
-
-			while (!OutOfRange(sx, sy))
-			{
-				if (_image[sx, sy] > 30) break;
-
-				listWings.Add(new Tuple<int, int>(sx, sy));
-
-				sx = Convert.ToInt32(sx - Math.Cos(angle));
-				sy = Convert.ToInt32(sy - Math.Sin(angle));
-			}
-
-	        listWings.Reverse();
-
-	        return listWings;
+            _image = image;
+            _orientation = new PixelwiseOrientationField(image, 16); //will try change blockSize
+            _step = step;
+            _lengthWings = lengthWings;
+            _section = new Tuple<int, int>[2 * lengthWings + 1];
+            _diffAngle = false;
+            _visited = new bool[image.GetLength(0), image.GetLength(1)];
+            _minutias = new List<Tuple<Minutia, MinutiaTypes>>();
         }
 
-	    private bool OutOfRange(int x, int y)
-	    {
-		    return x < 0 || y < 0 || _image.GetLength(0) <= x || _image.GetLength(1) <= y;
-	    }
-
-	    private Tuple<int, int> MakeStep(int px = -1, int py = -1, bool forPaint = false)
-	    {
-			//int mid = _wings.Count() / 2;
-		    int x = forPaint ? px : _wings[_mid].Item1;
-			int y = forPaint ? py : _wings[_mid].Item2;
-
-		    int step = forPaint ? 1 : _step;
-		    double wingAngle = _orientationField.GetOrientation(x, y);
-
-			double angle = wingAngle + ((int)_direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
-			while (angle > Math.PI * 2) angle -= Math.PI * 2;
-
-			double dx = step * Math.Cos(angle);
-			double dy = step * Math.Sin(angle);
-
-			x += (int)(dx >= 0 ? dx + 0.5 : dx - 0.5);
-			y += (int)(dy >= 0 ? dy + 0.5 : dy - 0.5);
-
-		    if (OutOfRange(x, y)) return new Tuple<int, int>(-1, -1);
-
-			if (!forPaint)
-		    {
-			    double ang2Check = _orientationField.GetOrientation(x, y);
-			    if (((wingAngle*ang2Check < 0) ? (wingAngle > 1.4) || (ang2Check > 1.4) : Math.Abs(wingAngle - ang2Check) > 0.5))
-			    {
-				    _diffAngle = !_diffAngle;
-			    }
-		    }
-
-		    return new Tuple<int, int>(x, y);
-	    }
-
-        private void Follow(int x, int y, Directions direction)
+        private void NewSection(Tuple<int, int> point)  
         {
-	        List<Tuple<int, int>> dfltWings = SearchNewWings(x, y);
-			if (dfltWings.Count == 0) return;
+            for (int index = 0; index < _section.Length; index++)
+            {
+                _section[index] = new Tuple<int, int>(-1, -1);
+            }
 
-	        MinutiaeType minutiae;
-	        int mx, my;
-	        double angle;
+            int x = point.Item1;
+            int y = point.Item2;
 
-	        _direction = direction;
+            int lEnd = _lengthWings;
+            int rEnd = lEnd;
 
-	        do
-	        {
-		        mx = _wings[_mid].Item1;
-		        my = _wings[_mid].Item2;
-		        //angle = _orientationField.GetOrientation(mx, my);
+            bool rightE = false;
+            bool leftE = false;
 
-		        Tuple<int, int> afterStep = MakeStep();
-				if (afterStep.Item1 == -1) return;
+            double angle = _orientation.GetOrientation(y, x) + Pi4*2;
 
-				minutiae = TryDetectMinutiae();
+            _section[_lengthWings] = point;
 
-		        List<Tuple<int, int>> newWings = SearchNewWings(mx, my);
-				if (newWings.Count == 0) return;
+            for (var i = 1; i <= _lengthWings; i++)
+            {
+                int xs = Convert.ToInt32(x - i * Math.Cos(angle));
+                int ys = Convert.ToInt32(y - i * Math.Sin(angle));
+                int xe = Convert.ToInt32(x + i * Math.Cos(angle));
+                int ye = Convert.ToInt32(y + i * Math.Sin(angle));
 
-				Paint(newWings);
-		        _wings = newWings;
-	        } while (minutiae == MinutiaeType.NotMinutiae);
+                if (!OutOfImage(xs, ys) && _image[ys, xs] < 15 && !rightE)
+                {
+                    _section[_lengthWings - i] = new Tuple<int, int>(xs, ys);
+                    rEnd--;
+                }
+                else
+                {
+                    rightE = true;
+                }
+                
+                if (!OutOfImage(xe, ye) && _image[ye, xe] < 15 && !leftE)
+                {
+                    _section[_lengthWings + i] = new Tuple<int, int>(xe, ye);
+                    lEnd++;
+                }
+                else
+                {
+                    leftE = true;
+                }
 
-			mx = _wings[_mid].Item1;
-			my = _wings[_mid].Item2;
-			angle = _orientationField.GetOrientation(mx, my) + ((int) _direction) + (_diffAngle ? Math.PI : 0);
+                _sectionsCenter = (lEnd + rEnd) / 2;
 
-	        Minutia possiblyMinutia = new Minutia();
+                x = _section[_sectionsCenter].Item1;
+                y = _section[_sectionsCenter].Item2;
 
-	        possiblyMinutia.X = mx;
-	        possiblyMinutia.Y = my;
-			possiblyMinutia.Angle = (float) angle;
-
-	        if (!IsDuplicate(possiblyMinutia, minutiae))
-	        {
-		        AddMinutiae(possiblyMinutia, minutiae);
-	        }
+                _sectionsAngle = _orientation.GetOrientation(y, x);
+            }
         }
 
-	    private void AddMinutiae(Minutia newMinutiae, MinutiaeType type)
+        private bool OutOfImage(int x, int y)
+        {
+            return x < 0 || y < 0 || x >= _image.GetLength(1) || y >= _image.GetLength(0);
+        }
+
+        private Tuple<int, int> MakeStep(int _x = -1, int _y = -1, bool forPaint = false)
+        {
+            int x = forPaint ? _x : _section[_sectionsCenter].Item1;
+            int y = forPaint ? _y : _section[_sectionsCenter].Item2;
+
+            int __step = forPaint ? 1 : _step;
+
+            double angle = _sectionsAngle + ((int)_direction) * Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI * 2;
+            while (angle > Math.PI * 2) angle -= Math.PI * 2;
+
+            double dx = x + __step * Math.Cos(angle);
+            double dy = y + __step * Math.Sin(angle);
+
+            x = (int)(dx >= 0 ? dx + 0.5 : dx - 0.5);
+            y = (int)(dy >= 0 ? dy + 0.5 : dy - 0.5);
+
+            if (OutOfImage(x, y)) return new Tuple<int, int>(-1, -1);
+
+            double ang2Check = _orientation.GetOrientation(y, x);
+            if (((_sectionsAngle * ang2Check < 0) ? (_sectionsAngle > 1.4) || (ang2Check > 1.4) : Math.Abs(_sectionsAngle - ang2Check) > 0.5) & !forPaint)
+            {
+                _diffAngle = !_diffAngle;
+            }
+
+            return new Tuple<int, int>(x, y);
+        }
+
+        private void Paint(Tuple<int, int>[] edge, int edgesCenter)
+        {
+            List<Tuple<int, int>> queue = new List<Tuple<int, int>>();
+            List<Tuple<int, int>> stopPixels = new List<Tuple<int, int>>();
+
+            foreach (var tuple in edge.Where(tuple => tuple.Item1 != -1))
+            {
+                _visited[tuple.Item2, tuple.Item1] = true;
+                queue.Add(tuple);
+                stopPixels.Add(tuple);
+            }
+
+            foreach (var tuple in _section.Where(tuple => tuple.Item1 != -1))
+            {
+                _visited[tuple.Item2, tuple.Item1] = true;
+                stopPixels.Add(tuple);
+            }
+            while (queue.Count > 0)
+            {
+                int x = queue[0].Item1;
+                int y = queue[0].Item2;
+                stopPixels.Add(queue[0]);
+
+                queue.RemoveAt(0);
+
+                var pCheck = MakeStep(x, y, true);
+
+                for (int i = -1; i < 2; i++)
+                {
+                    for (int j = -1; j < 2; j++)
+                    {
+                        var fooPoint = new Tuple<int, int>(x + i, y + j);
+
+                        if (!OutOfImage(x + i, y + j) && _image[y + j, x + i] < 15 && !_visited[y + j, x + i] && !queue.Exists(q => (q.Item1 == fooPoint.Item1) 
+                                    && (q.Item2 == fooPoint.Item2)) && !stopPixels.Exists(q => (q.Item1 == fooPoint.Item1) && (q.Item2 == fooPoint.Item2)))
+                        {
+                            queue.Add(fooPoint);
+                            _visited[y + j, x + i] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        private MinutiaTypes CheckStopCriteria(int threshold = 20) 
+        {
+            int x = _section[_sectionsCenter].Item1;
+            int y = _section[_sectionsCenter].Item2;
+
+            if (_visited[y, x])
+            {
+                //MakeTestBmp(x, y); 
+                return MinutiaTypes.Intersection;
+            }
+
+            if (_image[y, x] > threshold)
+            {
+                //MakeTestBmp(x, y);
+                return MinutiaTypes.LineEnding;
+            }
+
+            return MinutiaTypes.NotMinutia;
+        }
+
+        private void MakeTestBmp(int x, int y)  //for visualisation results
+        {
+            int[,] image = new int[_visited.GetLength(0), _visited.GetLength(1)];
+
+            for (int i = 0; i < image.GetLength(1); i++)
+            {
+                for (int j = 0; j < image.GetLength(0); j++)
+                {
+                    if (_visited[j, i])
+                    {
+                        image[j, i] = 255;
+                    }
+                }
+            }
+
+            var bmp = ImageHelper.SaveArrayToBitmap(image);
+
+            bmp.SetPixel(x, 364 - y, Color.Red); //What the 364??
+
+            bmp.Save("Test" + _countTest + ".bmp");
+            _countTest++;
+        }
+
+        private void FollowLine(Tuple<int, int> point, Directions direction)
+        {
+            NewSection(point);
+            if (_section[_sectionsCenter].Item1 == -1) return;
+
+            _direction = direction;
+
+            MinutiaTypes minutiaType;
+            int x, y;
+            double angle;
+
+            do
+            {
+                x = point.Item1;
+                y = point.Item2;
+                angle = _orientation.GetOrientation(y, x);
+
+                var oldSection = new Tuple<int, int>[_lengthWings * 2 + 1];
+                for (int i = 0; i < _section.Length; i++)
+                {
+                    oldSection[i] = _section[i];
+                }
+
+                var oldCenter = _sectionsCenter;
+
+                point = MakeStep();
+
+                angle += ((int)direction) * Math.PI + (_diffAngle ? Math.PI : 0);
+                while (angle > Math.PI * 2) angle -= Math.PI * 2;
+
+                if (point.Item1 == -1) return;
+
+                NewSection(point);
+                if (_section[_sectionsCenter].Item1 == -1) return; //?
+
+                minutiaType = CheckStopCriteria();
+                if (minutiaType == MinutiaTypes.NotMinutia) Paint(oldSection, oldCenter);
+                else minutiaType = minutiaType;
+            } while (minutiaType == MinutiaTypes.NotMinutia);
+
+            x = point.Item1;
+            y = point.Item2;
+
+            var possMinutia = new Minutia();
+            possMinutia.X = x;
+            possMinutia.Y = y;
+            possMinutia.Angle = Convert.ToSingle(angle);
+
+            if (!IsDuplicate(possMinutia, minutiaType))
+            {
+                AddMinutia(possMinutia, minutiaType); //need add check of false minutias
+                MakeTestBmp(x, y);
+            }    
+        }
+
+        public List<Tuple<Minutia, MinutiaTypes>> GetMinutiaList()
+        {
+            return _minutias;
+        }
+
+        public void FindMinutia(int x, int y, double duplicateDelta, int colorThreshold = 15)
+        {
+            if (_image[y, x] >= colorThreshold || _visited[y, x]) return;
+            _visited[y, x] = true;
+
+            FollowLine(new Tuple<int, int>(x, y), Directions.Forward);
+            _diffAngle = false;
+
+
+            FollowLine(new Tuple<int, int>(x, y), Directions.Back);
+            _diffAngle = false;
+        }
+
+        private void CheckAndDeleteFalseMinutia(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 3)
+        {
+            var i =
+                _minutias.FindIndex(x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta);
+
+            _minutias.RemoveAt(i);
+        }
+
+        private bool IsDuplicate(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 5)
+        {
+            return
+                _minutias.Exists(
+                    x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta && x.Item2 == minutiaTypes);
+        }
+
+	    public bool[,] GetVisitedMap()
 	    {
-			_minutiaeList.Add(new Tuple<Minutia, MinutiaeType>(newMinutiae, type));
-		}
-
-	    private void Paint(List<Tuple<int, int>> finish)
-	    {
-		    List<Tuple<int, int>> queue = new List<Tuple<int, int>>();
-		    List<Tuple<int, int>> stopPixels = new List<Tuple<int, int>>();
-
-		    foreach (var tuple in finish.Where(tuple => tuple.Item1 != -1))
-		    {
-			    _visited[tuple.Item2, tuple.Item1] = true;
-			    queue.Add(tuple);
-			    stopPixels.Add(tuple);
-		    }
-
-		    foreach (var tuple in _wings.Where(tuple => tuple.Item1 != -1))
-		    {
-			    _visited[tuple.Item2, tuple.Item1] = true;
-			    stopPixels.Add(tuple);
-		    }
-		    while (queue.Count > 0)
-		    {
-			    int x = queue[0].Item1;
-			    int y = queue[0].Item2;
-			    stopPixels.Add(queue[0]);
-
-			    queue.RemoveAt(0);
-
-			    var pCheck = MakeStep(x, y, true);
-
-			    for (int i = -1; i < 2; i++)
-			    {
-				    for (int j = -1; j < 2; j++)
-				    {
-					    var fooPoint = new Tuple<int, int>(x + i, y + j);
-
-					    if (!OutOfRange(x + i, y + j) && _image[y + j, x + i] < 15 && !_visited[y + j, x + i] &&
-					        !queue.Exists(q => (q.Item1 == fooPoint.Item1)
-					                           && (q.Item2 == fooPoint.Item2)) &&
-					        !stopPixels.Exists(q => (q.Item1 == fooPoint.Item1) && (q.Item2 == fooPoint.Item2)))
-					    {
-						    queue.Add(fooPoint);
-						    _visited[y + j, x + i] = true;
-					    }
-				    }
-			    }
-
-		    }
+		    return _visited;
 	    }
-
-	    static MinutiaeType TryDetectMinutiae(int threshold = 40)
-	    {
-		    int x = _wings[_mid].Item1;
-		    int y = _wings[_mid].Item2;
-
-		    if (_visited[y, x])
-		    {
-			    return MinutiaeType.Intersection;
-		    }
-
-		    if (_image[y, x] > threshold)
-		    {
-			    return MinutiaeType.LineEnding;
-		    }
-
-			return MinutiaeType.NotMinutiae;
-	    }
-
-		private bool IsDuplicate(Minutia minutia, MinutiaeType minutiaTypes, double delta = 5)
-		{
-			return
-				_minutiaeList.Exists(
-					x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta && x.Item2 == minutiaTypes);
-		}
     }
-
-	class Program
-	{
-		private static void Main(string[] args)
-		{
-			var bmp = Resources._4_8;
-			var image = ImageHelper.LoadImage<int>(bmp);
-
-			var detectingMinutiae = new RidgeLine();
-
-			for (int i = 0; i < image.GetLength(1); i++)
-			{
-				for (int j = 0; j < image.GetLength(0); j++)
-				{
-					detectingMinutiae.StartSearch(i, j, 5.0);
-				}
-			}
-		}
-	}
 }
