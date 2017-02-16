@@ -5,7 +5,7 @@ using System.Linq;
 using CUDAFingerprinting.Common;
 using CUDAFingerprinting.Common.OrientationField;
 
-namespace CUDAFingerprinting.RidgeLine
+namespace CUDAFingerprinting.DetectionMinutiae
 {
 	internal enum Directions
 	{
@@ -25,6 +25,7 @@ namespace CUDAFingerprinting.RidgeLine
 		private const double Pi4 = Math.PI/4;
 		private int _countTest; //for testing
 		private bool _diffAngle;
+		private bool _diffAngleForPaint;
 		private Directions _direction;
 		private readonly int[,] _image;
 		private readonly int _lengthWings;
@@ -86,7 +87,7 @@ namespace CUDAFingerprinting.RidgeLine
 
 			var angle = _orientation.GetOrientation(y, x) + Pi4*2;
 
-			_section[_lengthWings] = point;
+			_section[_lengthWings] = point; //check on withe??
 
 			for (var i = 1; i <= _lengthWings; i++)
 			{
@@ -134,13 +135,13 @@ namespace CUDAFingerprinting.RidgeLine
 			var x = forPaint ? _x : _section[_sectionsCenter].Item1;
 			var y = forPaint ? _y : _section[_sectionsCenter].Item2;
 
-			var __step = forPaint ? 1 : _step;
+			var step = forPaint ? 1 : _step;
 
 			var angle = _sectionsAngle + (int) _direction*Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI*2;
 			while (angle > Math.PI*2) angle -= Math.PI*2;
 
-			var dx = x + __step*Math.Cos(angle);
-			var dy = y + __step*Math.Sin(angle);
+			var dx = x + step*Math.Cos(angle);
+			var dy = y + step*Math.Sin(angle);
 
 			x = (int) (dx >= 0 ? dx + 0.5 : dx - 0.5);
 			y = (int) (dy >= 0 ? dy + 0.5 : dy - 0.5);
@@ -151,12 +152,100 @@ namespace CUDAFingerprinting.RidgeLine
 			if ((_sectionsAngle*ang2Check < 0
 				    ? (_sectionsAngle > 1.4) || (ang2Check > 1.4)
 				    : Math.Abs(_sectionsAngle - ang2Check) > 0.5) & !forPaint)
+			{
+				//_diffAngleForPaint = _diffAngle;
 				_diffAngle = !_diffAngle;
+			}
 
 			return new Tuple<int, int>(x, y);
 		}
 
-		private void Paint(Tuple<int, int>[] edge, int edgesCenter)
+		private void Paint(Tuple<int, int>[] edge)
+		{
+			var queue = new List<Tuple<int, int>>();
+			Tuple<int, int> v1, v2;
+
+			int x1 = -1,x2 = -1, y1 = -1, y2 = -1, x_a, y_a;
+
+			foreach (var tuple in edge.Where(tuple => tuple.Item1 != -1))
+			{
+				if (x1 == -1)
+				{
+					x1 = tuple.Item1;
+					y1 = tuple.Item2;
+				}
+
+				x2 = tuple.Item1;
+				y2 = tuple.Item2;
+
+				_visited[tuple.Item2, tuple.Item1] = true;
+				queue.Add(tuple);
+			}
+
+			v1 = new Tuple<int, int>(x2 - x1, y2 - y1);
+			x_a = x1;
+			y_a = y1;
+
+			x1 = -1;
+			y1 = -1;
+			x2 = -1;
+			y2 = -1;
+
+			foreach (var tuple in _section.Where(tuple => tuple.Item1 != -1))
+			{
+				if (x1 == -1)
+				{
+					x1 = tuple.Item1;
+					y1 = tuple.Item2;
+				}
+
+				x2 = tuple.Item1;
+				y2 = tuple.Item2;
+
+				_visited[tuple.Item2, tuple.Item1] = true;
+			}
+
+			v2 = new Tuple<int, int>(x2 - x1, y2 - y1);
+
+			if (v1.Item1*v2.Item1 + v1.Item2*v2.Item2 < 0)
+			{
+				x1 = x2;
+				y1 = y2;
+				v1 = new Tuple<int, int>(-v1.Item1, -v1.Item2);
+			}
+
+			while (queue.Count > 0)
+			{
+				var cX = queue[0].Item1;
+				var cY = queue[0].Item2;
+				queue.RemoveAt(0);
+
+				for (int i = -1; i < 2; i++)
+					for (int j = -1; j < 2; j++)
+					{
+						if (i == 0 && j == 0) continue;
+
+						var x = cX + i;
+						var y = cY + j;
+
+						if (OutOfImage(x, y) || _visited[y, x] || _image[y, x] > 15) continue;
+
+						var pointV1 = new Tuple<int, int>(x_a - x, y_a - y);
+						var pointV2 = new Tuple<int, int>(x1 - x, y1 - y);
+
+						var skew1 = v1.Item1*pointV1.Item2 - pointV1.Item1*v1.Item2 >= 0 ? 1 : -1;
+						var skew2 = v2.Item1*pointV2.Item2 - pointV2.Item1*v2.Item2 >= 0 ? 1 : -1;
+
+						if (skew1*skew2 < 0)
+						{
+							queue.Add(new Tuple<int, int>(x, y));
+							_visited[y, x] = true;
+						}
+					}
+			}
+		}
+
+		private void Paint(Tuple<int, int>[] edge, int edgesCenter) //must be remade!!!!
 		{
 			var queue = new List<Tuple<int, int>>();
 			var stopPixels = new List<Tuple<int, int>>();
@@ -165,7 +254,7 @@ namespace CUDAFingerprinting.RidgeLine
 			{
 				_visited[tuple.Item2, tuple.Item1] = true;
 				queue.Add(tuple);
-				stopPixels.Add(tuple);
+				//stopPixels.Add(tuple);
 			}
 
 			foreach (var tuple in _section.Where(tuple => tuple.Item1 != -1))
@@ -225,7 +314,7 @@ namespace CUDAFingerprinting.RidgeLine
 
 			var bmp = ImageHelper.SaveArrayToBitmap(image);
 
-			bmp.SetPixel(x, 364 - y, Color.Red); //What the 364??
+			bmp.SetPixel(x, image.GetLength(0) - y - 1, Color.Red);
 
 			bmp.Save("Test" + _countTest + ".bmp");
 			_countTest++;
@@ -265,7 +354,7 @@ namespace CUDAFingerprinting.RidgeLine
 				if (_section[_sectionsCenter].Item1 == -1) return; //?
 
 				minutiaType = CheckStopCriteria();
-				if (minutiaType == MinutiaTypes.NotMinutia) Paint(oldSection, oldCenter);
+				if (minutiaType == MinutiaTypes.NotMinutia) Paint(oldSection);
 				else minutiaType = minutiaType;
 			} while (minutiaType == MinutiaTypes.NotMinutia);
 
@@ -277,22 +366,27 @@ namespace CUDAFingerprinting.RidgeLine
 			possMinutia.Y = y;
 			possMinutia.Angle = Convert.ToSingle(angle);
 
-			if (!IsDuplicate(possMinutia, minutiaType))
+			if (IsDuplicate(possMinutia, minutiaType)) return;
+
+			if (!CheckAndDeleteFalseMinutia(possMinutia, minutiaType))
 			{
-				AddMinutia(possMinutia, minutiaType); //need add check of false minutias
+				AddMinutia(possMinutia, minutiaType);
 				MakeTestBmp(x, y);
-			}
+			} 
 		}
 
-		private void CheckAndDeleteFalseMinutia(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 3)
+		private bool CheckAndDeleteFalseMinutia(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 6)
 		{
 			var i =
 				_minutias.FindIndex(x => Math.Sqrt(Math.Pow(x.Item1.X - minutia.X, 2) + Math.Pow(x.Item1.Y - minutia.Y, 2)) < delta);
 
+			if (i == -1) return false;
+
 			_minutias.RemoveAt(i);
+			return true;
 		}
 
-		private bool IsDuplicate(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 5)
+		private bool IsDuplicate(Minutia minutia, MinutiaTypes minutiaTypes, double delta = 6)
 		{
 			return
 				_minutias.Exists(

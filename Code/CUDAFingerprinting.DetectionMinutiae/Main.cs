@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CUDAFingerprinting.Common;
-using CUDAFingerprinting.DetectionMinutiae;
 
-namespace CUDAFingerprinting.RidgeLine
+namespace CUDAFingerprinting.DetectionMinutiae
 {
     class Program
     {
@@ -16,7 +12,7 @@ namespace CUDAFingerprinting.RidgeLine
             var bmp = Resources.SampleFinger4;
             var image = ImageHelper.LoadImage<int>(bmp);
 
-            var detectingMinutias = new RidgeOnLine(image, 2, 4);  //(image, step, size_wings)
+            var detectingMinutias = new RidgeOnLine(image, 2, 10);  //(image, step, size_wings)
 
             for (int i = 0; i < image.GetLength(1); i++)
             {
@@ -37,7 +33,7 @@ namespace CUDAFingerprinting.RidgeLine
             {
                 Common.Minutia temp = new Common.Minutia();
                 temp.X = minutia.Item1.X;
-                temp.Y = 364 - minutia.Item1.Y;
+                temp.Y = image.GetLength(0) - minutia.Item1.Y - 1;
                 temp.Angle = minutia.Item1.Angle;
 
                 Console.WriteLine($@"x = {temp.X}; y = {temp.Y}; Type = {minutia.Item2}; Angle = {temp.Angle}");
