@@ -245,49 +245,49 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			}
 		}
 
-		private void Paint(Tuple<int, int>[] edge, int edgesCenter) //must be remade!!!!
-		{
-			var queue = new List<Tuple<int, int>>();
-			var stopPixels = new List<Tuple<int, int>>();
+		//private void Paint(Tuple<int, int>[] edge, int edgesCenter) 
+		//{
+		//	var queue = new List<Tuple<int, int>>();
+		//	var stopPixels = new List<Tuple<int, int>>();
 
-			foreach (var tuple in edge.Where(tuple => tuple.Item1 != -1))
-			{
-				_visited[tuple.Item2, tuple.Item1] = true;
-				queue.Add(tuple);
-				//stopPixels.Add(tuple);
-			}
+		//	foreach (var tuple in edge.Where(tuple => tuple.Item1 != -1))
+		//	{
+		//		_visited[tuple.Item2, tuple.Item1] = true;
+		//		queue.Add(tuple);
+		//		//stopPixels.Add(tuple);
+		//	}
 
-			foreach (var tuple in _section.Where(tuple => tuple.Item1 != -1))
-			{
-				_visited[tuple.Item2, tuple.Item1] = true;
-				stopPixels.Add(tuple);
-			}
-			while (queue.Count > 0)
-			{
-				var x = queue[0].Item1;
-				var y = queue[0].Item2;
-				stopPixels.Add(queue[0]);
+		//	foreach (var tuple in _section.Where(tuple => tuple.Item1 != -1))
+		//	{
+		//		_visited[tuple.Item2, tuple.Item1] = true;
+		//		stopPixels.Add(tuple);
+		//	}
+		//	while (queue.Count > 0)
+		//	{
+		//		var x = queue[0].Item1;
+		//		var y = queue[0].Item2;
+		//		stopPixels.Add(queue[0]);
 
-				queue.RemoveAt(0);
+		//		queue.RemoveAt(0);
 
-				var pCheck = MakeStep(x, y, true);
+		//		var pCheck = MakeStep(x, y, true);
 
-				for (var i = -1; i < 2; i++)
-					for (var j = -1; j < 2; j++)
-					{
-						var fooPoint = new Tuple<int, int>(x + i, y + j);
+		//		for (var i = -1; i < 2; i++)
+		//			for (var j = -1; j < 2; j++)
+		//			{
+		//				var fooPoint = new Tuple<int, int>(x + i, y + j);
 
-						if (!OutOfImage(x + i, y + j) && (_image[y + j, x + i] < 15) && !_visited[y + j, x + i] &&
-						    !queue.Exists(q => (q.Item1 == fooPoint.Item1)
-						                       && (q.Item2 == fooPoint.Item2)) &&
-						    !stopPixels.Exists(q => (q.Item1 == fooPoint.Item1) && (q.Item2 == fooPoint.Item2)))
-						{
-							queue.Add(fooPoint);
-							_visited[y + j, x + i] = true;
-						}
-					}
-			}
-		}
+		//				if (!OutOfImage(x + i, y + j) && (_image[y + j, x + i] < 15) && !_visited[y + j, x + i] &&
+		//				    !queue.Exists(q => (q.Item1 == fooPoint.Item1)
+		//				                       && (q.Item2 == fooPoint.Item2)) &&
+		//				    !stopPixels.Exists(q => (q.Item1 == fooPoint.Item1) && (q.Item2 == fooPoint.Item2)))
+		//				{
+		//					queue.Add(fooPoint);
+		//					_visited[y + j, x + i] = true;
+		//				}
+		//			}
+		//	}
+		//}
 
 		private MinutiaTypes CheckStopCriteria(int threshold = 20)
 		{
@@ -354,8 +354,8 @@ namespace CUDAFingerprinting.DetectionMinutiae
 				if (_section[_sectionsCenter].Item1 == -1) return; //?
 
 				minutiaType = CheckStopCriteria();
-				if (minutiaType == MinutiaTypes.NotMinutia) Paint(oldSection);
-				else minutiaType = minutiaType;
+				//if (minutiaType == MinutiaTypes.NotMinutia)
+					Paint(oldSection);
 			} while (minutiaType == MinutiaTypes.NotMinutia);
 
 			x = point.Item1;

@@ -9,10 +9,10 @@ namespace CUDAFingerprinting.DetectionMinutiae
     {
         static void Main()
         {
-            var bmp = Resources.SampleFinger4;
+            var bmp = Resources.SampleFinger3;
             var image = ImageHelper.LoadImage<int>(bmp);
 
-            var detectingMinutias = new RidgeOnLine(image, 2, 10);  //(image, step, size_wings)
+            var detectingMinutias = new RidgeOnLine(image, 2, 5);  //(image, step, size_wings)
 
             for (int i = 0; i < image.GetLength(1); i++)
             {
