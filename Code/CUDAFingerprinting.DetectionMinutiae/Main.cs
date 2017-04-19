@@ -9,10 +9,10 @@ namespace CUDAFingerprinting.DetectionMinutiae
     {
         static void Main()
         {
-            var bmp = Resources.SampleFinger3;
+            var bmp = Resources.SampleFinger4;
             var image = ImageHelper.LoadImage<int>(bmp);
 
-            var detectingMinutias = new RidgeOnLine(image, 2, 5);  //(image, step, size_wings)
+            var detectingMinutias = new RidgeOnLine(image, 2, 3);  //(image, step, size_wings)
 
             for (int i = 0; i < image.GetLength(1); i++)
             {
@@ -36,7 +36,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
                 temp.Y = image.GetLength(0) - minutia.Item1.Y - 1;
                 temp.Angle = minutia.Item1.Angle;
 
-                Console.WriteLine($@"x = {temp.X}; y = {temp.Y}; Type = {minutia.Item2}; Angle = {temp.Angle}");
+                //Console.WriteLine($@"x = {temp.X}; y = {temp.Y}; Type = {minutia.Item2}; Angle = {temp.Angle}");
                 if (minutia.Item2 == MinutiaTypes.LineEnding) MinutiaE.Add(temp);
                 if (minutia.Item2 == MinutiaTypes.Intersection) MinutiaI.Add(temp);
             }
@@ -45,6 +45,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 	        var visitedMap = detectingMinutias.GetVisitedMap();
             var bmpVis = new Bitmap(MakeBmp(visitedMap));
             bmpVis.Save("Vis.bmp");
+
             ImageHelper.MarkMinutiae("Vis.bmp", MinutiaE, "withMinutiaE.bmp");
 			ImageHelper.MarkMinutiae("Vis.bmp", MinutiaI, "withMinutiaI.bmp");
 			Console.ReadKey();

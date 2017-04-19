@@ -24,8 +24,6 @@ namespace CUDAFingerprinting.DetectionMinutiae
 	{
 		private const double Pi4 = Math.PI/4;
 		private int _countTest; //for testing
-		private bool _diffAngle;
-		private bool _diffAngleForPaint;
 		private Directions _direction;
 		private readonly int[,] _image;
 		private readonly int _lengthWings;
@@ -44,11 +42,10 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			_countTest = 0;
 
 			_image = image;
-			_orientation = new PixelwiseOrientationField(image, 16); //will try change blockSize
+			_orientation = new PixelwiseOrientationField(image, 18); //will try change blockSize
 			_step = step;
 			_lengthWings = lengthWings;
 			_section = new Tuple<int, int>[2*lengthWings + 1];
-			_diffAngle = false;
 			_visited = new bool[image.GetLength(0), image.GetLength(1)];
 			_minutias = new List<Tuple<Minutia, MinutiaTypes>>();
 		}
@@ -63,14 +60,18 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			if ((_image[y, x] >= colorThreshold) || _visited[y, x]) return;
 			_visited[y, x] = true;
 
+
+			_sectionsAngle = _orientation.GetOrientation(y, x);
+			if (_sectionsAngle < 0) _sectionsAngle += 2 * Math.PI;
 			FollowLine(new Tuple<int, int>(x, y), Directions.Forward);
-			_diffAngle = false;
 
 
+			_sectionsAngle = _orientation.GetOrientation(y, x) + Math.PI;
+			//if (_sectionsAngle < 0) _sectionsAngle += 2 * Math.PI;
 			FollowLine(new Tuple<int, int>(x, y), Directions.Back);
-			_diffAngle = false;
 		}
 
+		//Need add calculate angle and remade selection 
 		private void NewSection(Tuple<int, int> point)
 		{
 			for (var index = 0; index < _section.Length; index++)
@@ -85,7 +86,8 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			var rightE = false;
 			var leftE = false;
 
-			var angle = _orientation.GetOrientation(y, x) + Pi4*2;
+			var angle = _orientation.GetOrientation(y, x);
+			angle += Pi4;
 
 			_section[_lengthWings] = point; //check on withe??
 
@@ -121,7 +123,16 @@ namespace CUDAFingerprinting.DetectionMinutiae
 				x = _section[_sectionsCenter].Item1;
 				y = _section[_sectionsCenter].Item2;
 
-				_sectionsAngle = _orientation.GetOrientation(y, x);
+				angle = _orientation.GetOrientation(y, x);
+				//Console.WriteLine(angle);
+				angle += (double)_direction * Math.PI;
+				if (angle < 0) angle += 2 * Math.PI;
+
+				if (Math.Abs(_sectionsAngle - angle) > 0.2) angle += Math.PI;
+				while (angle > 2 * Math.PI) angle -= Math.PI;
+
+				_sectionsAngle = angle;
+				//Console.WriteLine(_sectionsAngle);
 			}
 		}
 
@@ -130,34 +141,23 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			return (x < 0) || (y < 0) || (x >= _image.GetLength(1)) || (y >= _image.GetLength(0));
 		}
 
-		private Tuple<int, int> MakeStep(int _x = -1, int _y = -1, bool forPaint = false)
+		//Remade step
+		private Tuple<int, int> MakeStep(int _x = -1, int _y = -1)
 		{
-			var x = forPaint ? _x : _section[_sectionsCenter].Item1;
-			var y = forPaint ? _y : _section[_sectionsCenter].Item2;
+			var x = _section[_sectionsCenter].Item1;
+			var y = _section[_sectionsCenter].Item2;
 
-			var step = forPaint ? 1 : _step;
+			var step = _step;
 
-			var angle = _sectionsAngle + (int) _direction*Math.PI + (_diffAngle ? Math.PI : 0) + Math.PI*2;
-			while (angle > Math.PI*2) angle -= Math.PI*2;
+			var angle = _sectionsAngle;
 
-			var dx = x + step*Math.Cos(angle);
-			var dy = y + step*Math.Sin(angle);
+			var dx = x + step * Math.Cos(angle);
+			var dy = y + step * Math.Sin(angle);
 
 			x = (int) (dx >= 0 ? dx + 0.5 : dx - 0.5);
 			y = (int) (dy >= 0 ? dy + 0.5 : dy - 0.5);
 
-			if (OutOfImage(x, y)) return new Tuple<int, int>(-1, -1);
-
-			var ang2Check = _orientation.GetOrientation(y, x);
-			if ((_sectionsAngle*ang2Check < 0
-				    ? (_sectionsAngle > 1.4) || (ang2Check > 1.4)
-				    : Math.Abs(_sectionsAngle - ang2Check) > 0.5) & !forPaint)
-			{
-				//_diffAngleForPaint = _diffAngle;
-				_diffAngle = !_diffAngle;
-			}
-
-			return new Tuple<int, int>(x, y);
+			return OutOfImage(x, y) ? new Tuple<int, int>(-1, -1) : new Tuple<int, int>(x, y);
 		}
 
 		private void Paint(Tuple<int, int>[] edge)
@@ -245,50 +245,6 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			}
 		}
 
-		//private void Paint(Tuple<int, int>[] edge, int edgesCenter) 
-		//{
-		//	var queue = new List<Tuple<int, int>>();
-		//	var stopPixels = new List<Tuple<int, int>>();
-
-		//	foreach (var tuple in edge.Where(tuple => tuple.Item1 != -1))
-		//	{
-		//		_visited[tuple.Item2, tuple.Item1] = true;
-		//		queue.Add(tuple);
-		//		//stopPixels.Add(tuple);
-		//	}
-
-		//	foreach (var tuple in _section.Where(tuple => tuple.Item1 != -1))
-		//	{
-		//		_visited[tuple.Item2, tuple.Item1] = true;
-		//		stopPixels.Add(tuple);
-		//	}
-		//	while (queue.Count > 0)
-		//	{
-		//		var x = queue[0].Item1;
-		//		var y = queue[0].Item2;
-		//		stopPixels.Add(queue[0]);
-
-		//		queue.RemoveAt(0);
-
-		//		var pCheck = MakeStep(x, y, true);
-
-		//		for (var i = -1; i < 2; i++)
-		//			for (var j = -1; j < 2; j++)
-		//			{
-		//				var fooPoint = new Tuple<int, int>(x + i, y + j);
-
-		//				if (!OutOfImage(x + i, y + j) && (_image[y + j, x + i] < 15) && !_visited[y + j, x + i] &&
-		//				    !queue.Exists(q => (q.Item1 == fooPoint.Item1)
-		//				                       && (q.Item2 == fooPoint.Item2)) &&
-		//				    !stopPixels.Exists(q => (q.Item1 == fooPoint.Item1) && (q.Item2 == fooPoint.Item2)))
-		//				{
-		//					queue.Add(fooPoint);
-		//					_visited[y + j, x + i] = true;
-		//				}
-		//			}
-		//	}
-		//}
-
 		private MinutiaTypes CheckStopCriteria(int threshold = 20)
 		{
 			var x = _section[_sectionsCenter].Item1;
@@ -303,7 +259,8 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			return MinutiaTypes.NotMinutia;
 		}
 
-		private void MakeTestBmp(int x, int y) //for visualisation results
+		//for visualisation results
+		private void MakeTestBmp(int x, int y)
 		{
 			var image = new int[_visited.GetLength(0), _visited.GetLength(1)];
 
@@ -322,31 +279,21 @@ namespace CUDAFingerprinting.DetectionMinutiae
 
 		private void FollowLine(Tuple<int, int> point, Directions direction)
 		{
+			_direction = direction;
+
 			NewSection(point);
 			if (_section[_sectionsCenter].Item1 == -1) return;
 
-			_direction = direction;
-
 			MinutiaTypes minutiaType;
 			int x, y;
-			double angle;
 
 			do
 			{
-				x = point.Item1;
-				y = point.Item2;
-				angle = _orientation.GetOrientation(y, x);
-
 				var oldSection = new Tuple<int, int>[_lengthWings*2 + 1];
 				for (var i = 0; i < _section.Length; i++)
 					oldSection[i] = _section[i];
 
-				var oldCenter = _sectionsCenter;
-
 				point = MakeStep();
-
-				angle += (int) direction*Math.PI + (_diffAngle ? Math.PI : 0);
-				while (angle > Math.PI*2) angle -= Math.PI*2;
 
 				if (point.Item1 == -1) return;
 
@@ -355,7 +302,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 
 				minutiaType = CheckStopCriteria();
 				//if (minutiaType == MinutiaTypes.NotMinutia)
-					Paint(oldSection);
+				Paint(oldSection);
 			} while (minutiaType == MinutiaTypes.NotMinutia);
 
 			x = point.Item1;
@@ -364,7 +311,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			var possMinutia = new Minutia();
 			possMinutia.X = x;
 			possMinutia.Y = y;
-			possMinutia.Angle = Convert.ToSingle(angle);
+			possMinutia.Angle = Convert.ToSingle(_sectionsAngle);
 
 			if (IsDuplicate(possMinutia, minutiaType)) return;
 
