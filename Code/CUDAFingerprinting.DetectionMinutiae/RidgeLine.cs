@@ -60,15 +60,22 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			if ((_image[y, x] >= colorThreshold) || _visited[y, x]) return;
 			_visited[y, x] = true;
 
+			Console.Clear();
+			Console.WriteLine(_countTest + ":");
 
 			_sectionsAngle = _orientation.GetOrientation(y, x);
 			if (_sectionsAngle < 0) _sectionsAngle += 2 * Math.PI;
 			FollowLine(new Tuple<int, int>(x, y), Directions.Forward);
 
+			//Console.ReadKey();
+			Console.Clear();
+			Console.WriteLine(_countTest + ":");
 
 			_sectionsAngle = _orientation.GetOrientation(y, x) + Math.PI;
 			//if (_sectionsAngle < 0) _sectionsAngle += 2 * Math.PI;
 			FollowLine(new Tuple<int, int>(x, y), Directions.Back);
+
+			//Console.ReadKey();
 		}
 
 		//Need add calculate angle and remade selection 
@@ -87,7 +94,7 @@ namespace CUDAFingerprinting.DetectionMinutiae
 			var leftE = false;
 
 			var angle = _orientation.GetOrientation(y, x);
-			angle += Pi4;
+			angle += Pi4 * 2;
 
 			_section[_lengthWings] = point; //check on withe??
 
@@ -122,18 +129,18 @@ namespace CUDAFingerprinting.DetectionMinutiae
 
 				x = _section[_sectionsCenter].Item1;
 				y = _section[_sectionsCenter].Item2;
-
-				angle = _orientation.GetOrientation(y, x);
-				//Console.WriteLine(angle);
-				angle += (double)_direction * Math.PI;
-				if (angle < 0) angle += 2 * Math.PI;
-
-				if (Math.Abs(_sectionsAngle - angle) > 0.2) angle += Math.PI;
-				while (angle > 2 * Math.PI) angle -= Math.PI;
-
-				_sectionsAngle = angle;
-				//Console.WriteLine(_sectionsAngle);
 			}
+
+			angle = _orientation.GetOrientation(y, x);
+			//Console.WriteLine(angle);
+			angle += (double)_direction * Math.PI;
+			if (angle < 0) angle += 2 * Math.PI;
+
+			if (Math.Abs(_sectionsAngle - angle) > 0.2 && Math.Abs(_sectionsAngle - angle) < 6) angle += Math.PI;
+			while (angle > 2 * Math.PI) angle -= 2 * Math.PI;
+
+			_sectionsAngle = angle;
+			Console.WriteLine(_sectionsAngle);
 		}
 
 		private bool OutOfImage(int x, int y)
