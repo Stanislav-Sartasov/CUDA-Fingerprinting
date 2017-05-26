@@ -68,7 +68,7 @@ struct Queue
 			newElem->point = point;
 			newElem->next = NULL;
 
-			if (head != NULL)
+			if (head == NULL)
 			{
 				head = newElem;
 				tail = head;
@@ -144,7 +144,7 @@ struct ListOfMinutiae
 			newElem->minutiae = newMinutiae;
 			newElem->next = NULL;
 
-			if (head != NULL)
+			if (head == NULL)
 			{
 				head = newElem;
 				tail = head;

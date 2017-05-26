@@ -73,7 +73,7 @@ __device__ void NewSection(int sx, int sy, Direction direction, CUDAArray<float>
 		int xe = (int)(x + i * cos(angle));
 		int ye = (int)(y + i * sin(angle));
 
-		if (!OutOfImage(image, xs, ys) && (image.At(xs, ys)) && !rightE)
+		if (!OutOfImage(image, xs, ys) && (image.At(xs, ys) < 15) && !rightE)
 		{
 			section[lengthWings - i] = NewPoint(xs, ys);
 			rEnd--;
@@ -83,7 +83,7 @@ __device__ void NewSection(int sx, int sy, Direction direction, CUDAArray<float>
 			rightE = true;
 		}
 
-		if (!OutOfImage(image, xe, ye) && (image.At(xe, ye)) && !leftE)
+		if (!OutOfImage(image, xe, ye) && (image.At(xe, ye) < 15) && !leftE)
 		{
 			section[lengthWings - i] = NewPoint(xe, ye);
 			lEnd--;
@@ -247,7 +247,7 @@ __device__ void FollowLine(int x, int y, Direction direction, CUDAArray<float> i
 
 	do
 	{
-		Point* oldSection = (Point*)malloc(sizeof(Point) * size);
+		Point* oldSection = new Point[size];
 		for (int i = 0; i < size; i++)
 			oldSection[i] = section[i];
 
@@ -287,10 +287,13 @@ __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientation
 	bool flag;
 	minutiaes.SetAt(blockIdx.x, 0, new ListOfMinutiae);
 
-	for (int i = blockIdx.x * gridDim.x; i < (blockIdx.x + 1) * gridDim.x; i++)
-		for (int j = blockIdx.y * gridDim.x; j < (blockIdx.y + 1) * gridDim.x; j++)
+	int partX = image.Height / gridDim.x;
+	int partY = image.Width / gridDim.y;
+
+	for (int i = blockIdx.x * partX; i < (blockIdx.x + 1) * partX; i++)
+		for (int j = blockIdx.y * partY; j < (blockIdx.y + 1) * partY; j++)
 		{
-			if ((image.At(i, j) >= colorThreshold) || visited.At(i, j)) return;
+			if ((image.At(i, j) >= colorThreshold) || visited.At(i, j)) continue;
 			visited.SetAt(i, j, true);
 
 			FollowLine(i, j, Forward, image, orientationField, visited, countOfMinutiae, minutiaes, 
@@ -311,7 +314,7 @@ bool* Start(float* source, int step, int lengthWings, int width, int height)
 	CUDAArray<ListOfMinutiae*> minutiaes = CUDAArray<ListOfMinutiae*>((ListOfMinutiae**)calloc(defaultThreadCount, sizeof(ListOfMinutiae*)), defaultThreadCount, 1);
 
 	dim3 blockSize = 1;
-	dim3 gridSize = dim3(defaultThreadCount);
+	dim3 gridSize = dim3(ceilMod(image.Height, defaultThreadCount), ceilMod(image.Width, defaultThreadCount));
 
 	FindMinutia << <gridSize, blockSize >> > (image, orientationField, visited, countOfMinutiae, minutiaes, sizeSection, step);
 
@@ -336,8 +339,10 @@ int main()
 	for (int i = 0; i < height; i++)
 		for (int j = 0; j < width; j++)
 		{
-			img[i * width + j] = res[i * width + j] ? 0 : 255;
+			img[i * width + j] = res[i * width + j] ? 255 : 0;
 		}
+
+
 
 	saveBmp("..\\rez.bmp", img, width, height);
 
