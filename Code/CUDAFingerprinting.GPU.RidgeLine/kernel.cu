@@ -287,8 +287,8 @@ __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientation
 	bool flag;
 	minutiaes.SetAt(blockIdx.x, 0, new ListOfMinutiae);
 
-	for (int i = blockIdx.x * blockDim.x; i < (blockIdx.x + 1) * blockDim.x; i++)
-		for (int j = blockIdx.y * blockDim.y; j < (blockIdx.y + 1) * blockDim.y; j++)
+	for (int i = blockIdx.x * gridDim.x; i < (blockIdx.x + 1) * gridDim.x; i++)
+		for (int j = blockIdx.y * gridDim.x; j < (blockIdx.y + 1) * gridDim.x; j++)
 		{
 			if ((image.At(i, j) >= colorThreshold) || visited.At(i, j)) return;
 			visited.SetAt(i, j, true);
@@ -300,7 +300,7 @@ __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientation
 		}
 }
 
-void Start(float* source, int step, int lengthWings, int width, int height)
+bool* Start(float* source, int step, int lengthWings, int width, int height)
 {
 	int sizeSection = lengthWings * 2 + 1;
 
@@ -311,9 +311,11 @@ void Start(float* source, int step, int lengthWings, int width, int height)
 	CUDAArray<ListOfMinutiae*> minutiaes = CUDAArray<ListOfMinutiae*>((ListOfMinutiae**)calloc(defaultThreadCount, sizeof(ListOfMinutiae*)), defaultThreadCount, 1);
 
 	dim3 blockSize = 1;
-	dim3 gridSize = dim3(ceilMod(height, defaultThreadCount));
+	dim3 gridSize = dim3(defaultThreadCount);
 
 	FindMinutia << <gridSize, blockSize >> > (image, orientationField, visited, countOfMinutiae, minutiaes, sizeSection, step);
+
+	return visited.GetData();
 }
 
 int main()
@@ -329,7 +331,15 @@ int main()
 			source[i * width + j] = (float)img[i * width + j];
 		}
 
-	Start(source, 2, 3, width, height);
+	bool* res = Start(source, 2, 3, width, height);
 	
+	for (int i = 0; i < height; i++)
+		for (int j = 0; j < width; j++)
+		{
+			img[i * width + j] = res[i * width + j] ? 0 : 255;
+		}
+
+	saveBmp("..\\rez.bmp", img, width, height);
+
 	return 0;
 }

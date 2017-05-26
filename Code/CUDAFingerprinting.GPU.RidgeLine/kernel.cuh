@@ -6,10 +6,11 @@
 #include "constsmacros.h"
 #include <stdlib.h>
 #include <math.h>
-#include "ImageLoading.cuh"
+#include "ImageLoading.cu"
 #include "CUDAArray.cuh"
 #include <float.h>
-#include "OrientationField.cuh"
+#include "OrientationField.cu"
+#include "Convolution.cu"
 
 enum Direction
 {
