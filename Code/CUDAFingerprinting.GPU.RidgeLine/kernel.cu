@@ -1,4 +1,18 @@
 #include "kernel.cuh"
+#include "cuda_runtime.h"
+#include <iostream>
+#include "device_launch_parameters.h"
+#include "device_functions.h"
+#include <stdio.h>
+#include "constsmacros.h"
+#include <stdlib.h>
+#include <math.h>
+//#include "ImageLoading.cu"
+//#include "CUDAArray.cuh"
+#include <float.h>
+#include "OrientationField.cu"
+#include "Convolution.cu"
+
 #define M_PI 3.14159265358979323846
 #define Pi4 (M_PI / 4);
 
@@ -303,7 +317,22 @@ __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientation
 		}
 }
 
-bool* Start(float* source, int step, int lengthWings, int width, int height)
+ListOfMinutiae* MergeMinutiaePools(ListOfMinutiae** pools)
+{
+	ListOfMinutiae* resPool = new ListOfMinutiae;
+
+	for (int i = 0; i < defaultThreadCount; i++)
+	{
+		while (pools[i]->head != NULL)
+		{
+			resPool->Add(pools[i]->Pop());
+		}
+	}
+
+	return resPool;
+}
+
+bool Start(float* source, int step, int lengthWings, int width, int height)
 {
 	int sizeSection = lengthWings * 2 + 1;
 
@@ -318,33 +347,35 @@ bool* Start(float* source, int step, int lengthWings, int width, int height)
 
 	FindMinutia << <gridSize, blockSize >> > (image, orientationField, visited, countOfMinutiae, minutiaes, sizeSection, step);
 
-	return visited.GetData();
+	ListOfMinutiae** notProcessedPools = minutiaes.GetData();
+
+	return Parsing(MergeMinutiaePools(notProcessedPools));
 }
 
-int main()
-{
-	int width;
-	int height;
-	char* filename = "H:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.RidgeLine\\res.bmp";  //Write your way to bmp file
-	int* img = loadBmp(filename, &width, &height);
-	float* source = (float*)malloc(height*width*sizeof(float));
-	for (int i = 0; i < height; i++)
-		for (int j = 0; j < width; j++)
-		{
-			source[i * width + j] = (float)img[i * width + j];
-		}
-
-	bool* res = Start(source, 2, 3, width, height);
-	
-	for (int i = 0; i < height; i++)
-		for (int j = 0; j < width; j++)
-		{
-			img[i * width + j] = res[i * width + j] ? 255 : 0;
-		}
-
-
-
-	saveBmp("..\\rez.bmp", img, width, height);
-
-	return 0;
-}
+//int main()
+//{
+//	int width;
+//	int height;
+//	char* filename = "H:\\GitHub\\CUDA-Fingerprinting\\Code\\CUDAFingerprinting.GPU.RidgeLine\\res.bmp";  //Write your way to bmp file
+//	int* img = loadBmp(filename, &width, &height);
+//	float* source = (float*)malloc(height*width*sizeof(float));
+//	for (int i = 0; i < height; i++)
+//		for (int j = 0; j < width; j++)
+//		{
+//			source[i * width + j] = (float)img[i * width + j];
+//		}
+//
+//	bool* res = Start(source, 2, 3, width, height);
+//	
+//	for (int i = 0; i < height; i++)
+//		for (int j = 0; j < width; j++)
+//		{
+//			img[i * width + j] = res[i * width + j] ? 255 : 0;
+//		}
+//
+//
+//
+//	saveBmp("..\\rez.bmp", img, width, height);
+//
+//	return 0;
+//}

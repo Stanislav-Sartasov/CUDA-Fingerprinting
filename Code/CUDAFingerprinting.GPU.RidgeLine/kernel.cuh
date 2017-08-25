@@ -1,16 +1,13 @@
-#include "cuda_runtime.h"
-#include <iostream>
-#include "device_launch_parameters.h"
-#include "device_functions.h"
-#include <stdio.h>
-#include "constsmacros.h"
-#include <stdlib.h>
-#include <math.h>
-#include "ImageLoading.cu"
 #include "CUDAArray.cuh"
-#include <float.h>
-#include "OrientationField.cu"
-#include "Convolution.cu"
+
+extern "C"
+{
+	__declspec(dllexport) int* GetX();
+	__declspec(dllexport) int* GetY();
+	__declspec(dllexport) int* GetMType();
+	__declspec(dllexport) float* GetAngle();
+	__declspec(dllexport) bool Start(float* source, int step, int lengthWings, int width, int height);
+}
 
 enum Direction
 {
@@ -156,9 +153,23 @@ struct ListOfMinutiae
 			}
 		}
 
-		
+		__device__ __host__
+			Minutiae Pop()
+		{
+			Minutiae minutiae = head->minutiae;
+			Node* next = head->next;
+
+			delete(head);
+			head = next;
+
+			if (head == NULL) tail = NULL;
+
+			return minutiae;
+		}
 };
 
 __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientationField, CUDAArray<bool> visited,
 	CUDAArray<int> countOfMinutiae, CUDAArray<ListOfMinutiae*> minutiaes,
 	const int size, const int step, int colorThreshold);
+
+bool Parsing(ListOfMinutiae* minutiaeList);
