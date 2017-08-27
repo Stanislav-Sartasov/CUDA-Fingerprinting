@@ -6,7 +6,7 @@ extern "C"
 	__declspec(dllexport) int* GetY();
 	__declspec(dllexport) int* GetMType();
 	__declspec(dllexport) float* GetAngle();
-	__declspec(dllexport) bool Start(float* source, int step, int lengthWings, int width, int height);
+	__declspec(dllexport) bool* Start(float* source, int step, int lengthWings, int width, int height);
 }
 
 enum Direction
@@ -173,3 +173,11 @@ __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientation
 	const int size, const int step, int colorThreshold);
 
 bool Parsing(ListOfMinutiae* minutiaeList);
+
+#define cudaCheckError() {\
+	cudaError_t e = cudaGetLastError(); \
+	if (e != cudaSuccess) {\
+		printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e));\
+		exit(0);\
+											}\
+}
