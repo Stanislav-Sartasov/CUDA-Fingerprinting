@@ -52,11 +52,10 @@ __device__ void AddMinutiae(CUDAArray<int> countOfMinutiae, CUDAArray<ListOfMinu
 	countOfMinutiae.SetAt(blockIdx.x * gridDim.x + blockIdx.y, 0, countOfMinutiae.At(blockIdx.x * gridDim.x + blockIdx.y, 0) + 1);
 }
 
-//make for blocks
 __device__ bool OutOfImage(CUDAArray<float> image, int x, int y, int partX, int partY)
 {
-	//return (x < 0) || (y < 0) || (x >= image.Width) || (y >= image.Height);
-	return (x < blockIdx.x * partX) || (y < blockIdx.y * partY) || (x >= (blockIdx.x + 1) * partX) || (y >= (blockIdx.y + 1) * partY) || (x >= image.Width) || (y >= image.Height);
+	//return (x < 0) || (y < 0) || (y >= image.Width) || (x >= image.Height);
+	return (x < blockIdx.x * partX) || (y < blockIdx.y * partY) || (x >= (blockIdx.x + 1) * partX) || (y >= (blockIdx.y + 1) * partY) || (y >= image.Width) || (x >= image.Height);
 }
 
 __device__ void NewSection(int sx, int sy, Direction direction, CUDAArray<float> image, CUDAArray<float> orientationField, 
@@ -284,7 +283,7 @@ __device__ void FollowLine(int x, int y, Direction direction, CUDAArray<float> i
 	possMinutiae.angle = *sectionAngle;
 	possMinutiae.type = type;
 
-	printf("Minutia. x = %d y = %d type = %d\n", possMinutiae.x, possMinutiae.y, possMinutiae.type);
+	//printf("Minutia. x = %d y = %d type = %d\n", possMinutiae.x, possMinutiae.y, possMinutiae.type);
 
 	//if (IsDuplicate(possMinutiae)) return;
 
@@ -303,18 +302,25 @@ __global__ void FindMinutia(CUDAArray<float> image, CUDAArray<float> orientation
 	float sectionAngle;
 	int centerSection;
 	bool flag;
-	minutiaes.SetAt(blockIdx.x, 0, new ListOfMinutiae);
+	minutiaes.SetAt(blockIdx.x * gridDim.x + blockIdx.y, 0, new ListOfMinutiae);
 
 	int partX = 32; //image.Height / gridDim.x;
 	int partY = 32; //image.Width / gridDim.y;
 
 	//printf("%d %d %d\n", blockIdx.x, blockIdx.y, threadIdx.x);
 
-	/*for (int i = blockIdx.x * partX; i < (blockIdx.x + 1) * partX; i++)
-		for (int j = blockIdx.y * partY; j < (blockIdx.y + 1) * partY; j++)*/
-	for (int i = 0; i < image.Height; i++)
-		for (int j = 0; j < image.Width; j++)
+	//if (blockIdx.x == 11 && blockIdx.y == 7)
+	for (int i = blockIdx.x * partX; i < (blockIdx.x + 1) * partX; i++)
+		for (int j = blockIdx.y * partY; j < (blockIdx.y + 1) * partY; j++)
+	/*for (int i = 0; i < image.Height; i++)
+		for (int j = 0; j < image.Width; j++)*/
 		{
+			if (!OutOfImage(image, i, j, partX, partY))
+			{
+				printf("Tu-tu. %d %d\n", i, j);
+				continue;
+			}
+
 			if ((image.At(i, j) >= colorThreshold) || visited.At(i, j)) continue;
 			visited.SetAt(i, j, true);
 
@@ -362,7 +368,7 @@ bool* Start(float* source, int step, int lengthWings, int width, int height)
 	CUDAArray<float> image = CUDAArray<float>(source, width, height);
 
 	dim3 blockSize = 1;
-	dim3 gridSize = 1;// dim3(ceilMod(image.Height, defaultThreadCount), ceilMod(image.Width, defaultThreadCount));
+	dim3 gridSize = dim3(ceilMod(image.Height, defaultThreadCount), ceilMod(image.Width, defaultThreadCount));
 
 	CUDAArray<float> orientationField = CUDAArray<float>(OrientationFieldInBlocks(source, width, height), height, width);
 	CUDAArray<bool> visited = CUDAArray<bool>((bool*)calloc(width * height, sizeof(bool)), width, height);
